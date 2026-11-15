@@ -73,7 +73,7 @@ try {
   });
   // Await a successful PTY write, rather than racing the asynchronous shell startup.
   await expect.poll(async () => page.evaluate(async () => {
-    try { await window.feiyuDesktop.core.invoke('term_write', { data: process.platform === 'win32' ? "echo FEIYU_TERMINAL_%FEIYU_TEST_MARKER%\r" : "printf 'FEIYU_%s_OK\\n' TERMINAL\n" }); return true; }
+    try { await window.feiyuDesktop.core.invoke('term_write', { data: window.feiyuDesktop.platform === 'win32' ? "echo FEIYU_TERMINAL_%FEIYU_TEST_MARKER%\r" : "printf 'FEIYU_%s_OK\\n' TERMINAL\n" }); return true; }
     catch { return false; }
   })).toBe(true);
   await page.waitForFunction(() => window.__terminalOutput.includes('FEIYU_TERMINAL_OK'));
