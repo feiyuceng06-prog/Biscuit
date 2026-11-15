@@ -3,6 +3,7 @@ on:
   workflow_dispatch:
   pull_request:
   push:
+    branches: ['codex/publish-desktop-*']
     tags: ['desktop-v*']
 permissions:
   contents: read
@@ -101,12 +102,13 @@ jobs:
   # 打 desktop-v* 标签时把上面那两个包挂到 Releases 上，没有 GitHub 账号也下得到。
   # 单独一个 job：只有它要写权限，装依赖、跑测试那些步骤拿到的 token 照旧是只读的
   release:
-    if: startsWith(github.ref, 'refs/tags/desktop-v')
+    if: startsWith(github.ref, 'refs/tags/desktop-v') || startsWith(github.ref, 'refs/heads/codex/publish-desktop-')
     needs: [linux, windows]
     runs-on: ubuntu-22.04
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: feiyu-linux-x64
@@ -118,8 +120,14 @@ jobs:
       - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
+          REF_NAME: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
         run: |
+          if [ "$REF_TYPE" = tag ]; then
+            TAG="$REF_NAME"
+          else
+            TAG="desktop-v$(node -p "require('./desktop/package.json').version")"
+          fi
           gh release create "$TAG" built/release/*.deb built/release/*.AppImage built-windows/release/*.exe \
-            --repo "$GITHUB_REPOSITORY" --title "Feiyu ${TAG#desktop-v}" \
-            --notes "Ubuntu 上用 deb：sudo apt install ./文件名.deb。AppImage：chmod +x 之后双击；它要 libfuse2，Ubuntu 22.04 起默认不装，先 sudo apt install libfuse2（24.04 是 libfuse2t64）。Windows 用户安装 exe 后需另装 Git for Windows（Git Bash）才能执行 agent 命令。第一次打开时按「连接模型」，选个接口、贴上 key 就能用。"
+            --target "$GITHUB_SHA" --repo "$GITHUB_REPOSITORY" --title "Feiyu ${TAG#desktop-v}" \
+            --notes "Ubuntu 上用 deb：sudo apt install ./文件名.deb。AppImage：chmod +x 之后双击；它要 libfuse2，Ubuntu 22.04 起默认不装，先 sudo apt install libfuse2（24.04 是 libfuse2t64）。Windows 用户安装 exe 后需另装 Git for Windows（Git Bash）才能执行 agent 命令。安装包未签名，Windows 上未验证真实模型请求；Linux 的 bubblewrap 沙箱不可用于 Windows。第一次打开时按「连接模型」，选个接口、贴上 key 就能用。"
