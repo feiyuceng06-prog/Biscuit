@@ -14,7 +14,7 @@
 
 Windows x64 安装包将在 Windows 构建通过后的 [Releases](https://github.com/feiyuceng06-prog/feiyu-agent/releases) 中提供。下载安装程序并打开 Feiyu；Python 后端已包含在安装包中。Agent 执行命令还需要安装 [Git for Windows](https://git-scm.com/install/windows)（包含 Git Bash），安装后重新启动 Feiyu。Windows 不提供 Linux 的 bubblewrap 沙箱，命令仍遵循应用内的权限确认。安装包目前未经代码签名。
 
-从源码构建：安装 Python 3.10+、Node.js 22+、MSVC 构建工具和 Git for Windows，在 PowerShell 中运行 `./install-windows.ps1`，安装程序输出在 `desktop/release/`。Windows 构建需在 Windows 上验证；当前尚未完成原生实测。
+从源码构建：安装 Python 3.10+、Node.js 22+、MSVC 构建工具和 Git for Windows，在 PowerShell 中运行 `./install-windows.ps1`，安装程序输出在 `desktop/release/`。Windows x64 安装包已通过 Windows 原生 CI 的安装和桌面冒烟测试；尚需更多真实用户环境和模型请求验证。
 
 ### Linux 一行装好（桌面版 + 终端版）
 
@@ -620,7 +620,7 @@ stdout 里只有 JSON，界面和日志全走 stderr。不合 schema 会让它�
 
 ## 平台
 
-Python agent 支持 Linux 和 macOS；bash 沙箱只在 Linux 上。Electron 桌面优先验证 Linux；macOS/Windows 构建入口已提供，但仍需对应平台实机验证。Windows 开发需 Python 3.10+、Node.js 22+、MSVC 构建工具和 Git for Windows，运行 `./install-windows.ps1`，安装程序位于 `desktop/release/`。
+Python agent 支持 Linux、macOS 和 Windows（Windows 的命令执行需要 Git Bash）；bash 沙箱只在 Linux 上。Electron 桌面已在 Linux 和 Windows x64 CI 运行安装与冒烟测试；macOS 构建仍需原生验证。Windows 开发需 Python 3.10+、Node.js 22+、MSVC 构建工具和 Git for Windows，运行 `./install-windows.ps1`，安装程序位于 `desktop/release/`。
 
 ## 测试
 

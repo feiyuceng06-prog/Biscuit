@@ -2,7 +2,7 @@
 
 Electron workbench for the existing Python agent, inspired by the separation of
 responsibilities in Hermes Desktop. The shell uses Chromium on every platform.
-Linux is the first validated platform; Windows/macOS need native verification.
+Linux and Windows x64 are covered by native CI; macOS still needs native verification.
 
 ## Develop
 
@@ -45,7 +45,7 @@ On Windows x64, install Git for Windows (Git Bash), Python 3.10+, Node.js 22+,
 and MSVC build tools, then run `../install-windows.ps1` in PowerShell. It builds
 an NSIS installer under `release/`. End users do not need Python or Node, but
 do need Git Bash for agent commands. The Windows build runs native automated
-smoke tests in CI; native validation is pending until that workflow succeeds.
+smoke tests in CI; the installer and the installed application have passed those tests.
 Linux bubblewrap isolation is unavailable on Windows. For macOS, build the backend
 on that OS and run `npm run dist:mac`. Signing and automatic updates are not configured.
 
