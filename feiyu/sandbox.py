@@ -39,6 +39,7 @@ import os
 import shlex
 import shutil
 import subprocess
+import sys
 
 from . import files
 
@@ -68,8 +69,18 @@ DAEMON_SOCKETS = ("/run/docker.sock", "/var/run/docker.sock", "/run/podman/podma
 # POSIX 模式**，而模型写的是 bash：`source 相对路径` 在 POSIX 模式下不搜当前目录
 # （只搜 PATH），`export -p` 的输出格式也不一样 工具叫 bash、说明里写的是 shell 命令，
 # 那就该真给它 bash 没装 bash 的系统退回 /bin/sh
+def _bundled_git() -> str | None:
+    if os.name != "nt" or not getattr(sys, "frozen", False):
+        return None
+    root = os.path.join(os.path.dirname(os.path.dirname(sys.executable)), "git")
+    return root if os.path.isfile(os.path.join(root, "bin", "bash.exe")) else None
+
+
 def _shell() -> str:
     if os.name == "nt":
+        bundled = _bundled_git()
+        if bundled:
+            return os.path.join(bundled, "bin", "bash.exe")
         for base in (os.environ.get("ProgramFiles"), os.environ.get("ProgramFiles(x86)")):
             candidate = os.path.join(base or "", "Git", "bin", "bash.exe")
             if os.path.isfile(candidate):
@@ -78,6 +89,13 @@ def _shell() -> str:
     return shutil.which("bash") or "/bin/sh"
 
 
+# The bundled executables are added only to the backend process, never to the
+# user's system PATH. Git and shell utilities must also work from agent commands.
+_bundled = _bundled_git()
+if _bundled:
+    os.environ["PATH"] = os.pathsep.join((os.path.join(_bundled, "cmd"),
+                                           os.path.join(_bundled, "usr", "bin"),
+                                           os.environ.get("PATH", "")))
 SHELL = _shell()
 
 _probe: bool | None = None

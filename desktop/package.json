@@ -44,6 +44,9 @@
         "to": "backend"
       }
     ],
+    "win": {
+      "extraResources": [{ "from": "build/git", "to": "git" }, { "from": "WINDOWS-THIRD-PARTY.md", "to": "WINDOWS-THIRD-PARTY.md" }]
+    },
     "linux": {
       "target": [
         "deb",

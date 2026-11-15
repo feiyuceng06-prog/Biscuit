@@ -12,7 +12,7 @@ About 4,800 lines of Python, no framework, three dependencies: `anthropic`, `pil
 
 ### Windows desktop
 
-A Windows x64 installer will be available in [Releases](https://github.com/feiyuceng06-prog/feiyu-agent/releases) once the Windows build passes. The installer includes the Python backend; install [Git for Windows](https://git-scm.com/install/windows) for Git Bash, which agent shell commands require, then restart Feiyu. Linux bubblewrap sandboxing is unavailable on Windows; in-app command approvals still apply. The installer is unsigned.
+A Windows x64 installer will be available in [Releases](https://github.com/feiyuceng06-prog/feiyu-agent/releases) once the Windows build passes. The installer includes the Python backend and Git Bash; no separate Git installation is required. Linux bubblewrap sandboxing is unavailable on Windows; in-app command approvals still apply. The installer is unsigned.
 
 To build from source, install Python 3.10+, Node.js 22+, MSVC build tools and Git for Windows, then run `./install-windows.ps1` in PowerShell. The installer is written to `desktop/release/`. The Windows x64 installer has passed native CI installation and desktop smoke tests; real-user environments and provider requests need further validation.
 
@@ -701,7 +701,7 @@ So: use it on projects you trust and keep under git, where a bad edit is easy to
 
 ## Platforms
 
-The Python agent supports Linux, macOS and Windows (Git Bash is required for shell commands on Windows); its bash sandbox is Linux-only. The Electron desktop has passed Linux and Windows x64 CI smoke tests; macOS requires native validation. For Windows development, install Python 3.10+, Node.js 22+, MSVC build tools and Git for Windows, then run `./install-windows.ps1`; the installer is built under `desktop/release/`.
+The Python agent supports Linux, macOS and Windows (the Windows desktop installer includes Git Bash); its bash sandbox is Linux-only. The Electron desktop has passed Linux and Windows x64 CI smoke tests; macOS requires native validation. For Windows development, install Python 3.10+, Node.js 22+, MSVC build tools and Git for Windows, then run `./install-windows.ps1`; the installer is built under `desktop/release/`.
 
 ## Tests
 
