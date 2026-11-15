@@ -15,7 +15,8 @@ await fs.writeFile(path.join(other, 'second.txt'), 'Second workspace');
 await fs.mkdir(path.join(temporary, 'config'), { recursive: true });
 const env = { ...process.env, HOME: temporary, XDG_CONFIG_HOME: path.join(temporary, 'config'),
   XDG_STATE_HOME: path.join(temporary, 'state'), XDG_DATA_HOME: path.join(temporary, 'data'),
-  FEIYU_BIN: process.env.FEIYU_TEST_EXECUTABLE ? '/nonexistent-backend-override' : path.join(desktop, 'build/backend/feiyu-backend'), SHELL: '/bin/sh' };
+  FEIYU_BIN: process.env.FEIYU_TEST_EXECUTABLE ? '/nonexistent-backend-override' : path.join(desktop, 'build/backend', process.platform === 'win32' ? 'feiyu-backend.exe' : 'feiyu-backend'), SHELL: '/bin/sh' };
+if (process.platform === 'win32') { env.USERPROFILE = temporary; env.FEIYU_TEST_MARKER = 'OK'; }
 delete env.ELECTRON_RUN_AS_NODE;
 let application;
 try {
@@ -66,7 +67,7 @@ try {
   });
   // Await a successful PTY write, rather than racing the asynchronous shell startup.
   await expect.poll(async () => page.evaluate(async () => {
-    try { await window.feiyuDesktop.core.invoke('term_write', { data: "printf 'FEIYU_%s_OK\\n' TERMINAL\n" }); return true; }
+    try { await window.feiyuDesktop.core.invoke('term_write', { data: process.platform === 'win32' ? "echo FEIYU_TERMINAL_%FEIYU_TEST_MARKER%\r" : "printf 'FEIYU_%s_OK\\n' TERMINAL\n" }); return true; }
     catch { return false; }
   })).toBe(true);
   await page.waitForFunction(() => window.__terminalOutput.includes('FEIYU_TERMINAL_OK'));

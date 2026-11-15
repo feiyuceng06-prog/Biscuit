@@ -10,7 +10,13 @@ About 4,800 lines of Python, no framework, three dependencies: `anthropic`, `pil
 
 ## Install
 
-### One line (desktop + terminal)
+### Windows desktop
+
+A Windows x64 installer will be available in [Releases](https://github.com/feiyuceng06-prog/feiyu-agent/releases) once the Windows build passes. The installer includes the Python backend; install [Git for Windows](https://git-scm.com/install/windows) for Git Bash, which agent shell commands require, then restart Feiyu. Linux bubblewrap sandboxing is unavailable on Windows; in-app command approvals still apply. The installer is unsigned.
+
+To build from source, install Python 3.10+, Node.js 22+, MSVC build tools and Git for Windows, then run `./install-windows.ps1` in PowerShell. The installer is written to `desktop/release/`. Native Windows validation is still pending.
+
+### Linux one line (desktop + terminal)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/feiyuceng06-prog/feiyu-agent/main/get.sh | bash
@@ -22,7 +28,7 @@ into your user directory: no sudo, no Python, no libfuse2. Afterwards **Feiyu** 
 model. Run it again to upgrade. Without curl (Ubuntu desktop doesn't ship it), start the line with
 `wget -qO-` instead. If `~/.local/bin` isn't on your PATH (the case on a fresh Ubuntu), it adds one line
 to `~/.bashrc` (`~/.zshrc` for zsh) so new terminal windows find `feiyu`; to skip that, run
-`… | FEIYU_NO_MODIFY_PATH=1 bash`. Only Linux x86_64 packages exist so far, and the system needs to be
+`… | FEIYU_NO_MODIFY_PATH=1 bash`. This command supports Linux x86_64, and the system needs to be
 Ubuntu 22.04-era or newer (glibc 2.35+).
 
 Already have the AppImage (say, downloaded on another machine): `bash get.sh Feiyu-x.y.z.AppImage`.
@@ -418,7 +424,7 @@ own Python backend — no Python, Node or terminal needed. On first launch it as
 "connect a model": pick a provider (OpenRouter, DeepSeek, Kimi, Qwen, SiliconFlow, OpenAI,
 Anthropic, or type your own address), paste that provider's key, and choose from the model list
 it fetches live. Opened from the app menu, it reuses the last workspace you picked. There are
-no Windows or macOS packages yet.
+Windows installer builds are described above; a validated macOS package is not available yet.
 
 **Nothing from the window leaks into your terminal.** The agent's human-readable output — and the bridge's own `→ op` trace — goes to `~/.local/state/feiyu/desktop.log`, kept at 0600 like the session saves and rewritten from the top past 4 MB. To watch it in the terminal instead: `FEIYU_DESKTOP_STDERR=1 feiyu-desktop`.
 
@@ -695,7 +701,7 @@ So: use it on projects you trust and keep under git, where a bad edit is easy to
 
 ## Platforms
 
-The Python agent supports Linux and macOS; its bash sandbox is Linux-only. The Electron desktop is validated on Linux first. macOS and Windows build commands exist but require platform testing. For Windows development, install Python 3.10+, Node.js 22+, MSVC build tools and Git for Windows, then run `./install-windows.ps1`; the app is built under `desktop/release/win-unpacked/`.
+The Python agent supports Linux and macOS; its bash sandbox is Linux-only. The Electron desktop is validated on Linux first. macOS and Windows build commands exist but require platform testing. For Windows development, install Python 3.10+, Node.js 22+, MSVC build tools and Git for Windows, then run `./install-windows.ps1`; the installer is built under `desktop/release/`.
 
 ## Tests
 

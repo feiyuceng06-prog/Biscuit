@@ -25,7 +25,7 @@ test('the last workspace survives a round trip and a broken file reads as none',
   assert.equal(readLast(file), null);
   writeLast(file, '/srv/project');
   assert.equal(readLast(file), '/srv/project');
-  assert.equal((await fs.stat(file)).mode & 0o777, 0o600);
+  if (process.platform !== 'win32') assert.equal((await fs.stat(file)).mode & 0o777, 0o600);
   await fs.writeFile(file, '{not json');
   assert.equal(readLast(file), null);
   await fs.writeFile(file, '{"last": 42}');

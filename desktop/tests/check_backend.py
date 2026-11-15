@@ -12,6 +12,8 @@ with tempfile.TemporaryDirectory(prefix="feiyu-payload-test-") as temporary:
     config.mkdir(parents=True)
     env = dict(os.environ, HOME=temporary, XDG_CONFIG_HOME=str(root / "config"),
                XDG_STATE_HOME=str(root / "state"), XDG_DATA_HOME=str(root / "data"))
+    if os.name == "nt":
+        env["USERPROFILE"] = temporary
     for kind in ("openai", "anthropic"):
         (config / "models.json").write_text(json.dumps({"smoke": {
             "kind": kind, "model": "smoke-model", "key": "test-only-not-a-key",

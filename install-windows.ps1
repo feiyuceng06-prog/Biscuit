@@ -18,8 +18,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Desktop dependency installation failed.' }
     py -3 scripts/build_backend.py
     if ($LASTEXITCODE -ne 0) { throw 'Python backend build failed.' }
-    npm run pack
+    npm run dist:win
     if ($LASTEXITCODE -ne 0) { throw 'Desktop build failed.' }
 } finally { Pop-Location }
-Write-Host 'Built desktop\release\win-unpacked\feiyu-desktop.exe'
-Write-Host 'Keep the entire win-unpacked directory together; Python is bundled inside.'
+Write-Host 'Built the Windows installer in desktop\release\. Python is bundled inside.'
+Write-Host 'Users need Git for Windows (Git Bash) for agent shell commands.'

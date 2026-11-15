@@ -41,8 +41,13 @@ release. A local build on a newer distro can require a newer glibc. AppImage
 still requires compatible system graphics libraries and an appropriate FUSE
 setup (or extraction). The `.deb` declares the Electron runtime libraries.
 
-For other platforms, build the backend on that OS and run `npm run dist:win` or
-`npm run dist:mac`. Signing and automatic updates are not configured.
+On Windows x64, install Git for Windows (Git Bash), Python 3.10+, Node.js 22+,
+and MSVC build tools, then run `../install-windows.ps1` in PowerShell. It builds
+an NSIS installer under `release/`. End users do not need Python or Node, but
+do need Git Bash for agent commands. The Windows build runs native automated
+smoke tests in CI; native validation is pending until that workflow succeeds.
+Linux bubblewrap isolation is unavailable on Windows. For macOS, build the backend
+on that OS and run `npm run dist:mac`. Signing and automatic updates are not configured.
 
 ## Architecture
 

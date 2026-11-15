@@ -10,9 +10,13 @@ test('workspace boundary rejects traversal and external symlinks', async t => {
   t.after(() => fs.rm(dir, { recursive: true, force: true }));
   const root = path.join(dir, 'workspace'); await fs.mkdir(root);
   await fs.writeFile(path.join(dir, 'secret'), 'outside');
-  await fs.symlink(path.join(dir, 'secret'), path.join(root, 'escape'));
   await assert.rejects(underRoot(root, '../secret'), /工作区/);
-  await assert.rejects(previewFile(root, 'escape'), /工作区/);
+  try {
+    await fs.symlink(path.join(dir, 'secret'), path.join(root, 'escape'), 'file');
+    await assert.rejects(previewFile(root, 'escape'), /工作区/);
+  } catch (error) {
+    if (process.platform !== 'win32' || error.code !== 'EPERM') throw error;
+  }
   await fs.writeFile(path.join(root, 'safe.txt'), '<script>not executable</script>');
   assert.deepEqual(await previewFile(root, 'safe.txt'), { kind: 'text', content: '<script>not executable</script>' });
   await fs.writeFile(path.join(root, 'binary'), Buffer.from([0, 1]));
@@ -28,7 +32,7 @@ test('uploads cannot overwrite files or escape via upload directory symlinks', a
   assert.notEqual(first, second);
   assert.equal(await fs.readFile(path.join(root, first), 'utf8'), 'A');
   await fs.rm(path.join(root, '.feiyu'), { recursive: true });
-  await fs.symlink(outside, path.join(root, '.feiyu'));
+  await fs.symlink(outside, path.join(root, '.feiyu'), process.platform === 'win32' ? 'junction' : 'dir');
   await assert.rejects(uploadFile(root, 'escape.txt', [67]), /工作区/);
   assert.deepEqual(await fs.readdir(outside), []);
 });
