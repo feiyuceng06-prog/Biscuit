@@ -63,6 +63,8 @@ jobs:
         working-directory: desktop
       - run: npm test
         working-directory: desktop
+      - run: python scripts/build_windows_shell.py
+        working-directory: desktop
       - run: python scripts/build_backend.py
         working-directory: desktop
       - name: Test Git Bash integration
@@ -91,6 +93,9 @@ jobs:
           if (-not (Test-Path $env:FEIYU_TEST_EXECUTABLE)) { throw "Installed application missing: $env:FEIYU_TEST_EXECUTABLE" }
           npm run test:desktop
           if ($LASTEXITCODE -ne 0) { throw 'Installed desktop test failed' }
+          $backend = Join-Path $installDir 'resources/backend/feiyu-backend.exe'
+          & ./build/python-build/Scripts/python.exe tests/check_windows_shell.py $backend
+          if ($LASTEXITCODE -ne 0) { throw 'Bundled shell test failed' }
       - uses: actions/upload-artifact@v4
         with:
           name: feiyu-windows-x64
@@ -130,4 +135,4 @@ jobs:
           fi
           gh release create "$TAG" built/release/*.deb built/release/*.AppImage built-windows/release/*.exe \
             --target "$GITHUB_SHA" --repo "$GITHUB_REPOSITORY" --title "Feiyu ${TAG#desktop-v}" \
-            --notes "Ubuntu 上用 deb：sudo apt install ./文件名.deb。AppImage：chmod +x 之后双击；它要 libfuse2，Ubuntu 22.04 起默认不装，先 sudo apt install libfuse2（24.04 是 libfuse2t64）。Windows 用户安装 exe 后需另装 Git for Windows（Git Bash）才能执行 agent 命令。安装包未签名，Windows 上未验证真实模型请求；Linux 的 bubblewrap 沙箱不可用于 Windows。第一次打开时按「连接模型」，选个接口、贴上 key 就能用。"
+            --notes "Ubuntu 上用 deb：sudo apt install ./文件名.deb。AppImage：chmod +x 之后双击；它要 libfuse2，Ubuntu 22.04 起默认不装，先 sudo apt install libfuse2（24.04 是 libfuse2t64）。Windows 安装包内含 Git Bash，无需另行安装。安装包未签名，Windows 上未验证真实模型请求；Linux 的 bubblewrap 沙箱不可用于 Windows。第一次打开时按「连接模型」，选个接口、贴上 key 就能用。"

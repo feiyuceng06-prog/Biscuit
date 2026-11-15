@@ -43,8 +43,7 @@ setup (or extraction). The `.deb` declares the Electron runtime libraries.
 
 On Windows x64, install Git for Windows (Git Bash), Python 3.10+, Node.js 22+,
 and MSVC build tools, then run `../install-windows.ps1` in PowerShell. It builds
-an NSIS installer under `release/`. End users do not need Python or Node, but
-do need Git Bash for agent commands. The Windows build runs native automated
+an NSIS installer under `release/`. End users do not need Python, Node or a separate Git installation. The Windows build runs native automated
 smoke tests in CI; the installer and the installed application have passed those tests.
 Linux bubblewrap isolation is unavailable on Windows. For macOS, build the backend
 on that OS and run `npm run dist:mac`. Signing and automatic updates are not configured.
