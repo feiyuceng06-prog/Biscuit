@@ -474,7 +474,10 @@ class Feiyu:
         self.resumed = progress_mod.load(workspace)
         self.task = ""           # 用户最近一次的要求，存进度时一起留下
         self.trace = trace or Trace(workspace, enabled=False)
-        self.verify = find_verify(self.context_text)
+        self._verify = find_verify(self.context_text)
+        self._verify_project = True
+        self._verify_decision = None
+        self.approve_verify = None
         self.verified_ok = None      # 最近一次校验过没有：True/False/None（没跑过）
         # 动手之前那次"先跑一遍看什么是坏的"跑过没有 一个会话只跑一次
         self._baseline = ""          # 跑出来的要点，附在第一次写文件的结果里
@@ -584,9 +587,44 @@ class Feiyu:
 
     def reload_context(self) -> None:
         self.context_file, self.context_text = load_project_context(self.toolbox.root)
-        self.verify = find_verify(self.context_text)
+        self._verify = find_verify(self.context_text)
+        self._verify_project = True
+        self._verify_decision = None
+        self._baseline_done = False
+        self.verified_ok = None
         self._apply_project_limits()
         self._refresh_system()
+
+    @property
+    def verify(self) -> str:
+        return self._verify
+
+    @verify.setter
+    def verify(self, command: str) -> None:
+        # /verify 是用户主动输入；从项目文件加载的命令必须走独立信任确认。
+        self._verify = command
+        self._verify_project = False
+        self._verify_decision = None
+        self._baseline_done = False
+        self.verified_ok = None
+
+    def _allow_verify(self) -> bool:
+        if not self.verify:
+            return False
+        if not self._verify_project:
+            return True
+        if self._verify_decision is None:
+            source = str((self.toolbox.root / self.context_file).resolve())
+            self._verify_decision = hooks_mod.allow_verify(
+                self.toolbox.root, source, self.context_text, self.verify, self.approve_verify)
+        return self._verify_decision
+
+    def load_verify(self) -> str:
+        if not self.verify or not self._verify_project:
+            return ""
+        if self._allow_verify():
+            return ""
+        return "项目自动校验未启用（%s 中的 verify: 尚未获准执行）" % self.context_file
 
     def tool_schemas(self) -> list[dict]:
         # 没配出图接口就不挂 image_generate 一百个人里九十九个不出图，
@@ -665,7 +703,7 @@ class Feiyu:
         合成成钩子而不是各走各的，省得两套机制各写一遍、行为还不一样
         """
         found = list(self.hooks)
-        if self.verify:
+        if self.verify and (not self._verify_project or self._verify_decision is True):
             found.append(hooks_mod.Hook(
                 "PostToolUse",
                 {"matcher": "Write|Update", "command": self.verify,
@@ -676,6 +714,8 @@ class Feiyu:
     def _fire(self, event: str, tool: str = "", subject: str = "",
               extra: dict | None = None) -> list:
         """跑这个时机上所有匹配的钩子，返回结果列表 """
+        if event == "PostToolUse" and tool in VERIFY_AFTER:
+            self._allow_verify()
         chosen = hooks_mod.pick(self.all_hooks, event, tool, subject)
         results = []
         for hook in chosen:
@@ -1798,7 +1838,7 @@ class Feiyu:
         改完之后的校验由 PostToolUse 那条钩子管，两者不是一回事。
         跑不起来就当没有 —— 这是帮忙的东西，不该挡着人干活。
         """
-        if self._baseline_done or not self.verify:
+        if self._baseline_done or not self.verify or not self._allow_verify():
             return
         if not tools_mod.reproduce_on():
             return      # 评测的 A/B 对照档

@@ -1145,6 +1145,7 @@ class TestLoopSurvivesBadPayload(unittest.TestCase):
     def box(self, out, boom=None):
         class Box(serve.Server):
             def __init__(self):
+                self._reader_started = False
                 self.busy = True
                 self.proto = serve.Protocol(out)
                 self.inbox = queue.Queue()

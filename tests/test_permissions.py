@@ -65,13 +65,41 @@ class TestVerdictBash(Isolated):
         self.write_rules()
 
     def test_出厂规则照常放行(self):
-        for cmd in ("ls -la", "pwd", "git status", "git log --oneline -5",
+        for cmd in ("ls -la", "pwd",
                     "which python", "echo hi", "wc -l feiyu/ui.py"):
             self.assertEqual(self.bash(cmd), "allow", cmd)
 
     def test_允许的命令串在一起还是放行(self):
-        self.assertEqual(self.bash("git status && git log"), "allow")
-        self.assertEqual(self.bash("git diff | wc -l"), "allow")
+        self.assertEqual(self.bash("pwd && ls"), "allow")
+        self.assertEqual(self.bash("ls | wc -l"), "allow")
+
+    def test_换行不能把后续命令并入允许前缀(self):
+        for command in ("ls\nrm sentinel", "ls\r\nrm sentinel", "ls # comment\nrm sentinel",
+                        "ls\n'python' -c 'print(123)'", 'echo "hello\nrm sentinel"'):
+            with self.subTest(command=command):
+                self.assertEqual(self.bash(command), "ask")
+        self.assertEqual(self.bash("ls\npwd"), "allow")
+
+    def test_续行不绕过_deny(self):
+        self.write_rules(allow=["Bash(*)"], deny=["Bash(rm:*)"])
+        self.assertEqual(self.bash("ls\nr\\\nm sentinel"), "deny")
+        self.assertEqual(self.bash("ls\r\nrm sentinel"), "deny")
+
+    def test_续行不能隐藏替换或敏感路径(self):
+        for command in ("ls $\\\n(rm sentinel)", "echo $\\\n{COMMAND}"):
+            self.assertEqual(self.bash(command), "ask", command)
+        self.assertEqual(self.bash("ls ~/.s\\\nsh/id_rsa"), "deny")
+
+    def test_文件重定向不是描述符复制(self):
+        for command in ("ls &> output", "ls >&output", "ls 2>output", "ls >output"):
+            self.assertEqual(self.bash(command), "ask", command)
+        self.assertEqual(self.bash("ls 2>&1"), "allow")
+
+    def test_git_bash_由确认控制_结构化查询仍放行(self):
+        for command in ("git branch", "git branch -D feature", "git branch -m renamed",
+                        "git diff --output=out.txt", "git log --output=out.txt", "git status"):
+            self.assertEqual(self.bash(command), "ask", command)
+        self.assertEqual(permissions.verdict("git", {"action": "diff"}), "allow")
 
     def test_搭便车的第二条命令必须问(self):
         # 这一组在 0.11.0 全是 allow
@@ -261,3 +289,22 @@ class TestDefaultsMigration(unittest.TestCase):
         rules = permissions.load()
         self.assertIn("Bash(cat:*)", rules["allow"])
         self.assertEqual(rules["deny"], ["Bash(rm:*)"])
+
+    def test_撤回旧版默认_git_bash_授权(self):
+        retired = ["Bash(git %s:*)" % action for action in ("branch", "status", "diff", "log")]
+        for with_known in (False, True):
+            data = {"allow": ["Bash(ls:*)", *retired, "Bash(make:*)"], "deny": ["Bash(rm:*)"]}
+            if with_known:
+                data["known"] = [*permissions.DEFAULT_ALLOW, *retired]
+            self.dump(data)
+            rules = permissions.load()
+            for rule in retired:
+                self.assertNotIn(rule, rules["allow"])
+            self.assertIn("Bash(make:*)", rules["allow"])
+            self.assertEqual(rules["deny"], ["Bash(rm:*)"])
+            self.assertEqual(permissions.verdict("bash", {"command": "git branch -D x"}), "ask")
+
+    def test_升级后用户重新明确授权的_git_规则保留(self):
+        self.dump({"allow": ["Read(*)"], "deny": [], "known": list(permissions.DEFAULT_ALLOW)})
+        permissions.add_allow("Bash(git branch:*)")
+        self.assertEqual(permissions.verdict("bash", {"command": "git branch -D x"}), "allow")

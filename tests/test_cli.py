@@ -51,6 +51,8 @@ class TestVersionSync(unittest.TestCase):
         for name in ("package.json", "package-lock.json"):
             pkg = _json.loads((root / "desktop" / name).read_text(encoding="utf-8"))
             self.assertEqual(pkg.get("version"), __version__, "desktop/" + name)
+            if name == "package-lock.json":
+                self.assertEqual(pkg["packages"][""]["version"], __version__, "npm root package")
 
 
 class TestArgs(unittest.TestCase):

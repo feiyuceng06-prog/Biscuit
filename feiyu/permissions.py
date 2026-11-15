@@ -61,10 +61,6 @@ DEFAULT_ALLOW = [
     "Bash(echo:*)",
     "Bash(wc:*)",
     "Bash(which:*)",
-    "Bash(git status:*)",
-    "Bash(git log:*)",
-    "Bash(git diff:*)",
-    "Bash(git branch:*)",
     "Read(*)",
     "List(*)",
     "Search(*)",
@@ -89,6 +85,10 @@ DEFAULT_ALLOW = [
     "Skill(*)",
 ]
 
+# Bash 的 Git 参数还能删分支、写输出文件或执行仓库配置的程序。
+# 结构化 Git 工具收紧了这些入口；旧版送出的 Bash 规则也必须撤回。
+_RETIRED_ALLOW = {"Bash(git %s:*)" % action for action in ("status", "log", "diff", "branch")}
+
 # 出厂拦截的：碰这些路径的命令一律不放行，deny 优先所以 allow 里写了也没用
 # 这是 Claude Code 那个分类器的粗糙替代品——挡不住变形写法，但挡得住直白的读取
 DENY_PATHS = re.compile(
@@ -102,8 +102,8 @@ _RULE = re.compile(r"^\s*(\w+)\s*\((.*)\)\s*$", re.S)
 # 规则是按前缀匹配的，所以一条命令必须先切成段，每段单独过规则
 # 不切的话 `ls -la && rm -rf x` 会顺着 Bash(ls:*) 一路放行（0.11.0 及以前就是这样）
 # 重定向也要切开：`echo x > ~/.bashrc` 里危险的是目标而不是 echo
-_FD_DUP = re.compile(r"\d?>&\d?|&>")          # 2>&1 这类只接管描述符，不碰文件
-_SEPARATOR = re.compile(r"&&|\|\||[;&|<>\n]")
+_FD_DUP = re.compile(r"\d*>&\d+(?=\s|$|[;&|<>])")  # &> / >&文件 是写文件，不能抹掉
+_SEPARATOR = re.compile(r"&&|\|\||[;&|<>\r\n]")
 # 命令替换里能藏任何东西，前缀匹配看不见，一律降级成问一声
 _SUBSTITUTION = re.compile(r"\$\(|`|\$\{|<\(")
 # 唯一无害的重定向目标：写不进东西也读不出东西
@@ -113,7 +113,7 @@ _HARMLESS = {"/dev/null"}
 def segments(command: str) -> list[str]:
     """把一条 shell 命令切成若干段 引号里的元字符也会被切开，
     结果是多问一声而不是多放行一条，宁可这个方向错 """
-    plain = _FD_DUP.sub(" ", command)
+    plain = _FD_DUP.sub(" ", command.replace("\\\n", ""))
     parts = (" ".join(p.split()) for p in _SEPARATOR.split(plain))
     return [p for p in parts if p and p not in _HARMLESS]
 
@@ -134,10 +134,13 @@ def load() -> dict:
     # Ask / Job / Git 三条都是这样漏掉的）"known" 记的是发过哪些出厂规则：
     # 没发过的补进去，用户自己删掉的（发过但不在 allow 里）不动
     known = raw.get("known") if isinstance(raw.get("known"), list) else []
+    previous = allow
+    allow = [r for r in allow if not (isinstance(r, str) and r in _RETIRED_ALLOW
+             and (r in known or "known" not in raw))]
     # 空列表是「什么都不放行」，那是刻意清空的，别往里补
     fresh = [r for r in DEFAULT_ALLOW if r not in known and r not in allow] if allow else []
     rules = {"allow": list(allow) + fresh, "deny": list(raw.get("deny") or [])}
-    if fresh or known != list(DEFAULT_ALLOW):
+    if fresh or allow != previous or known != list(DEFAULT_ALLOW):
         save(rules)
     return rules
 
@@ -167,7 +170,8 @@ def add_allow(rule: str) -> bool:
 def subject(tool: str, args: dict) -> str:
     """规则要匹配的那段文本：bash 是整条命令，其余是主参数 """
     if tool == "bash":
-        return " ".join((args.get("command") or "").split())
+        command = args.get("command")
+        return command if isinstance(command, str) else ""
     if tool == "git":
         # 规则按 action 写：Git(diff:*) 放行所有 diff，Git(commit:*) 放行提交
         return " ".join([str(args.get("action") or "")] + [str(p) for p in args.get("paths") or []])
@@ -206,6 +210,7 @@ def verdict(tool: str, args: dict) -> str:
             return "deny"
         return "allow" if any(matches(r, tool, text) for r in rules["allow"]) else "ask"
 
+    text = text.replace("\\\n", "")
     if DENY_PATHS.search(text):
         return "deny"
     parts = segments(text)

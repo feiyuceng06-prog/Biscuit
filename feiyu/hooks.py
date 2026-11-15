@@ -24,6 +24,7 @@ import hashlib
 import json
 import os
 import subprocess
+import tempfile
 
 from . import files
 from . import sandbox
@@ -35,6 +36,7 @@ _DIR = os.path.join(
 )
 GLOBAL = os.path.join(_DIR, "hooks.json")
 TRUST = os.path.join(_DIR, "trusted-hooks.json")
+VERIFY_TRUST = os.path.join(_DIR, "trusted-verify.json")
 PROJECT = os.path.join(".feiyu", "hooks.json")
 
 DEFAULT_TIMEOUT = 60
@@ -81,6 +83,31 @@ def digest(path: str) -> str:
 
 def _trusted() -> dict:
     return _read(TRUST)
+
+
+def allow_verify(workspace, source: str, text: str, command: str, approve=None) -> bool:
+    fingerprint = hashlib.sha256(json.dumps([source, text, command],
+                                            ensure_ascii=False).encode()).hexdigest()
+    data = _read(VERIFY_TRUST)
+    key = os.path.realpath(workspace)
+    if data.get(key) == fingerprint:
+        return True
+    if approve is None or not approve(source, command):
+        return False
+    data[key] = fingerprint
+    temporary = None
+    try:
+        files.private_dir(os.path.dirname(VERIFY_TRUST))
+        fd, temporary = tempfile.mkstemp(prefix=".verify-trust-", dir=os.path.dirname(VERIFY_TRUST))
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=1)
+        os.replace(temporary, VERIFY_TRUST)
+    except OSError:
+        pass
+    finally:
+        if temporary and os.path.exists(temporary):
+            os.unlink(temporary)
+    return True
 
 
 def trust(workspace, fingerprint: str) -> None:

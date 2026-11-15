@@ -189,6 +189,8 @@ def main() -> int:
     # 项目钩子是仓库里带下来的命令，第一次见到（和内容变了之后）必须让用户点头
     agent.approve_hooks = lambda path, count: ui.ask_yes_no(
         "%s 里有 %d 条项目钩子，它们会在这台机器上执行 要启用吗？" % (hooks_mod.PROJECT, count))
+    agent.approve_verify = lambda path, command: ui.ask_yes_no(
+        "%s 的自动校验会在沙箱外执行以下命令：\n%s\n要信任并启用吗？" % (path, command))
     if args.mode:
         agent.set_mode(args.mode)      # 一律走 set_mode：它要重拼系统提示
     # 项目 MCP 配置同理：仓库里带下来的命令，第一次见到必须让用户点头
@@ -201,6 +203,9 @@ def main() -> int:
             skills_mod.PROJECT_SKILLS, len(names), "、".join(names[:6])
             + ("…" if len(names) > 6 else "")))
     note = agent.load_hooks()
+    verify_note = agent.load_verify()
+    if verify_note:
+        print(ui.notice(verify_note), file=sys.stderr)
     mcp_note = agent.load_mcp()
     if mcp_note:
         print(ui.notice(mcp_note), file=sys.stderr)
@@ -955,6 +960,8 @@ def _verify(agent: Feiyu, arg: str) -> str:
             "或者 /verify <命令> 临时设一个 改完代码就会自动跑，不过就把报错交给它自己修 "
             % (agent.context_file or "、".join(CONTEXT_FILES)))
     state = {True: "上次通过", False: "上次没过", None: "还没跑过"}[agent.verified_ok]
+    if agent._verify_project and agent._verify_decision is not True:
+        state = "未启用，项目命令需要信任确认；/context 重新确认"
     return ui.notice("当前校验命令：%s（%s） /verify off 关掉" % (agent.verify, state))
 
 
@@ -990,7 +997,7 @@ def _sandbox(arg: str) -> str:
     rows.append("  " + ui.bold("写是真隔离") + ui.paint("grey", "，工作区外一律只读"))
     rows.append("  " + ui.bold("读只是挖空了几个目录")
                 + ui.paint("grey", "，整个文件系统仍然可读，别当成读也隔离了"))
-    rows.append(ui.notice("钩子和 verify: 的命令不进沙箱——那是你自己写的，不是模型产出的 "))
+    rows.append(ui.notice("钩子和自动校验命令不进沙箱；项目携带的命令必须先经信任确认 "))
     rows.append(ui.notice("/sandbox <档位> 切换 · FEIYU_SANDBOX 环境变量可以临时压过配置"))
     return "\n".join(rows)
 

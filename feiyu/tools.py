@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from html.parser import HTMLParser
 from pathlib import Path
 
-from . import (enabled, files, images, jobs as jobs_mod, lsp, mcp, memory, permissions, sandbox,
+from . import (enabled, files, images, jobs as jobs_mod, lsp, mcp, memory, net, permissions, sandbox,
                skills as skills_mod, todo)
 
 
@@ -980,41 +980,15 @@ def _looks_binary(raw: bytes) -> bool:
 
 
 def _local_ok() -> bool:
-    return os.environ.get("FEIYU_ALLOW_LOCAL_FETCH", "").strip() not in ("", "0", "false", "no")
+    return net.local_allowed()
 
 
 def _internal_ip(ip) -> bool:
-    return bool(ip.is_loopback or ip.is_private or ip.is_link_local
-                or ip.is_reserved or ip.is_multicast)
+    return net.internal_ip(ip)
 
 
 def _blocked_host(host: str) -> str:
-    """回环/内网/链路本地一律挡掉 不挡的话，被网页内容诱导去打
-    http://169.254.169.254 这类地址就能读到云上的凭据
-
-    **要解析出来的地址全是内网才拦**，有一条公网的就放行 原来是"有一条内网的就拦"，
-    结果 DNS 被污染时公网域名会被误杀：日志里 `www.google.com` 被拦过两次，
-    它的 A 记录是正常公网地址，AAAA 记录被污染成 `2001::1`（Teredo 前缀，
-    Python 算 is_private）要挡的那几种（169.254.169.254、localhost、内网主机名）
-    解析出来全是内网，新口径照样拦得住
-    """
-    if not host:
-        return "地址里没有主机名"
-    if _local_ok():
-        return ""
-    try:
-        infos = socket.getaddrinfo(host, None)
-    except OSError:
-        return ""      # 解析不了的交给后面的请求去报错
-    ips = []
-    for info in infos:
-        try:
-            ips.append(ipaddress.ip_address(info[4][0]))
-        except ValueError:
-            continue
-    if not ips or not all(_internal_ip(ip) for ip in ips):
-        return ""
-    return "%s 解析到内网地址 %s" % (host, ips[0])
+    return net.blocked_host(host)
 
 
 def _blocked_fetch(url: str):
@@ -1105,7 +1079,10 @@ class _NoLocalRedirect(urllib.request.HTTPRedirectHandler):
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
-_opener = urllib.request.build_opener(_NoLocalRedirect)
+_opener = net.opener(_NoLocalRedirect)
+# Configured API endpoints may be self-hosted and retain system proxy support.
+# Its URL is separate from the untrusted page URL sent in the request body.
+_service_opener = urllib.request.build_opener(_NoLocalRedirect)
 
 
 class _Markdown(HTMLParser):
@@ -2027,6 +2004,7 @@ class Toolbox:
             if blocked:
                 return blocked
         request = urllib.request.Request(url, headers={"User-Agent": _WEB_UA, **(headers or {})})
+        request._feiyu_allow_local = allow_local
         try:
             with _opener.open(request, timeout=_WEB_TIMEOUT) as reply:
                 ctype = (reply.headers.get_content_type() or "").lower()
@@ -2047,7 +2025,7 @@ class Toolbox:
             headers={"Content-Type": "application/json", "Authorization": "Bearer " + key,
                      "User-Agent": _WEB_UA})
         try:
-            with _opener.open(request, timeout=FIRECRAWL_TIMEOUT) as reply:
+            with _service_opener.open(request, timeout=FIRECRAWL_TIMEOUT) as reply:
                 raw = json.loads(reply.read(_WEB_MAX_BYTES).decode("utf-8", "replace"))
         except urllib.error.HTTPError as exc:
             # 报错正文要带上 额度用完（402）和 key 不对（401）只看状态码分不清
@@ -2271,7 +2249,7 @@ class Toolbox:
             headers={"Content-Type": "application/json", "Authorization": "Bearer " + key,
                      "User-Agent": _WEB_UA})
         try:
-            with _opener.open(request, timeout=IMAGE_TIMEOUT) as reply:
+            with _service_opener.open(request, timeout=IMAGE_TIMEOUT) as reply:
                 raw = json.loads(reply.read().decode("utf-8", "replace"))
         except urllib.error.HTTPError as exc:
             detail = _error_body(exc, 300)

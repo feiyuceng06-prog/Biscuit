@@ -159,6 +159,7 @@ class Server:
         self.inbox: queue.Queue = queue.Queue()
         self.busy = False
         self.stopped = False
+        self._reader_started = False
         self.commands = {c.name: c for c in skills_mod.load_commands(workspace)}
 
     # ---- agent 要问人的三条回调 ----
@@ -948,8 +949,13 @@ class Server:
                 {"kind": msg.get("kind"), "name": msg.get("name"), "on": msg.get("on")})))
         return True
 
+    def start_reader(self) -> None:
+        if not self._reader_started:
+            self._reader_started = True
+            threading.Thread(target=self.reader, daemon=True).start()
+
     def run(self) -> int:
-        threading.Thread(target=self.reader, daemon=True).start()
+        self.start_reader()
         self.proto.send("hello", **self.status())
         # 开局就问一次，不然要等第一轮跑完界面上才有数
         self.agent.refresh_credits(then=self.push_status)
@@ -1042,17 +1048,21 @@ def serve(agent, workspace, tracer, resume: bool = False, *, trusted: bool = Fal
     agent.ask_user = server.ask_user
     agent.approve_hooks = lambda path, count: server.approve_trust(
         "hooks", path, ["%d 条" % count])
+    agent.approve_verify = lambda path, command: server.approve_trust("verify", path, [command])
     agent.approve_mcp = lambda path, names: server.approve_trust("mcp", path, names)
     agent.approve_skills = lambda folder, names: server.approve_trust("skills", folder, names)
 
     events.install(lambda kind, payload: proto.send(kind, **payload))
     # 人看的那些 ANSI 全挪到 stderr，stdout 只剩协议 —— 跟 --json-schema 同一个做法
     with contextlib.redirect_stdout(sys.stderr):
+        # Startup trust requests also need the reader to receive their replies.
+        server.start_reader()
         # 启动时这三句是**环境说明**，不是对话。单独一种事件，让前端摆在别处 ——
         # 当成 note 发的话它会在正文流里占一整块，看着像 agent 开口说了句什么，
         # 还会把「把要做的事写在下面」那条空态提示顶掉（用户拿截图来问过）。
         # 规矩照 0.26.1：常态不占位置，异常才出现。
         for kind, text in (("hooks", agent.load_hooks()),
+                           ("verify", agent.load_verify()),
                            ("mcp", agent.load_mcp()),
                            ("skills", agent.load_skills())):
             if text:

@@ -623,6 +623,17 @@ class TestShellState(Base):
 
 
 class TestWebGuards(Base):
+    def setUp(self):
+        super().setUp()
+        def resolve(host, *args, **kwargs):
+            ip = "127.0.0.1" if host == "localhost" else host
+            if host == "example.com":
+                ip = "93.184.215.14"
+            return [(2, 1, 6, "", (ip, 0))]
+        dns = unittest.mock.patch.object(tools.socket, "getaddrinfo", side_effect=resolve)
+        dns.start()
+        self.addCleanup(dns.stop)
+
     def test_内网地址被挡(self):
         for host in ("localhost", "127.0.0.1", "169.254.169.254", "10.0.0.1"):
             self.assertTrue(tools._blocked_host(host), host)
@@ -630,22 +641,19 @@ class TestWebGuards(Base):
     def test_公网地址放行(self):
         self.assertEqual(tools._blocked_host("example.com"), "")
 
-    def test_有一条公网记录就放行(self):
-        """DNS 被污染时公网域名会拿到一条内网记录 日志里 www.google.com 被拦过两次：
-        A 记录正常，AAAA 记录是 2001::1（Teredo 前缀，Python 算 is_private）
-        """
+    def test_混合公网和非公网记录仍然拦截(self):
         mixed = [(2, 1, 6, "", ("104.244.42.197", 0)), (10, 1, 6, "", ("2001::1", 0, 0, 0))]
         with unittest.mock.patch.object(tools.socket, "getaddrinfo", return_value=mixed):
-            self.assertEqual(tools._blocked_host("www.example.com"), "")
+            self.assertTrue(tools._blocked_host("www.example.com"))
 
-    def test_全是内网记录才拦(self):
+    def test_全是内网记录也拦(self):
         allpriv = [(2, 1, 6, "", ("127.0.0.1", 0)), (10, 1, 6, "", ("::1", 0, 0, 0))]
         with unittest.mock.patch.object(tools.socket, "getaddrinfo", return_value=allpriv):
             self.assertTrue(tools._blocked_host("internal.example"))
 
-    def test_解析不出地址不拦(self):
+    def test_解析不出地址不放行(self):
         with unittest.mock.patch.object(tools.socket, "getaddrinfo", return_value=[]):
-            self.assertEqual(tools._blocked_host("nothing.example"), "")
+            self.assertTrue(tools._blocked_host("nothing.example"))
 
     def test_逃生门(self):
         os.environ["FEIYU_ALLOW_LOCAL_FETCH"] = "1"
@@ -1490,7 +1498,7 @@ class _Reply:
 
 
 class TestImageGenerate(Base):
-    """出图 不打网络：把 _opener.open 换掉 """
+    """出图 不打网络：把配置的 API 请求换掉 """
 
     PIXEL = (b"\x89PNG\r\n\x1a\n" + b"\x00" * 40)
 
@@ -1509,7 +1517,7 @@ class TestImageGenerate(Base):
     def reply(self, payload):
         import json
         return unittest.mock.patch.object(
-            tools._opener, "open", return_value=_Reply(json.dumps(payload).encode()))
+            tools._service_opener, "open", return_value=_Reply(json.dumps(payload).encode()))
 
     def many(self, default="甲"):
         """多模型形状的配置 别名各指一个不同的上游 model """
@@ -1624,12 +1632,23 @@ class TestImageGenerate(Base):
     def test_只回地址时再抓一次(self):
         self.config()
         import json
-        pages = [_Reply(json.dumps({"data": [{"url": "https://cdn.example/x.png"}]}).encode()),
-                 _Reply(self.PIXEL)]
-        with unittest.mock.patch.object(tools._opener, "open", side_effect=pages):
+        with self.reply({"data": [{"url": "https://cdn.example/x.png"}]}), \
+                unittest.mock.patch.object(tools._opener, "open", return_value=_Reply(self.PIXEL)), \
+                unittest.mock.patch.object(tools.socket, "getaddrinfo",
+                    return_value=[(2, 1, 6, "", ("93.184.215.14", 443))]):
             out = self.box.run("image_generate", {"prompt": "一只狗"})
         self.assertFalse(out.is_error, out.content)
         self.assertEqual((self.root / out.shows).read_bytes(), self.PIXEL)
+
+    def test_用户配置的内网接口不受图片下载限制(self):
+        import base64
+        self.config(base_url="http://127.0.0.1:8000/v1")
+        with self.reply({"data": [{"b64_json": base64.b64encode(self.PIXEL).decode()}]}) as api, \
+                unittest.mock.patch.object(tools._opener, "open") as download:
+            out = self.box.run("image_generate", {"prompt": "一只狗"})
+        self.assertFalse(out.is_error, out.content)
+        self.assertEqual(api.call_args.args[0].full_url, "http://127.0.0.1:8000/v1/images/generations")
+        download.assert_not_called()
 
     def test_地址指到内网就不抓(self):
         self.config()

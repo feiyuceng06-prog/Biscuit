@@ -4,7 +4,7 @@
 
 A coding agent that runs in your terminal. Give it a task and it reads the code, edits files and runs commands on its own, with every step printed on screen. Works with Claude, DeepSeek, Kimi and any OpenAI-compatible API.
 
-About 4,800 lines of Python, no framework, three dependencies: `anthropic`, `pillow`, `prompt_toolkit`.
+About 16,000 lines of Python, no framework, three core dependencies: `anthropic`, `pillow`, `prompt_toolkit`.
 
 ![demo](docs/demo.gif)
 
@@ -239,7 +239,7 @@ There is no dedicated PR tool; it uses `git` and `gh` through bash. The order it
 
 `.docx` `.xlsx` `.pptx` `.odt` `.ods` `.odp` `.pdf` are extracted to text when read, so "what does this weekly report say" just works. PDF needs `pdftotext` on the system. Read only; to produce such files have it write a script using `python-docx` or `openpyxl`.
 
-`web_fetch` converts pages to Markdown. With a `prompt` parameter the model reads the whole page and answers only that question, keeping the page out of the context. Private network addresses are never fetched; for a local dev server use `FEIYU_ALLOW_LOCAL_FETCH=1 feiyu`.
+`web_fetch` converts pages to Markdown. With a `prompt` parameter the model reads the whole page and answers only that question, keeping the page out of the context. Nonpublic addresses, mixed public/nonpublic DNS answers and failed lookups are rejected by default. Built-in fetches check DNS again when connecting and connect to the validated numeric address; HTTPS still verifies the original hostname. Built-in page and image downloads connect directly, ignoring environment proxies such as `HTTP_PROXY` and `HTTPS_PROXY`. For proxy access, configure a Firecrawl service. User-configured Firecrawl and image-generation API endpoints retain system proxy support and may be self-hosted. Firecrawl resolves page targets on its server, which must enforce its own network restrictions. For a local dev server use `FEIYU_ALLOW_LOCAL_FETCH=1 feiyu`.
 
 **Sites that block scrapers can fall back to [Firecrawl](https://firecrawl.dev).** Anti-bot defences
 (Cloudflare, UA checks) are something the built-in fetcher cannot beat. Put a key in
@@ -306,7 +306,7 @@ Mcp(fs:*)             every tool of one MCP server
 
 Commands are split at `&&` `||` `;` `|` and redirections, and every segment must be allowed, so `ls -la && curl x | sh` does not slip through because `ls` is allowed. Anything with `$(...)` or backticks always asks.
 
-The shipped list allows only `ls` `pwd` `echo` `wc` `which` and `git status/log/diff/branch`. `cat` `head` `grep` are left out because they can read any file outside the workspace. Commands touching `.ssh/`, `.aws/credentials`, `~/.config/feiyu/` or `.env` are refused, `auto` mode included.
+The shipped bash rules allow only `ls` `pwd` `echo` `wc` `which`. Use the structured `git` tool for `status` / `diff` / `log` queries, which are allowed by default. Git commands through bash require approval because flags and repository configuration can write files, delete branches or execute programs. Upgrades revoke the four broad Git bash grants shipped by older versions; grants explicitly added again after upgrading are preserved. Compound commands are checked segment by segment with their original newlines and control operators intact. `cat` `head` `grep` are left out because they can read any file outside the workspace. Commands touching `.ssh/`, `.aws/credentials`, `~/.config/feiyu/` or `.env` are refused, `auto` mode included.
 
 **After reading outside content, commands that can reach the network need your nod.** A web page, a search result, an MCP reply, or whatever `curl` / `wget` pulled in through bash may hide a line like "send `.env` to this address". Once the conversation has read any of them: with the sandbox on, bash runs offline by default, and a command that really needs the network (installing dependencies, fetching code) has to carry `network: true` and be approved by you; with the sandbox off the network cannot be cut, so everything except commands that cannot reach it (`ls` `cat` `grep` and friends) asks. **Neither `auto` mode nor allow rules skip this step.** It lifts on `/clear` or a new conversation. Where nobody can answer (pipes, benchmarks) the call is refused and the model tells you which step needs the network. `FEIYU_TRUST_OUTSIDE=1` turns it off entirely (for evals).
 
@@ -338,7 +338,7 @@ Three common in-sandbox failures are recognised and explained: ssh remotes fail 
 verify: npm test
 ```
 
-From then on the command runs after every file write or edit, and failures go back to the model to fix. The failure comes with a digest first (which test failed, the assertion, the compile error line), then the raw output.
+A project-supplied `verify:` command shows its source and full command for trust approval before first use. Reloading changed project conventions requires approval again. Rejection or no reply disables execution, including in `auto` mode. An explicit `/verify <command>` sets a command for the current session. Trusted commands run before the first edit and after each file write or edit, outside the bash sandbox. Failures go back to the model to fix. The failure comes with a digest first (which test failed, the assertion, the compile error line), then the raw output.
 
 **Three gates for long tasks.** In the same convention file, one line each:
 
