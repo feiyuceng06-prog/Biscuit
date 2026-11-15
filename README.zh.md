@@ -10,13 +10,19 @@
 
 ## 安装
 
-### 一行装好（桌面版 + 终端版）
+### Windows 桌面版
+
+Windows x64 安装包将在 Windows 构建通过后的 [Releases](https://github.com/feiyuceng06-prog/feiyu-agent/releases) 中提供。下载安装程序并打开 Feiyu；Python 后端已包含在安装包中。Agent 执行命令还需要安装 [Git for Windows](https://git-scm.com/install/windows)（包含 Git Bash），安装后重新启动 Feiyu。Windows 不提供 Linux 的 bubblewrap 沙箱，命令仍遵循应用内的权限确认。安装包目前未经代码签名。
+
+从源码构建：安装 Python 3.10+、Node.js 22+、MSVC 构建工具和 Git for Windows，在 PowerShell 中运行 `./install-windows.ps1`，安装程序输出在 `desktop/release/`。Windows x64 安装包已通过 Windows 原生 CI 的安装和桌面冒烟测试；尚需更多真实用户环境和模型请求验证。
+
+### Linux 一行装好（桌面版 + 终端版）
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/feiyuceng06-prog/feiyu-agent/main/get.sh | bash
 ```
 
-装的是 [Releases](https://github.com/feiyuceng06-prog/feiyu-agent/releases) 里最新的那一版，放进用户目录：不用 sudo、不用装 Python，也不需要 libfuse2。装完应用菜单里有 **Feiyu**（或者运行 `feiyu-desktop`），终端里运行 `feiyu`；第一次打开会请你「连接模型」。再跑一遍就是升级。没有 curl 就把开头换成 `wget -qO-`（Ubuntu 桌面版默认就没装 curl）。`~/.local/bin` 不在 PATH 里的话（新装的 Ubuntu 就是这样），它会往 `~/.bashrc` 加一行（zsh 是 `~/.zshrc`），新开的终端窗口就能直接敲 `feiyu`；不想改就写成 `… | FEIYU_NO_MODIFY_PATH=1 bash`。现在只有 Linux x86_64 的包，系统要 Ubuntu 22.04 那一代或更新（glibc 2.35 以上）。
+装的是 [Releases](https://github.com/feiyuceng06-prog/feiyu-agent/releases) 里最新的那一版，放进用户目录：不用 sudo、不用装 Python，也不需要 libfuse2。装完应用菜单里有 **Feiyu**（或者运行 `feiyu-desktop`），终端里运行 `feiyu`；第一次打开会请你「连接模型」。再跑一遍就是升级。没有 curl 就把开头换成 `wget -qO-`（Ubuntu 桌面版默认就没装 curl）。`~/.local/bin` 不在 PATH 里的话（新装的 Ubuntu 就是这样），它会往 `~/.bashrc` 加一行（zsh 是 `~/.zshrc`），新开的终端窗口就能直接敲 `feiyu`；不想改就写成 `… | FEIYU_NO_MODIFY_PATH=1 bash`。这条命令只支持 Linux x86_64，系统要 Ubuntu 22.04 那一代或更新（glibc 2.35 以上）。
 
 手上已经有 AppImage 文件的话（比如在别的机器上下好拷过来）：`bash get.sh Feiyu-x.y.z.AppImage`。不要了就删掉 `~/.local/share/feiyu-desktop`、`~/.local/bin/feiyu`、`~/.local/bin/feiyu-desktop` 和 `~/.local/share/applications/feiyu.desktop`，再删掉 `~/.bashrc` 里「由 feiyu 的 get.sh 加」那两行；模型、key 和对话记录在 `~/.config/feiyu` 和 `~/.local/state/feiyu`。
 
@@ -382,7 +388,7 @@ feiyu-desktop -r                  # 接着上次在这个目录里的对话
 
 装完在应用列表里也能搜到 **Feiyu**。
 
-**不想从源码装**：「安装」一节开头那行命令最省事；也可以到 [Releases](https://github.com/feiyuceng06-prog/feiyu-agent/releases) 下载 Linux 的 deb（`sudo apt install ./文件名.deb`，Ubuntu 上选这个）或 AppImage（`chmod +x` 之后双击）。AppImage 要系统里有 libfuse2，Ubuntu 从 22.04 起默认不装，先 `sudo apt install libfuse2`（24.04 上包名是 `libfuse2t64`），不然双击没反应。包里带着 Python 后端，不用装 Python、Node，也不用开终端。第一次打开会请你「连接模型」：选个接口（OpenRouter、DeepSeek、Kimi、通义千问、硅基流动、OpenAI、Anthropic，或者自己填地址），贴上那一家的 key，从现场拉回来的模型清单里点一个就能用。从应用菜单打开时，会接着用上一次选的工作台。Windows 和 macOS 的包还没有。
+**不想从源码装**：「安装」一节开头那行命令最省事；也可以到 [Releases](https://github.com/feiyuceng06-prog/feiyu-agent/releases) 下载 Linux 的 deb（`sudo apt install ./文件名.deb`，Ubuntu 上选这个）或 AppImage（`chmod +x` 之后双击）。AppImage 要系统里有 libfuse2，Ubuntu 从 22.04 起默认不装，先 `sudo apt install libfuse2`（24.04 上包名是 `libfuse2t64`），不然双击没反应。包里带着 Python 后端，不用装 Python、Node，也不用开终端。第一次打开会请你「连接模型」：选个接口（OpenRouter、DeepSeek、Kimi、通义千问、硅基流动、OpenAI、Anthropic，或者自己填地址），贴上那一家的 key，从现场拉回来的模型清单里点一个就能用。从应用菜单打开时，会接着用上一次选的工作台。Windows 安装包的构建和发布流程见上方 Windows 安装说明；macOS 暂无已验证的安装包。
 
 **窗口里的东西不会跑到终端上。** agent 那半边人看的输出（还有桥接自己那几行 `→ op`）写进 `~/.local/state/feiyu/desktop.log`，跟对话存盘一样按 0600 存，攒到 4 MB 从头写。要它回到终端上看：`FEIYU_DESKTOP_STDERR=1 feiyu-desktop`。
 
@@ -614,7 +620,7 @@ stdout 里只有 JSON，界面和日志全走 stderr。不合 schema 会让它�
 
 ## 平台
 
-Python agent 支持 Linux 和 macOS；bash 沙箱只在 Linux 上。Electron 桌面优先验证 Linux；macOS/Windows 构建入口已提供，但仍需对应平台实机验证。Windows 开发需 Python 3.10+、Node.js 22+、MSVC 构建工具和 Git for Windows，运行 `./install-windows.ps1`，产物位于 `desktop/release/win-unpacked/`。
+Python agent 支持 Linux、macOS 和 Windows（Windows 的命令执行需要 Git Bash）；bash 沙箱只在 Linux 上。Electron 桌面已在 Linux 和 Windows x64 CI 运行安装与冒烟测试；macOS 构建仍需原生验证。Windows 开发需 Python 3.10+、Node.js 22+、MSVC 构建工具和 Git for Windows，运行 `./install-windows.ps1`，安装程序位于 `desktop/release/`。
 
 ## 测试
 

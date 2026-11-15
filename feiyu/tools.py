@@ -791,8 +791,13 @@ _STATE_SKIP = ("PWD", "OLDPWD", "SHLVL", "_")
 _STATE_END = "__feiyu_end=1"
 
 
+def _shell_path(path: str) -> str:
+    """Git Bash accepts drive paths with forward slashes, including in redirects."""
+    return path.replace("\\", "/") if os.name == "nt" else path
+
+
 def _state_restore(path: str) -> str:
-    quoted = shlex.quote(path)
+    quoted = shlex.quote(_shell_path(path))
     return '[ "$(tail -n1 %s 2>/dev/null)" = %s ] && . %s 2>/dev/null\n' % (
         quoted, shlex.quote(_STATE_END), quoted)
 
@@ -818,8 +823,8 @@ def _save_trap(pwd_file: str, state: str) -> str:
         " export -p; declare -f ) > %s 2>/dev/null"
         " && echo %s >> %s 2>/dev/null\n"
         "}\ntrap __feiyu_save EXIT\n"
-    ) % (shlex.quote(pwd_file), " ".join(_STATE_SKIP), shlex.quote(state),
-         shlex.quote(_STATE_END), shlex.quote(state))
+    ) % (shlex.quote(_shell_path(pwd_file)), " ".join(_STATE_SKIP), shlex.quote(_shell_path(state)),
+         shlex.quote(_STATE_END), shlex.quote(_shell_path(state)))
 
 
 def _child_env() -> dict:

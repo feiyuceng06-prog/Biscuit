@@ -20,8 +20,7 @@ for (let i = 0; i < argv.length; i++) {
   else if (['-m', '--model'].includes(argv[i])) options.model = argv[++i];
   else if (['-r', '--resume'].includes(argv[i])) options.resume = true;
 }
-const lastFile = path.join(app.getPath('userData'), 'workspace.json');
-options.workspace = pickWorkspace({ given: options.workspace, cwd: process.cwd(), home: os.homedir(), last: readLast(lastFile) });
+let lastFile;
 let win, agent, terminal, workspace, transition, shown;
 let state = { state: 'starting' };
 let quitting = false;
@@ -127,6 +126,8 @@ ipcMain.handle('feiyu:command', async (event, command, args = {}) => {
 });
 
 app.whenReady().then(async () => {
+lastFile = path.join(app.getPath('userData'), 'workspace.json');
+options.workspace = pickWorkspace({ given: options.workspace, cwd: process.cwd(), home: os.homedir(), last: readLast(lastFile) });
 Menu.setApplicationMenu(null);
 win = new BrowserWindow({
   title: 'Feiyu', width: 1440, height: 920, minWidth: 800, minHeight: 560,

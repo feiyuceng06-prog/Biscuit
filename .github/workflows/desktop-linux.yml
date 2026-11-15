@@ -1,7 +1,9 @@
-name: Build Linux desktop
+name: Build desktop
 on:
   workflow_dispatch:
+  pull_request:
   push:
+    branches: ['codex/publish-desktop-*']
     tags: ['desktop-v*']
 permissions:
   contents: read
@@ -44,24 +46,88 @@ jobs:
             desktop/release/*.AppImage
             desktop/test-results/workbench.png
 
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+        working-directory: desktop
+      - run: npm test
+        working-directory: desktop
+      - run: python scripts/build_backend.py
+        working-directory: desktop
+      - name: Test Git Bash integration
+        run: desktop/build/python-build/Scripts/python.exe -m unittest tests.test_windows_support
+      - run: npm run build
+        working-directory: desktop
+      - run: npm run test:desktop
+        working-directory: desktop
+      - run: npm run dist:win
+        working-directory: desktop
+      - name: Test packaged application
+        working-directory: desktop
+        shell: pwsh
+        run: |
+          $env:FEIYU_TEST_EXECUTABLE = "$PWD/release/win-unpacked/feiyu-desktop.exe"
+          npm run test:desktop
+      - name: Install and test the Windows installer
+        working-directory: desktop
+        shell: pwsh
+        run: |
+          $installer = (Get-ChildItem release/*.exe | Select-Object -First 1).FullName
+          $installDir = Join-Path $env:RUNNER_TEMP 'feiyu-install-test'
+          $process = Start-Process -FilePath $installer -ArgumentList @('/S', "/D=$installDir") -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "Installer failed: $($process.ExitCode)" }
+          $env:FEIYU_TEST_EXECUTABLE = Join-Path $installDir 'feiyu-desktop.exe'
+          if (-not (Test-Path $env:FEIYU_TEST_EXECUTABLE)) { throw "Installed application missing: $env:FEIYU_TEST_EXECUTABLE" }
+          npm run test:desktop
+          if ($LASTEXITCODE -ne 0) { throw 'Installed desktop test failed' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: feiyu-windows-x64
+          if-no-files-found: error
+          path: |
+            desktop/release/*.exe
+            desktop/test-results/workbench.png
+
   # 打 desktop-v* 标签时把上面那两个包挂到 Releases 上，没有 GitHub 账号也下得到。
   # 单独一个 job：只有它要写权限，装依赖、跑测试那些步骤拿到的 token 照旧是只读的
   release:
-    if: startsWith(github.ref, 'refs/tags/desktop-v')
-    needs: linux
+    if: startsWith(github.ref, 'refs/tags/desktop-v') || startsWith(github.ref, 'refs/heads/codex/publish-desktop-')
+    needs: [linux, windows]
     runs-on: ubuntu-22.04
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: feiyu-linux-x64
           path: built
+      - uses: actions/download-artifact@v4
+        with:
+          name: feiyu-windows-x64
+          path: built-windows
       - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
+          REF_NAME: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
         run: |
-          gh release create "$TAG" built/release/*.deb built/release/*.AppImage \
-            --repo "$GITHUB_REPOSITORY" --title "Feiyu ${TAG#desktop-v}（Linux）" \
-            --notes "Ubuntu 上用 deb：sudo apt install ./文件名.deb。AppImage：chmod +x 之后双击；它要 libfuse2，Ubuntu 22.04 起默认不装，先 sudo apt install libfuse2（24.04 是 libfuse2t64）。第一次打开时按「连接模型」，选个接口、贴上 key 就能用。"
+          if [ "$REF_TYPE" = tag ]; then
+            TAG="$REF_NAME"
+          else
+            TAG="desktop-v$(node -p "require('./desktop/package.json').version")"
+          fi
+          gh release create "$TAG" built/release/*.deb built/release/*.AppImage built-windows/release/*.exe \
+            --target "$GITHUB_SHA" --repo "$GITHUB_REPOSITORY" --title "Feiyu ${TAG#desktop-v}" \
+            --notes "Ubuntu 上用 deb：sudo apt install ./文件名.deb。AppImage：chmod +x 之后双击；它要 libfuse2，Ubuntu 22.04 起默认不装，先 sudo apt install libfuse2（24.04 是 libfuse2t64）。Windows 用户安装 exe 后需另装 Git for Windows（Git Bash）才能执行 agent 命令。安装包未签名，Windows 上未验证真实模型请求；Linux 的 bubblewrap 沙箱不可用于 Windows。第一次打开时按「连接模型」，选个接口、贴上 key 就能用。"

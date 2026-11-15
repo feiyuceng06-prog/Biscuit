@@ -15,15 +15,22 @@ await fs.writeFile(path.join(other, 'second.txt'), 'Second workspace');
 await fs.mkdir(path.join(temporary, 'config'), { recursive: true });
 const env = { ...process.env, HOME: temporary, XDG_CONFIG_HOME: path.join(temporary, 'config'),
   XDG_STATE_HOME: path.join(temporary, 'state'), XDG_DATA_HOME: path.join(temporary, 'data'),
-  FEIYU_BIN: process.env.FEIYU_TEST_EXECUTABLE ? '/nonexistent-backend-override' : path.join(desktop, 'build/backend/feiyu-backend'), SHELL: '/bin/sh' };
+  FEIYU_BIN: process.env.FEIYU_TEST_EXECUTABLE ? '/nonexistent-backend-override' : path.join(desktop, 'build/backend', process.platform === 'win32' ? 'feiyu-backend.exe' : 'feiyu-backend'), SHELL: '/bin/sh' };
+if (process.platform === 'win32') {
+  env.USERPROFILE = temporary; env.FEIYU_TEST_MARKER = 'OK';
+  env.APPDATA = path.join(temporary, 'AppData', 'Roaming');
+  env.LOCALAPPDATA = path.join(temporary, 'AppData', 'Local');
+  await fs.mkdir(env.APPDATA, { recursive: true });
+  await fs.mkdir(env.LOCALAPPDATA, { recursive: true });
+}
 delete env.ELECTRON_RUN_AS_NODE;
-let application;
+let application, page;
 try {
   application = await electron.launch({
     ...(process.env.FEIYU_TEST_EXECUTABLE ? { executablePath: process.env.FEIYU_TEST_EXECUTABLE } : {}),
     args: [...(process.env.FEIYU_TEST_EXECUTABLE ? [] : [desktop]), '-w', workspace], env, timeout: 30000,
   });
-  const page = await application.firstWindow();
+  page = await application.firstWindow();
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await expect(page.locator('#s-ver')).not.toHaveText('—', { timeout: 30000 });
@@ -66,14 +73,14 @@ try {
   });
   // Await a successful PTY write, rather than racing the asynchronous shell startup.
   await expect.poll(async () => page.evaluate(async () => {
-    try { await window.feiyuDesktop.core.invoke('term_write', { data: "printf 'FEIYU_%s_OK\\n' TERMINAL\n" }); return true; }
+    try { await window.feiyuDesktop.core.invoke('term_write', { data: window.feiyuDesktop.platform === 'win32' ? "echo FEIYU_TERMINAL_%FEIYU_TEST_MARKER%\r" : "printf 'FEIYU_%s_OK\\n' TERMINAL\n" }); return true; }
     catch { return false; }
   })).toBe(true);
   await page.waitForFunction(() => window.__terminalOutput.includes('FEIYU_TERMINAL_OK'));
   await fs.mkdir(path.join(desktop, 'test-results'), { recursive: true });
   await page.screenshot({ path: path.join(desktop, 'test-results/workbench.png') });
   await page.evaluate(dir => goDesk(dir), other);
-  await expect(page.locator('#desk-path')).toHaveAttribute('title', other);
+  await expect(page.locator('#desk-path')).toHaveAttribute('title', await fs.realpath(other));
   await expect(page.getByRole('button', { name: '· second.txt', exact: true })).toBeVisible();
   await expect(page.locator('.file-tabs')).not.toContainText('README.md');
   await page.locator('#nav-shelf').click();
@@ -93,6 +100,7 @@ try {
   console.log('PASS: fullscreen intro, streamed caption, automatic exit, Escape, reduced motion, focus restoration');
   console.log('PASS: real backend, file preview, isolated renderer, path boundary, PTY, workspace switching, settings');
 } catch (error) {
+  try { console.error('Terminal display:', await page?.locator('.xterm-rows').innerText()); } catch {}
   try { console.error(await fs.readFile(path.join(temporary, 'state/feiyu/desktop.log'), 'utf8')); } catch {}
   throw error;
 } finally {
