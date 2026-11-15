@@ -16,15 +16,21 @@ await fs.mkdir(path.join(temporary, 'config'), { recursive: true });
 const env = { ...process.env, HOME: temporary, XDG_CONFIG_HOME: path.join(temporary, 'config'),
   XDG_STATE_HOME: path.join(temporary, 'state'), XDG_DATA_HOME: path.join(temporary, 'data'),
   FEIYU_BIN: process.env.FEIYU_TEST_EXECUTABLE ? '/nonexistent-backend-override' : path.join(desktop, 'build/backend', process.platform === 'win32' ? 'feiyu-backend.exe' : 'feiyu-backend'), SHELL: '/bin/sh' };
-if (process.platform === 'win32') { env.USERPROFILE = temporary; env.FEIYU_TEST_MARKER = 'OK'; }
+if (process.platform === 'win32') {
+  env.USERPROFILE = temporary; env.FEIYU_TEST_MARKER = 'OK';
+  env.APPDATA = path.join(temporary, 'AppData', 'Roaming');
+  env.LOCALAPPDATA = path.join(temporary, 'AppData', 'Local');
+  await fs.mkdir(env.APPDATA, { recursive: true });
+  await fs.mkdir(env.LOCALAPPDATA, { recursive: true });
+}
 delete env.ELECTRON_RUN_AS_NODE;
-let application;
+let application, page;
 try {
   application = await electron.launch({
     ...(process.env.FEIYU_TEST_EXECUTABLE ? { executablePath: process.env.FEIYU_TEST_EXECUTABLE } : {}),
     args: [...(process.env.FEIYU_TEST_EXECUTABLE ? [] : [desktop]), '-w', workspace], env, timeout: 30000,
   });
-  const page = await application.firstWindow();
+  page = await application.firstWindow();
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await expect(page.locator('#s-ver')).not.toHaveText('—', { timeout: 30000 });
@@ -94,6 +100,7 @@ try {
   console.log('PASS: fullscreen intro, streamed caption, automatic exit, Escape, reduced motion, focus restoration');
   console.log('PASS: real backend, file preview, isolated renderer, path boundary, PTY, workspace switching, settings');
 } catch (error) {
+  try { console.error('Terminal display:', await page?.locator('.xterm-rows').innerText()); } catch {}
   try { console.error(await fs.readFile(path.join(temporary, 'state/feiyu/desktop.log'), 'utf8')); } catch {}
   throw error;
 } finally {
