@@ -41,3 +41,16 @@ test('directory browsing sorts folders and hides dependency trees', async t => {
   await fs.writeFile(path.join(root, 'a.txt'), 'hello');
   assert.deepEqual((await listFiles(root)).map(e => e.name), ['z-folder', 'a.txt']);
 });
+
+test('FIFO preview rejects promptly and special files stay out of the list', { skip: process.platform === 'win32' }, async t => {
+  const { execFileSync } = await import('node:child_process');
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'feiyu-fifo-'));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  execFileSync('mkfifo', [path.join(root, 'pipe')]);
+  // A separate process gives regressions a hard timeout without wedging the test runner.
+  const module = new URL('../electron/files.mjs', import.meta.url).href;
+  execFileSync(process.execPath, ['--input-type=module', '-e',
+    `import assert from 'node:assert/strict'; import {previewFile} from ${JSON.stringify(module)};
+     await assert.rejects(previewFile(process.argv[1], 'pipe'), /普通文件/);`, root], { timeout: 3000 });
+  assert.deepEqual(await listFiles(root), []);
+});

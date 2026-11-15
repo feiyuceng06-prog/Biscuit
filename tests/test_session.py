@@ -3,6 +3,8 @@
 import json
 import os
 import stat
+import subprocess
+import sys
 import tempfile
 import time
 import unittest
@@ -429,11 +431,16 @@ class TestNewId(unittest.TestCase):
         for sid in [session.new_id() for _ in range(3)]:
             self.assertTrue(session._ID_OK.match(sid), sid)
 
-    def test_头一个不带后缀_排序还是按时间(self):
-        session._last_id = ""
-        first = session.new_id()
-        self.assertRegex(first, r"^\d{8}-\d{6}$")
-        self.assertTrue(session.new_id() > first)
+    def test_不同进程同秒编号不会覆盖(self):
+        code = "from unittest.mock import patch; from feiyu import session; " \
+               "p=patch('feiyu.session.time.strftime',return_value='20261113-120000'); " \
+               "p.start(); print(session.new_id())"
+        ids = [subprocess.check_output([sys.executable, "-c", code], text=True).strip()
+               for _ in range(2)]
+        self.assertNotEqual(*ids)
+        for sid in ids:
+            self.assertRegex(sid, r"^20261113-120000-[0-9a-f]{24}$")
+            self.assertIsNotNone(session._ID_OK.fullmatch(sid))
 
 
 class TestBrokenFiles(unittest.TestCase):

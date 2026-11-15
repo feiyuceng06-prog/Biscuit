@@ -22,7 +22,7 @@ for (let i = 0; i < argv.length; i++) {
 }
 const lastFile = path.join(app.getPath('userData'), 'workspace.json');
 options.workspace = pickWorkspace({ given: options.workspace, cwd: process.cwd(), home: os.homedir(), last: readLast(lastFile) });
-let win, agent, terminal, workspace, transition;
+let win, agent, terminal, workspace, transition, shown;
 let state = { state: 'starting' };
 let quitting = false;
 const logDir = path.join(process.env.XDG_STATE_HOME || path.join(os.homedir(), '.local/state'), 'feiyu');
@@ -121,6 +121,7 @@ ipcMain.handle('feiyu:command', async (event, command, args = {}) => {
       terminal.write(args.data); return;
     case 'term_resize': { const size = dimensions(args); terminal?.resize(size.cols, size.rows); return; }
     case 'term_stop': stopTerminal(); return;
+    case 'shown': return shown;
     default: throw new Error('未知桌面能力');
   }
 });
@@ -138,6 +139,9 @@ win.webContents.on('will-navigate', event => event.preventDefault());
 win.webContents.on('will-attach-webview', event => event.preventDefault());
 win.webContents.session.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
 win.webContents.session.setPermissionCheckHandler(() => false);
+// The page paints before the window is mapped (ready-to-show waits for that), and
+// visibilityState already reads "visible" then; the startup animation waits for this instead.
+shown = new Promise(resolve => win.once('show', () => resolve(true)));
 win.once('ready-to-show', () => win.show());
 win.webContents.on('render-process-gone', () => { stopTerminal(); void agent?.stop(); });
 app.on('before-quit', event => {

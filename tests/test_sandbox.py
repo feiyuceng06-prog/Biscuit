@@ -341,3 +341,34 @@ class TestExecWrapper(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestHealthRegressions(unittest.TestCase):
+    @需要沙箱
+    def test_xdg真实路径和符号链接都遮蔽(self):
+        import subprocess
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in ('config', 'state'):
+                (root / name / 'feiyu').mkdir(parents=True)
+                (root / name / 'feiyu' / 'secret').write_text('fake-only')
+            (root / 'alias').symlink_to(root / 'config', target_is_directory=True)
+            with patch.dict(os.environ, {'XDG_CONFIG_HOME': str(root / 'alias'),
+                                         'XDG_STATE_HOME': str(root / 'state'),
+                                         'FEIYU_EXEC_WRAPPER': ''}), \
+                    patch.object(sandbox, 'effective', return_value=('workspace', '')):
+                # Bind the fixture workspace back over /tmp so tmpfs cannot hide a failure.
+                args = sandbox.wrap('test ! -e config/feiyu/secret && '
+                                    'test ! -e alias/feiyu/secret && test ! -e state/feiyu/secret',
+                                    workspace=root, cwd=root)
+                result = subprocess.run(args, capture_output=True, timeout=10)
+                self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_代理错误只在断网模式附加提示(self):
+        from feiyu.tools import _sandbox_note
+        message = 'curl: (7) Failed to connect to example.com:443 over proxy 127.0.0.1'
+        self.assertIn('network: true', _sandbox_note(message, 'workspace', 'web'))
+        self.assertIn('strict', _sandbox_note(message, 'strict'))
+        self.assertEqual(_sandbox_note(message, 'workspace'), '')
+        self.assertEqual(_sandbox_note('curl: (7) Failed to connect to localhost', 'workspace', 'web'), '')

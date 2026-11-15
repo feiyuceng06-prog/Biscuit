@@ -27,6 +27,26 @@ try {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await expect(page.locator('#s-ver')).not.toHaveText('—', { timeout: 30000 });
+  expect(await page.evaluate(() => window.feiyuDesktop.core.invoke('shown'))).toBe(true);
+  const reduced = await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
+  if (!reduced) {
+    await expect(page.locator('#startup')).toBeVisible();
+    expect(await page.evaluate(() => {
+      const r = document.querySelector('#startup').getBoundingClientRect();
+      return r.width === innerWidth && r.height === innerHeight && !!document.querySelector('#input').closest('[inert]');
+    })).toBe(true);
+    await expect(page.locator('#startup-text')).toHaveText(/^Feiyu/);
+    expect(await page.locator('#startup-text').textContent()).not.toBe('Feiyu Agent帮助您工作。');
+    await expect(page.locator('#startup-text')).toHaveText('Feiyu Agent帮助您工作。', { timeout: 6000 });
+    await expect(page.locator('#startup')).toHaveAttribute('data-phase', 'play');
+    if (process.env.FEIYU_SPLASH_SCREENSHOT) {
+      await expect(page.locator('#startup')).toHaveAttribute('data-phase', 'play');
+      await page.evaluate(() => document.querySelector('#startup').getAnimations({subtree: true}).forEach(a => { a.pause(); a.currentTime = 4000; }));
+      await page.screenshot({path: process.env.FEIYU_SPLASH_SCREENSHOT});
+    }
+  }
+  await expect(page.locator('#startup')).toHaveCount(0, { timeout: 6500 });
+  await expect(page.locator('#input')).toBeFocused();
   await expect(page.locator('.backend-error')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '· README.md', exact: true })).toBeVisible();
   await page.getByRole('button', { name: '· README.md', exact: true }).click();
@@ -59,7 +79,18 @@ try {
   await page.locator('#nav-shelf').click();
   await expect(page.locator('#shelf')).toBeVisible();
   await checkModelForm(page);
+  await expect(page.locator('#startup')).toHaveCount(0);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.reload();
+  await expect(page.locator('#startup')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#startup')).toHaveCount(0);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.reload();
+  await expect(page.locator('#startup')).toHaveCount(0);
+  expect(await page.locator('[inert]').count()).toBe(0);
   expect(errors).toEqual([]);
+  console.log('PASS: fullscreen intro, streamed caption, automatic exit, Escape, reduced motion, focus restoration');
   console.log('PASS: real backend, file preview, isolated renderer, path boundary, PTY, workspace switching, settings');
 } catch (error) {
   try { console.error(await fs.readFile(path.join(temporary, 'state/feiyu/desktop.log'), 'utf8')); } catch {}

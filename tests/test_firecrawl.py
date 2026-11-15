@@ -5,6 +5,7 @@
 """
 
 import json
+import socket
 import tempfile
 import unittest
 import unittest.mock as mock
@@ -22,6 +23,14 @@ BLOCKED = (None, "HTTP 403 Forbidden", "HTTP 403")
 
 class Base(unittest.TestCase):
     def setUp(self):
+        def resolve(host, *args, **kwargs):
+            if host not in ("x.com", "169.254.169.254", "127.0.0.1"):
+                raise AssertionError("unexpected DNS lookup: " + host)
+            ip = "1.1.1.1" if host == "x.com" else host
+            return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", (ip, 0))]
+        dns = mock.patch("socket.getaddrinfo", side_effect=resolve)
+        dns.start()
+        self.addCleanup(dns.stop)
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name).resolve()
         # 配置路径是 import 时算好的，不换掉会读写用户真正的 key

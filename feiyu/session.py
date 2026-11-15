@@ -21,6 +21,7 @@ import os
 import re
 import tempfile
 import time
+import uuid
 
 from . import files
 
@@ -60,24 +61,9 @@ def _path(workspace, sid: str) -> str:
     return os.path.join(folder(workspace), sid + ".json")
 
 
-_last_id = ""
-
-
 def new_id() -> str:
-    """会话 id 用时间戳：**天生按时间排序**，列历史时不用再读一遍文件去比时间
-
-    **同一秒里连开两段不能撞。** 时间戳只到秒，而"开一段新的"是一下点出来的
-    （侧栏点两个机器人、连按两次新对话）—— 撞了的话第二段的存盘直接盖掉第一段，
-    表现是"刚才那段对话没了"。撞上就往后缀加序号；`_ID_OK` 认这个形状，
-    列表是按 `saved_at` 排的，多一截后缀不影响顺序。
-    """
-    global _last_id
-    now = time.strftime("%Y%m%d-%H%M%S")
-    if now == _last_id or _last_id.startswith(now + "-"):
-        n = int(_last_id.rpartition("-")[2]) + 1 if _last_id.startswith(now + "-") else 2
-        now = "%s-%d" % (now, n)
-    _last_id = now
-    return now
+    """时间戳便于辨认；随机后缀防止不同进程在同一秒覆盖彼此的会话。"""
+    return time.strftime("%Y%m%d-%H%M%S") + "-" + uuid.uuid4().hex[:24]
 
 
 def _plain(obj):

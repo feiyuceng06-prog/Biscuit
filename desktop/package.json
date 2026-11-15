@@ -1,6 +1,6 @@
 {
   "name": "feiyu-desktop",
-  "version": "0.82.4",
+  "version": "0.84.2",
   "description": "Feiyu agent desktop workbench",
   "author": {
     "name": "Feiyu",
@@ -85,5 +85,8 @@
     "node": ">=22"
   },
   "homepage": "https://github.com/feiyuceng06-prog/feiyu-agent",
-  "desktopName": "feiyu.desktop"
+  "desktopName": "feiyu.desktop",
+  "overrides": {
+    "minimatch@>=7.0.0 <11.0.1": "^11.0.1"
+  }
 }

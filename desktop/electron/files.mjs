@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import { constants } from 'node:fs';
 import path from 'node:path';
 
 export const MAX_FILE = 2 * 1024 * 1024;
@@ -16,7 +17,9 @@ export async function underRoot(root, requested = '.') {
 }
 export async function readBounded(root, requested, limit) {
   const target = await underRoot(root, requested);
-  const file = await fs.open(target, 'r');
+  if (!(await fs.stat(target)).isFile()) throw new Error('只能读取普通文件');
+  // Nonblocking open also covers a regular file replaced by a FIFO after stat.
+  const file = await fs.open(target, constants.O_RDONLY | (constants.O_NONBLOCK ?? 0));
   try {
     const stat = await file.stat();
     if (!stat.isFile()) throw new Error('只能读取普通文件');
@@ -30,7 +33,8 @@ export async function readBounded(root, requested, limit) {
 export async function listFiles(root, requested = '.') {
   const target = await underRoot(root, requested);
   const entries = await fs.readdir(target, { withFileTypes: true });
-  return entries.filter(e => !['.git', 'node_modules', '.venv', '__pycache__'].includes(e.name))
+  return entries.filter(e => (e.isFile() || e.isDirectory() || e.isSymbolicLink()))
+    .filter(e => !['.git', 'node_modules', '.venv', '__pycache__'].includes(e.name))
     .sort((a, b) => Number(b.isDirectory()) - Number(a.isDirectory()) || a.name.localeCompare(b.name))
     .slice(0, 2000).map(e => ({ name: e.name, directory: e.isDirectory(),
       path: path.relative(root, path.join(target, e.name)).split(path.sep).join('/') }));

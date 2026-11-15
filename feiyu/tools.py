@@ -756,10 +756,12 @@ def _sandbox_note(out: str, level: str, outside: str = "") -> str:
     if "Cannot connect to the Docker daemon" in out or "docker.sock: connect" in out:
         return ("\n\n（bash 跑在沙箱里，docker 的 socket 被挡在外面 —— 碰得到它就能绕过沙箱"
                 "往任何地方写 要用 docker 的话跟用户说一声让他自己跑，或者让他 /sandbox off ）")
-    if outside and level != "strict" and any(mark in out for mark in _NET_FAILS):
+    network_failure = any(mark in out for mark in _NET_FAILS) or bool(
+        re.search(r"curl: \(7\).*Failed to connect[^\n]*over proxy", out))
+    if outside and level != "strict" and network_failure:
         return ("\n\n（这段对话读过外部内容（%s），bash 现在是断网跑的 "
                 "这条要是确实得联网，带上 network: true 再跑一次 —— 会先问用户 ）" % outside)
-    if level == "strict" and any(mark in out for mark in _NET_FAILS):
+    if level == "strict" and network_failure:
         return ("\n\n（bash 跑在 strict 档沙箱里，不联网 push / 拉依赖这类要出网的操作"
                 "跟用户说一声，让他自己做或者 /sandbox workspace ）")
     if any(mark in out for mark in _SSH_FAILS):
@@ -824,12 +826,14 @@ def _child_env() -> dict:
     """给 bash 工具用的环境 摘掉密钥类变量，免得 agent 一句 echo 就把它们
     读进对话历史、再发回给模型厂商 """
     if _keep_secrets():
-        return dict(os.environ)
-    return {
-        name: value
-        for name, value in os.environ.items()
-        if name in _SECRET_KEEP or not _SECRET_WORDS.search(name)
-    }
+        env = dict(os.environ)
+    else:
+        env = {
+            name: value
+            for name, value in os.environ.items()
+            if name in _SECRET_KEEP or not _SECRET_WORDS.search(name)
+        }
+    return env
 
 
 # ---- 办公文档 ----

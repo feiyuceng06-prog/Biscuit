@@ -240,6 +240,65 @@ function greeting() {
   return h < 5 ? "夜深了" : h < 11 ? "早上好" : h < 13 ? "中午好" : h < 18 ? "下午好" : "晚上好";
 }
 
+const DOG = $("dog").innerHTML;
+
+/* 整窗开场独立于会话 DOM；清空会话和切换工作区不重播。 */
+function startSplash() {
+  const overlay = $("startup");
+  if (REDUCED) { overlay.remove(); return; }
+  $("startup-mark").innerHTML = DOG;
+  const siblings = [...document.body.children].filter(el => el !== overlay && !["SCRIPT", "TEMPLATE"].includes(el.tagName));
+  const previous = siblings.map(el => el.inert);
+  siblings.forEach(el => { el.inert = true; });
+  const timers = [];
+  let closed = false;
+  const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+  const close = () => {
+    if (closed) return;
+    closed = true;
+    timers.forEach(clearTimeout);
+    siblings.forEach((el, i) => { el.inert = previous[i]; });
+    overlay.remove();
+    document.removeEventListener("keydown", keys, true);
+    window.removeEventListener("error", close);
+    inputEl.focus();
+  };
+  const keys = (event) => {
+    if (event.key === "Escape") { event.preventDefault(); close(); }
+    // 不让启动页上的快捷键落到背后的聊天界面。
+    event.stopImmediatePropagation();
+  };
+  document.addEventListener("keydown", keys, true);
+  window.addEventListener("error", close);
+  overlay.focus();
+  later(close, 12000);
+  const play = () => {
+    if (closed || overlay.dataset.phase !== "wait") return;
+    overlay.dataset.phase = "play";
+    const caption = $("startup-text");
+    const letters = [...overlay.querySelector(".startup__caption").getAttribute("aria-label")];
+    let next = 0;
+    const type = () => {
+      if (closed) return;
+      caption.textContent += letters[next++];
+      if (next < letters.length) { later(type, 110); return; }
+      caption.dataset.complete = "true";
+      // 读完文案再退场，定时器延迟时也不会把未输出完的字截掉。
+      later(() => { overlay.dataset.phase = "text-out"; }, 1100);
+      later(() => { overlay.dataset.phase = "overlay-out"; }, 1600);
+      later(close, 2300);
+    };
+    later(type, 1800);
+  };
+  const shown = window.feiyuDesktop ? window.feiyuDesktop.core.invoke("shown").catch(() => {}) : Promise.resolve();
+  Promise.race([shown, new Promise(resolve => later(resolve, 1500))]).then(() => {
+    if (closed) return;
+    requestAnimationFrame(() => requestAnimationFrame(play));
+    later(play, 300);
+  });
+}
+startSplash();
+
 function syncHello() {
   let el = $("hello");
   // **"有没有内容"不能把这块自己算进去。** 第一版写的是
@@ -261,8 +320,7 @@ function syncHello() {
   el.id = "hello";
   el.className = "block hello";
   el.innerHTML = `<div class="block__label">开始</div><div class="block__body">`
-    + `<h1 class="hello__greet"><span class="hello__mark" aria-hidden="true"></span>`
-    + `${greeting()}</h1>`
+    + `<h1 class="hello__greet">${DOG}<span class="hello__hi">${greeting()}</span></h1>`
     + `<p class="hello__lead">问它点什么，或者直接把要做的事说出来。</p>`
     + `<div class="hello__step" data-need="model"><p>先连一个模型：选个接口、贴上 key 就能用。</p>`
     + `<button type="button" class="act act--go" data-do="model">连接模型</button></div>`

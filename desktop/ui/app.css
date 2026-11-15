@@ -1517,11 +1517,20 @@ body[data-side="off"] .side { translate: -100% 0; visibility: hidden; }
 .hello__mark {
   width: 28px;
   height: 28px;
-  background: var(--accent);
-  -webkit-mask: url("logo.svg") center / contain no-repeat;
-  mask: url("logo.svg") center / contain no-repeat;
+  overflow: visible;
+  color: var(--accent);
   transform-origin: 40% 90%;
   animation: nod 900ms var(--spring) 180ms both;
+}
+
+/* 描边只在启动动画里露面。宽度按路径自己的坐标算：logo 的路径放大了 2.647 倍、
+   7200 见方画进 28px，140 个单位约 1.4px */
+.hello__mark path {
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 140;
+  stroke-linejoin: round;
+  stroke-opacity: 0;
 }
 
 @keyframes nod {
@@ -1657,6 +1666,38 @@ body[data-need-model] .hello__frame { display: none; }
    抬的是 .stream 不是 .sheet —— .sheet 抬上去会盖住标题栏 */
 body[data-empty] .stream,
 body[data-empty] .composer { translate: 0 calc(var(--lift, 0px) * -1); }
+
+/* 全窗开场：品牌先退场，再揭开工作台。 */
+.startup {
+  position: fixed; inset: 0; z-index: 10000;
+  display: grid; place-items: center; background: var(--bg); color: var(--accent);
+  opacity: 1; transition: opacity 700ms ease-out; outline: none;
+}
+.startup__brand { display: grid; justify-items: center; gap: 18px; text-align: center;
+  transition: opacity 500ms ease-out, transform 500ms ease-out; }
+.startup__mark .hello__mark { width: 116px; height: 116px; margin: 0; animation: none; }
+.startup__mark path { fill: currentColor; stroke: currentColor; stroke-width: 55;
+  stroke-dasharray: 1 1; stroke-dashoffset: 0; fill-opacity: 1; stroke-opacity: 0; }
+.startup__caption { display: grid; margin: 0; font-size: 13px; color: var(--muted); }
+.startup__caption > span { grid-area: 1 / 1; text-align: left; white-space: pre; }
+.startup__reserve { visibility: hidden; }
+#startup-text::after { content: ""; display: inline-block; width: 1px; height: 1em;
+  margin-left: 3px; vertical-align: -.12em; background: var(--accent);
+  animation: startup-cursor 900ms steps(2, start) infinite; }
+#startup-text[data-complete]::after { visibility: hidden; animation: none; }
+@keyframes startup-cursor { to { opacity: 0; } }
+.startup[data-phase="wait"] .startup__brand { opacity: 0; }
+.startup[data-phase="play"] .startup__mark path {
+  animation: startup-trace 1700ms var(--ease-move) both, startup-ink 850ms ease-out 1400ms both;
+}
+.startup[data-phase="play"] .startup__caption { animation: startup-rise 600ms ease-out 1700ms both; }
+.startup[data-phase="text-out"] .startup__brand,
+.startup[data-phase="overlay-out"] .startup__brand { opacity: 0; transform: translateY(8px); }
+.startup[data-phase="overlay-out"] { opacity: 0; }
+@keyframes startup-trace { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes startup-ink { from { fill-opacity: 0; stroke-opacity: 1; } to { fill-opacity: 1; stroke-opacity: 0; } }
+@keyframes startup-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .startup { display: none; } }
 
 .hello[data-leaving] {
   position: absolute;

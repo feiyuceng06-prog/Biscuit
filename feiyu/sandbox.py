@@ -201,8 +201,10 @@ def wrap(command: str, *, workspace, cwd, writable=(), offline=False) -> list[st
         "--die-with-parent",
         "--unshare-pid",
     ]
-    for path in SHADOW_DIRS:
-        real = os.path.expanduser(path)
+    private_dirs = (*SHADOW_DIRS,
+                    os.path.join(os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config"), "feiyu"),
+                    os.path.join(os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"), "feiyu"))
+    for real in sorted({os.path.realpath(os.path.expanduser(p)) for p in private_dirs}):
         if os.path.isdir(real):
             argv += ["--tmpfs", real]
     for path in SHADOW_FILES:

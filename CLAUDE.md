@@ -5012,3 +5012,76 @@ get.sh 建的，于是不光当前窗口，**新开的终端窗口也找不到**
 
 `tests/test_get.py` 加了五条（写进 bashrc 且只写一次、PATH 不会越来越长、zsh / fish 写各自的、已经在 PATH 里不写、
 FEIYU_NO_MODIFY_PATH），五处承重行改坏各自红一条。
+
+
+## 0.83.0：启动小动画
+
+用户要「给 feiyu-desktop 加个启动小动画」，三选一里挑了「不挡人，在空白页上演」和「狗的轮廓描出来」
+（整屏启动页、只在加载慢时出现，这两个没要）。量过：新装的机器上后端 0.16 秒就回 status，
+所以它只管开场，不兼当加载。
+
+- **只演一次**：打开窗口后的第一块「开始」。狗沿轮廓描一遍（480ms）→ 填色、描边退掉（380ms 起）→
+  问候 420 / 说明 500 / 卡片和例子框 580 / 例子 620–740 / 快捷键 800 依次浮上来，1.1 秒收住。
+  之后新建会话摆出来的那块照旧只点一下头；关了动效不演；演的时候输入框照样能打字。
+- **狗是 index.html 里的 `<template id="dog">`**，跟 `logo.svg` 同一条路径，`desktop/tests/logo.test.mjs` 盯着
+  （viewBox 要逐字一样，logo 里写的是 `7200.000000`，头一版写成 7200 就被它逮到了）。
+  `<img>` 和 CSS mask 里的路径碰不到，描不了边。`pathLength="1"` 不能丢：描边是 dashoffset 从 1 到 0。
+- **窗口真露面了才开演。** Electron 在 show 之前就在画（`paintWhenInitiallyHidden` 默认开，ready-to-show 靠它），
+  那时 `visibilityState` 照样报 visible。所以渲染进程 `invoke("shown")` 问主进程，主进程在 `win.once('show')` 时兑现。
+  真 Electron 里量过：173ms 那块已经在 wait、窗口还没出来；267ms 窗口露面；284ms 开演；1370ms 收住。
+  等不到也只等 1.5 秒，不然那块一直是空的。浏览器入口（devserver）没有这个命令，两帧之后直接演。
+- **wait / play / done 三段，演完不能把属性摘掉**：摘了的话 nod、fade-in、整块的 msg-in 会重新起一遍。
+  每样东西的动画都是 play 那一刻才挂上去的，时间从露面那一刻算。
+- 选择器里用 `:where()`：`:is()` 取最高那个参数的特指度（`.hello__list li`），会压掉后面那几条 delay
+  —— 0.81.0 记过的同一个坑。
+- 描边宽度写在路径自己的坐标里（140 ≈ 1.4px）。没用 `vector-effect: non-scaling-stroke`：
+  它跟按 pathLength 换算的虚线叠在一起怎么算没验过。
+
+### 夹具
+
+- `shoot.mjs` 文末一节（29 号五张图）。**devserver 会把这一轮里真 agent 推过的事件回放给新开的页面**
+  （cleared / opened 也在里面），打开后第一块 50ms 内就可能被换掉 —— 所以开演那段靠页面加载前挂的
+  MutationObserver 记，**每块「开始」一进页面就单独盯住它自己**（盯在节点上的观察者，节点撤下之后照样收得到）；
+  每一帧长什么样另起一块，用 `getAnimations()` 暂停在固定时刻上量和拍，不靠 sleep。
+- `smoke.mjs` 在真 Electron 里查 `shown` 回 true、那块收在 done、狗是实心的（系统关了动效就跳过这条）。
+- 回退验证：不调 playIntro / 拿掉描边动画 / 收尾摘掉属性，三处各有断言红；logo 路径改一个数、
+  去掉 pathLength 各红；preload 白名单里拿掉 shown，smoke 报「未知桌面能力」。
+
+### 顺带修的夹具：「第一次打开」从 0.82.1 起一直是红的
+
+0.82.1（48f8642）改成只有点了「列出模型」才发请求、回话也只认那一次的编号（`accepts()`），
+同一个提交里写的夹具却只点了厂商按钮，清单永远是空的。现在先点「列出模型」。
+**devserver 不是 trusted，真 agent 会拿同一个编号回一句「不替你拿 key 出去问」**，
+得等它先落地再灌编好的清单，不然它晚到会把清单收起来。
+
+devserver 不发 `vendor/xterm*`（三个 404），终端面板在夹具里本来就起不来，跟这轮无关。
+
+## 0.83.2：冻结后端与宿主系统库分开
+
+接完之前停在探针验证的打包修复。原补丁仅在 `tools._child_env` 过滤 `_MEIPASS`，并给 tools 的 urllib opener 指定系统证书：漏了其他子进程、模型列表和 MCP HTTP，还会覆盖用户显式证书。现在由 `desktop/scripts/backend_entry.py` 在导入业务模块前调用 `runtime.configure_frozen_environment()`，只作用于冻结的 Linux 后端。
+
+- 用 `LD_LIBRARY_PATH_ORIG` 恢复用户库路径；过滤 PyInstaller 目录，以及确认包含当前后端的 APPDIR/usr/lib；原进程已经启动的库加载路径不动。保留用户原有 CUDA 等路径，子进程不继承打包库。
+- 显式 `SSL_CERT_FILE` / `SSL_CERT_DIR` 原样保留。默认 CA 库为空才查宿主常见证书文件，验证文件确实加载了 CA 后设置 SSL_CERT_FILE；没有关闭证书校验。源码模式不改环境。
+- 参考 PyInstaller 的 Linux 子进程库路径说明：https://pyinstaller.org/en/latest/common-issues-and-pitfalls.html#launching-external-programs-from-the-frozen-application
+- `tests/test_runtime.py` 六项覆盖库路径恢复、AppImage 过滤、源码模式、自定义证书和默认 CA 回退。`desktop/tests/check_backend.py` 增加冻结版 MCP 子进程启动 bash，以及本地自签 CA 的 HTTPS 模型列表测试，无模型调用；Linux 测试需要 openssl。
+- 验证：Python 1,535 项（跳过 1 项）通过，桌面 9 项通过，冻结后端和真实桌面 smoke 通过；解开 0.83.2 AppImage 后，注入 APPDIR/usr/lib 再跑后端检查也通过。
+- 本地生成了 deb/AppImage，仅验证当前 Arch；不能把本地构建产物当成已通过 Ubuntu 22.04 兼容测试的正式发行包。未提交、推送、安装或发布。
+
+## 0.84.0：Hermes 形式的整窗开场
+
+用户改选整屏动画，替代原来空会话卡片里的启动动画，并明确不要跳过按钮。参考 Hermes 的 `components/gateway-connecting-overlay.tsx`：居中的品牌内容先退场、整窗遮罩再淡出。使用 Feiyu 自己的小狗 SVG 和主题 token，无外部素材或新依赖。
+
+- 启动时覆盖整个窗口，小狗描边/填色，品牌名及短文案浮现；窗口 show 后开始计时，2.2 秒后品牌退场，2.6 秒后遮罩淡出，3.12 秒恢复工作台。不是后端加载进度，不会无限等待连接。
+- 没有跳过按钮。保留 Esc 快捷退出；减少动态效果时直接不显示。动画期间后台界面 inert，退出恢复原值并把焦点还给输入框；发生 JS error 或超过 8 秒上限也解除遮挡。
+- 开场状态独立于会话 DOM，切工作区和新建会话不重播。旧 shoot.mjs 的欢迎卡片启动断言已由真实 Electron smoke 的整屏、自动退场、Esc、减少动态效果、焦点恢复检查替代。
+- 版本同步到 0.84.0，更新本地 release/linux-unpacked；不改已安装的 0.82.3 桌面快捷方式，不提交或发布。
+
+## 0.84.1：开场放慢，文案逐字显示
+
+按用户要求改成“Feiyu Agent帮助您工作。”。整段约 6 秒：小狗描边 1.7 秒，填色 0.85 秒；开场 1.8 秒后每 110ms 输出一个字符，全部显示后停留 1.1 秒，品牌 0.5 秒退场，遮罩再淡出 0.7 秒。退场计时从最后一个字出现时开始，不会因调度延迟截断文案。文案用隐藏完整文本占位，输出时不左右跳动；屏幕阅读器读取完整 aria-label。无跳过按钮，减少动态效果和 Esc 保留。兜底退出调整到 12 秒。
+
+真实桌面 smoke 检查逐字中间态、完整文案及自动退场；9 项桌面单元测试通过。更新本地 linux-unpacked，未修改已安装快捷方式或发布。
+
+## 0.84.2：启动页去掉大标题
+
+按用户要求移除小狗下方单独的 Feiyu 大字及对应样式/动画，仅保留小狗与“Feiyu Agent帮助您工作。”流式文案；约 6 秒节奏不变。

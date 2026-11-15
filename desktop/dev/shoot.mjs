@@ -1553,12 +1553,21 @@ const form = JSON.parse(await cdp.eval(`JSON.stringify((() => {
   const f = pane.querySelector(".form");
   const or = pane.querySelector('.preset[data-name="OpenRouter"]');
   if (or) or.click();
+  // 0.82.1 起只有点了「列出模型」才发请求，回话也只认那一次的编号
+  const ask = [...pane.querySelectorAll("button.act")].find((b) => b.textContent === "列出模型");
+  if (ask) ask.click();
   return { open: !document.getElementById("shelf").hidden, title: (pane.querySelector("h2") || {}).textContent,
            form: !!f, presets: pane.querySelectorAll(".preset").length,
            base: f ? f.modelForm.got.base_url.value : "", ticket: modelAsk };
 })())`));
 if (!form.open || form.title !== "模型" || !form.form) firstBad.push(`「连接模型」没落到设置的模型那一项：${JSON.stringify(form)}`);
 if (form.base !== "https://openrouter.ai/api/v1") firstBad.push(`选了 OpenRouter，地址没填上：${form.base}`);
+// devserver 不是 trusted，真 agent 会拿同一个编号回一句「不替你拿 key 出去问」——
+// 等它先落地再灌编好的清单，晚到的话它会把清单收起来
+for (let i = 0; i < 20; i++) {
+  if (await cdp.eval(`(document.querySelector("#shelf-pane .form")?.modelForm.hint.dataset.level || "") === "error"`)) break;
+  await sleep(150);
+}
 await feed([{ kind: "model_list", ticket: form.ticket - 1, ok: true, total: 1, rows: [{ id: "旧的/不该出现" }] }]);
 if (await cdp.eval(`document.querySelectorAll("#shelf-pane .picks button").length`)) firstBad.push("早先那次的回话也画出来了");
 await feed([{ kind: "model_list", ticket: form.ticket, ok: true, total: 3, rows: [
@@ -1593,6 +1602,8 @@ if (firstBad.length) {
 } else {
   console.log("第一次打开：先请人连模型、点了落到加一条、选接口填地址、清单点一个就填好、旧回话不认、报错带按钮");
 }
+
+/* 整窗启动动画由 tests/smoke.mjs 验证；欢迎卡片不再承担启动状态。 */
 
 const pageErrors = await cdp.eval("JSON.stringify(window.__errs || [])");
 if (pageErrors && pageErrors !== "[]") {
