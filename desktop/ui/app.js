@@ -320,6 +320,8 @@ function syncHello() {
   el.id = "hello";
   el.className = "block hello";
   el.innerHTML = `<div class="block__label">开始</div><div class="block__body">`
+    + `<div class="voyage" aria-hidden="true"><span class="voyage__eyebrow">FEIYU · GRAND LINE</span><span class="voyage__title">向着下一段<br>旅程出发。</span><span class="voyage__rule"></span><span class="voyage__caption">把好奇心，交给大海。</span></div>`
+    + `<div class="dreamscape" aria-hidden="true"><span class="dreamscape__index">FEIYU / DREAM LEVEL 01</span><span class="dreamscape__title">意识之下，<br>还有一层。</span><span class="dreamscape__caption">每一个问题，都是一次深入。</span></div>`
     + `<h1 class="hello__greet">${DOG}<span class="hello__hi">${greeting()}</span></h1>`
     + `<p class="hello__lead">问它点什么，或者直接把要做的事说出来。</p>`
     + `<div class="hello__step" data-need="model"><p>先连一个模型：选个接口、贴上 key 就能用。</p>`
@@ -1639,6 +1641,7 @@ function showShelf(on) {
     send({ op: "catalog" });
     send({ op: "profiles" });
     send({ op: "settings" });
+    drawShelf();
     // 藏着的元素量出来的 offsetWidth 是 0 —— 滑线要等它真的摆出来才量得到
     requestAnimationFrame(() => { $("shelf-find").focus(); syncInds(); });
   }
@@ -1780,7 +1783,11 @@ const THEMES = [
   { key: "light", label: "默认", about: "纯白纸、IBM Blue" },
   { key: "retro", label: "复古", about: "泛黄的纸、暖墨、赭色" },
   { key: "anthropic", label: "Anthropic",
-    about: "暖中性的纸、陶土橘。跟这台机器上 kitty / GTK / 壁纸同一套色" },
+    about: "暖白纸面、陶土橘点缀，搭配深色代码块" },
+  { key: "openai", label: "OpenAI", about: "柔和中性色、清晰留白与深绿点缀" },
+  { key: "inception", label: "盗梦空间", about: "折叠城市、深夜蓝与琥珀色梦境" },
+  { key: "grove", label: "松间", about: "暖纸、松绿与陶土色，安静舒展的工作台" },
+  { key: "grandline", label: "伟大航路", about: "海贼王主题：海图、阳光和扬帆的旅程" },
 ];
 
 function theme() {
@@ -2025,7 +2032,7 @@ const SETTINGS = [
   // local: 这一项不经服务端，改的是这个窗口自己的偏好
   { key: "theme", name: "外观", local: true,
     meta: () => (THEMES.find((t) => t.key === theme()) || THEMES[0]).label,
-    about: "只换配色，排版和字体一个不动 —— 终端那边的 /theme 是另一套，互不相干" },
+    about: "选择桌面工作台的外观；终端里的 /theme 是另一套，互不相干" },
   { key: "mode", name: "权限模式", meta: (c) => label(c.modes, c.mode),
     about: "它动手之前要不要先问你" },
   { key: "style", name: "回答风格", meta: (c) => label(c.styles, c.style),
@@ -2124,6 +2131,20 @@ function drawSetting(pane, key) {
     pane.append(oneLine("", "加一条，比如 Bash(npm test:*)", (v) => v && tune("/allow " + v)));
     pane.append(ruleList(c.allow, "放行"), ruleList(c.deny, "拒绝"));
   } else if (key === "memory") {
+    const dreamLead = document.createElement("p");
+    dreamLead.className = "note";
+    dreamLead.textContent = "Dreaming 将近期会话的对话文字发给旁活模型，生成带出处的建议。后台默认关闭；开启后每天最多整理一次，可能产生额外费用。确认前不会修改记忆。";
+    const dreamActions = document.createElement("div");
+    dreamActions.className = "acts";
+    [["回顾会话", "run"], ["查看建议", "show"], ["应用建议", "apply"], ["丢弃建议", "discard"], ["开启后台", "auto on"], ["关闭后台", "auto off"]].forEach(([label, action]) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "act";
+      button.textContent = label;
+      button.onclick = () => { showShelf(false); tune("/dream " + action); };
+      dreamActions.append(button);
+    });
+    pane.append(dreamLead, dreamActions);
     pane.append(memoryList(c.memory));
   }
 }

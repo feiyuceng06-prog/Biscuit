@@ -38,7 +38,7 @@ import _thread
 
 from . import agent as agent_mod
 from . import bots as bots_mod
-from . import enabled, events, keys, memory, permissions, profiles as profiles_mod
+from . import dream, enabled, events, keys, memory, permissions, profiles as profiles_mod
 from . import mentions as mentions_mod
 from . import providers
 from . import providers as providers_mod
@@ -774,6 +774,9 @@ class Server:
         elif head == "/memory":
             self._say(cli._memory(agent, rest))
             self.push_settings()
+        elif head == "/dream":
+            self._say(cli._dream(agent, rest))
+            self.push_settings()
         elif head == "/allow":
             self._say(cli._allow(rest))
             self.push_settings()
@@ -836,6 +839,8 @@ class Server:
             # 用户要的就是"每次用完能同步"
             self.agent.refresh_credits(then=self.push_status)
             session_mod.save(self.workspace, self.agent, self.agent.session_id)
+            if self.agent.ready and dream.config(self.workspace).get("enabled"):
+                dream.schedule(self.workspace, self.agent._helper_entry())
             self.proto.send("turn_end")
             self.push_status()
             # 新对话的第一轮跑完才有标题，侧边栏得跟着变

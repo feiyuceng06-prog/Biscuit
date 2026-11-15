@@ -739,7 +739,7 @@ class TestSettingsCommands(unittest.TestCase):
     ARGS = {
         "/mode ": "auto", "/style ": "concise", "/model ": "某模型",
         "/helper ": "off", "/sandbox ": "off", "/verify ": "off",
-        "/allow ": "Bash(ls:*)", "/memory forget ": "1",
+        "/allow ": "Bash(ls:*)", "/memory forget ": "1", "/dream ": "show",
     }
 
     def commands(self):

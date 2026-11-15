@@ -156,6 +156,7 @@ Type `/` for command completion:
 | `/verify` | Show or set the command run after every edit |
 | `/review` | Have another model grade this change |
 | `/memory` | Show, add, delete long-term memory for this directory |
+| `/dream` | Review sessions and propose changes to long-term memory |
 | `/context` | Reload the project convention file |
 | `/cost` | Recent spend by task, with each task's slowest turn |
 | `/compact` | Compress the history into a summary |
@@ -534,13 +535,13 @@ Find out how $ARGUMENTS is implemented in this repo. Read only, change nothing.
 
 `/skills` lists what is available and where each came from. A project entry wins over a global one of the same name.
 
-**Three looks, one layout.** The desktop app is a minimal layout built on the rules of
+**Desktop appearance.** The desktop app is built on the rules of
 [Fluid Functionalism](https://fluidfunctionalism.com): two control heights (36 / 28 px), a
 six-step type scale, a sliding hover highlight shared by each list, your messages as bubbles,
-the input as a floating card, and the empty conversation framed in an
-[mdxcn](https://mdxcn.dev)-style dashed box. The three themes only swap colours: white paper
-with IBM Blue (default), aged paper with ochre ("retro"), and warm ivory with terracotta
-("Anthropic"). The terminal has its own `/theme` (ANSI colours and glyphs: `default` / `swiss` /
+the input as a floating card, and an [mdxcn](https://mdxcn.dev)-style dashed box. In addition
+to the default, retro and Anthropic palettes, the desktop offers OpenAI, Grove, Grand Line and
+Inception themes with their own layouts and details. Grand Line uses the Fluid motion engine
+for its spring interactions. The terminal has its own `/theme` (ANSI colours and glyphs: `default` / `swiss` /
 `retro` / `anthropic`); the two are deliberately separate settings.
 
 **A skill can be a package.** One `.md` is one skill, and so is a directory containing a
@@ -566,6 +567,10 @@ already-unpacked directory is never overwritten).
 **Project conventions.** Put a `FEIYU.md` in the workspace (`AGENTS.md` and `CLAUDE.md` also count, first one found) and it is read into the system prompt at startup. `/context` reloads it.
 
 **Long-term memory.** Things worth keeping, like how the build runs, the cause of a pitfall, or a preference you stated, it writes down itself after asking you. They come back in the next session in the same directory; `/memory` shows and deletes them. Stored in `~/.local/state/feiyu/memory/`, never inside your project.
+
+**Dreaming.** `/dream run` asks the helper model (or the main model if no helper is configured) to review up to eight recent sessions in this workspace and propose additions, corrections or removals with quoted sources. `/dream show` displays a pending proposal, `/dream apply` applies it, and `/dream discard` drops it. Proposals never change memory until applied; if the memory or quoted source has changed, run the review again. The desktop's Settings → Long-term memory has the same controls.
+
+Background reviews are off by default. `/dream auto on` opts this workspace in; after a completed turn, Feiyu may start a background review at most once per 24 hours when session text has changed. `/dream auto off` disables future reviews. Background work runs only while Feiyu is open, may be interrupted on exit, and uses a separate model request whose usage is not included in the current session's cost display. Reviews send bounded user and assistant conversation text and current memory to the configured model provider, not tool results; generated suggestions and their quotes can still be wrong, so check them before applying. This is a compact memory review, not an automatically maintained knowledge wiki.
 
 ```
 ⏺ Remember(tests in this project must run with pytest -q, conftest has fixtures)

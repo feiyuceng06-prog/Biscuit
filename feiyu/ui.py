@@ -1391,6 +1391,7 @@ SLASH = {
     "/review": "让一个没看过过程的模型给这次改动打分",
     "/cost": "按任务看最近的 token 和花费",
     "/memory": "查看 / 添加 / 删除这个目录的长期记忆",
+    "/dream": "整理记忆：run / show / apply / discard / auto on|off",
     "/hooks": "看在哪些时机会跑哪些外部命令",
     "/sandbox": "bash 沙箱：off / workspace / strict",
     "/jobs": "看 / 停掉挂在后台跑的命令",

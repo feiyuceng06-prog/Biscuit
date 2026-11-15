@@ -12,6 +12,7 @@ from . import serve as serve_mod
 from . import skills as skills_mod
 from . import bots as bots_mod
 from . import credits, enabled, keys, memory, permissions, pricing, profiles, progress
+from . import dream
 from . import sandbox as sandbox_mod
 from . import schema as schema_mod, session, trace, ui
 from . import __version__
@@ -370,6 +371,8 @@ def main() -> int:
                 print(_cost(agent, workspace))
             elif cmd == "/memory":
                 print(_memory(agent, arg))
+            elif cmd == "/dream":
+                print(_dream(agent, arg))
             elif cmd == "/hooks":
                 print(_hooks(agent))
             elif cmd == "/sandbox":
@@ -402,6 +405,8 @@ def main() -> int:
         print()
         _run_turn(agent, text)
         session.save(workspace, agent, agent.session_id)
+        if agent.ready and dream.config(workspace).get("enabled"):
+            dream.schedule(workspace, agent._helper_entry())
         print()
 
 
@@ -1042,6 +1047,59 @@ def _hooks(agent: Feiyu) -> str:
         "none": "没有这个文件", "trusted": "已信任", "unknown": "存在但未启用"}[state])))
     rows.append(ui.notice("改完配置重启生效 项目钩子内容一变就要重新确认"))
     return "\n".join(rows)
+
+
+def _dream(agent: Feiyu, arg: str) -> str:
+    root = agent.toolbox.root
+    action = arg.strip().lower()
+    try:
+        if action in ("auto on", "auto off"):
+            enabled = action.endswith("on")
+            dream.set_auto(root, enabled)
+            return ui.notice("后台 Dreaming 已%s。%s" % (
+                "开启" if enabled else "关闭",
+                "每轮完成后检查，每天最多回顾一次；调用旁活模型，建议需手动应用。" if enabled else ""))
+        if action == "run":
+            if not agent.ready:
+                return ui.error("还没有模型，先配置模型再整理记忆")
+            session.save(root, agent, agent.session_id)
+            proposal = dream.prepare(root, agent._side_backend().ask)
+            if not proposal["changes"]:
+                dream.discard(root)
+                return ui.notice("回顾完成，没有找到有可靠来源的记忆改动。")
+        elif action == "apply":
+            count = dream.apply(root)
+            agent._refresh_system()
+            return ui.notice("已应用 %d 条记忆改动。" % count)
+        elif action == "discard":
+            dream.discard(root)
+            return ui.notice("已丢弃 Dreaming 建议。")
+        elif action not in ("", "show"):
+            return ui.error("用法：/dream run、show、apply、discard、auto on、auto off")
+        proposal = dream.load(root)
+        if not proposal or not proposal.get("changes"):
+            status = dream.config(root)
+            error = " 上次后台整理失败（%s），可用 /dream run 重试查看原因。" % status["error"] if status.get("error") else ""
+            return ui.notice("没有待审阅建议。/dream run 会调用旁活模型回顾近期会话；"
+                             "后台整理%s，可用 /dream auto on 或 /dream auto off 切换。%s" %
+                             ("已开启" if status.get("enabled") else "已关闭", error))
+        rows = ["Dreaming 建议（尚未写入记忆）："]
+        labels = {"add": "新增", "replace": "修改", "remove": "删除"}
+        for i, change in enumerate(proposal["changes"], 1):
+            rows.append("\n%d. %s" % (i, labels.get(change["action"], change["action"])))
+            if change["old"]:
+                rows.append("原：" + change["old"])
+            if change["new"]:
+                rows.append("新：" + change["new"])
+            rows.append("来源 %s：%s" % (change["session"], change["quote"]))
+            if change["reason"]:
+                rows.append("理由：" + change["reason"])
+        rows.append("\n/dream apply 应用全部 · /dream discard 丢弃")
+        return "\n".join(rows)
+    except (ValueError, OSError, TypeError) as exc:
+        return ui.error("Dreaming 失败：%s" % exc)
+    except Exception as exc:
+        return ui.error("Dreaming 模型请求失败：%s" % exc)
 
 
 def _memory(agent: Feiyu, arg: str) -> str:

@@ -13,8 +13,7 @@
      · 动效三档 80 / 160 / 240ms，退场比进场快一档；只动 transform 和 opacity
    空对话那块用 mdxcn（mdxcn.dev）的框：虚线、四角压「+」、`[ 标题 ]` 骑在上边线上。
 
-   **主题只换颜色。** 默认（白纸 + IBM Blue）、复古、Anthropic 三套共用这一套
-   布局和字，切主题只改下面三段里的颜色 token。
+   默认、复古、Anthropic 共用布局；松间另有局部版式。
    ============================================================ */
 
 :root {
@@ -196,6 +195,156 @@
 }
 
 :root[data-theme="anthropic"] .bar__mark { opacity: 0.8; }
+
+/* OpenAI：中性纸白、石墨灰与克制的深绿。 */
+:root[data-theme="openai"] {
+  --ink: 24, 28, 26;
+  --bg: #fff;
+  --floor: #f5f5f2;
+  --raised: #fff;
+  --text: #202422;
+  --soft: #414845;
+  --muted: #626b66;
+  --faint: #7c8580;
+  --line: rgba(30, 43, 36, 0.1);
+  --line-strong: rgba(30, 43, 36, 0.2);
+  --accent: #147a60;
+  --accent-deep: #116b54;
+  --accent-deeper: #0b5543;
+  --plus: #147a60;
+  --link-line: #7aafa0;
+  --selection: rgba(20, 122, 96, 0.17);
+  --alert: #b02d35;
+  --alert-wash: rgba(176, 45, 53, 0.06);
+  --code-surface: #202421;
+  --code-bar: #292e2b;
+  --code-ink: #f0f3ee;
+  --code-dim: #adb8b1;
+  --code-ring: transparent;
+  --code-sep: transparent;
+  --content: 47rem;
+  --side: 16rem;
+  --side-w: 16rem;
+  --bar: 2.75rem;
+  --gut: 0px;
+  --r-lg: 0px;
+  --r-xl: 22px;
+  --shadow-panel: none;
+}
+
+/* 盗梦空间：夜色、石墨和一线琥珀光。 */
+:root[data-theme="inception"] {
+  color-scheme: dark;
+  --ink: 226, 235, 237;
+  --bg: #1d2a32;
+  --floor: #111b21;
+  --raised: #273740;
+  --text: #edf1ee;
+  --soft: #d4dfdc;
+  --muted: #b0c0c0;
+  --faint: #8fa4a7;
+  --line: rgba(215, 231, 230, 0.13);
+  --line-strong: rgba(215, 231, 230, 0.25);
+  --accent: #e4ba7c;
+  --accent-deep: #80502b;
+  --accent-deeper: #6b4021;
+  --plus: #83c4b8;
+  --link-line: #b79a6f;
+  --selection: rgba(228, 186, 124, 0.24);
+  --alert: #ffaaa0;
+  --alert-wash: rgba(255, 140, 130, 0.1);
+  --code-surface: #10191f;
+  --code-bar: #17242b;
+  --code-ink: #e5eeea;
+  --code-dim: #9eb1b1;
+  --code-ring: rgba(215, 231, 230, 0.12);
+  --code-sep: rgba(215, 231, 230, 0.12);
+  --bubble: #38434a;
+  --ring-focus: rgba(228, 186, 124, 0.6);
+  --shadow-panel: 0 0 0 1px var(--line), 0 14px 32px rgba(0, 0, 0, 0.2);
+  --shadow-card: 0 0 0 1px var(--line), 0 8px 24px rgba(0, 0, 0, 0.18);
+  --shadow-pop: 0 0 0 1px var(--line-strong), 0 14px 30px rgba(0, 0, 0, 0.3);
+  --content: 48rem;
+  --side: 16rem;
+  --side-w: 16rem;
+  --gut: 10px;
+  --bar: 2.75rem;
+  --bar-s: 2rem;
+  --r-lg: 8px;
+  --r-xl: 12px;
+}
+
+/* 松间：暖纸上的松绿与陶土色。 */
+:root[data-theme="grove"] {
+  --ink: 36, 49, 41;
+  --bg: #faf9f4;
+  --floor: #e9ede4;
+  --raised: #fffefa;
+  --text: #26352d;
+  --soft: #435448;
+  --muted: #5d6e61;
+  --faint: #718075;
+  --line: rgba(49, 74, 56, 0.14);
+  --line-strong: rgba(49, 74, 56, 0.27);
+  --accent: #a95235;
+  --accent-deep: #9e482d;
+  --accent-deeper: #813821;
+  --plus: #396c50;
+  --link-line: #ba8069;
+  --selection: rgba(169, 82, 53, 0.2);
+  --alert: #a02d2d;
+  --alert-wash: rgba(160, 45, 45, 0.06);
+  --code-surface: #25362e;
+  --code-bar: #2d4136;
+  --code-ink: #edf1e7;
+  --code-dim: #b4c4b4;
+  --code-ring: transparent;
+  --code-sep: transparent;
+  --content: 46rem;
+  --side: 16rem;
+  --side-w: 16rem;
+  --gut: 10px;
+  --r-lg: 14px;
+  --r-xl: 18px;
+  --shadow-panel: 0 0 0 1px rgba(48, 74, 54, 0.1), 0 8px 28px rgba(48, 67, 52, 0.06);
+  --shadow-card: 0 0 0 1px var(--line), 0 8px 24px rgba(48, 67, 52, 0.06);
+}
+
+/* 伟大航路：海军蓝、航海图的纸色与草帽红。 */
+:root[data-theme="grandline"] {
+  --ink: 23, 48, 64;
+  --bg: #f8f4e8;
+  --floor: #173e50;
+  --raised: #fffdf7;
+  --text: #1b3442;
+  --soft: #34515e;
+  --muted: #546e78;
+  --faint: #71868d;
+  --line: rgba(35, 76, 91, 0.16);
+  --line-strong: rgba(35, 76, 91, 0.3);
+  --accent: #b34636;
+  --accent-deep: #a63b2e;
+  --accent-deeper: #872d22;
+  --plus: #276b78;
+  --link-line: #5795a6;
+  --selection: rgba(44, 124, 149, 0.2);
+  --alert: #aa302d;
+  --alert-wash: rgba(170, 48, 45, 0.06);
+  --code-surface: #163340;
+  --code-bar: #1d4050;
+  --code-ink: #eef5ee;
+  --code-dim: #a8c3c8;
+  --code-ring: transparent;
+  --code-sep: transparent;
+  --content: 48rem;
+  --side: 16.5rem;
+  --side-w: 16.5rem;
+  --gut: 10px;
+  --r-lg: 14px;
+  --bar: 2.75rem;
+  --bar-s: 2rem;
+  --shadow-panel: 0 0 0 1px rgba(27, 70, 85, 0.12), 0 8px 28px rgba(32, 76, 92, 0.08);
+}
 
 /* ============================================================
    基础
@@ -1496,6 +1645,8 @@ body[data-side="off"] .side { translate: -100% 0; visibility: hidden; }
    空对话：问候 + mdxcn 框里的几个例子，和输入框一起摆在视觉中心
    ============================================================ */
 
+.voyage, .dreamscape { display: none; }
+
 .hello .block__body {
   display: flex;
   flex-direction: column;
@@ -2529,12 +2680,382 @@ body[data-motion][data-side="off"] .side { transition-delay: 0s, var(--slow); }
 body[data-glide] .stream { transition: translate var(--glide-dur) var(--ease-move); }
 body[data-glide] .composer { transition: translate var(--glide-dur) var(--ease-move), margin var(--slow) var(--ease-move); }
 
+/* 松间把欢迎区和输入区排成同一条阅读轴。 */
+:root[data-theme="grove"] .side { padding-inline: 12px; }
+:root[data-theme="grove"] .desk {
+  margin: 4px 0 10px;
+  padding-inline: 12px;
+  background: rgba(255, 255, 250, 0.48);
+  box-shadow: 0 0 0 1px var(--line);
+}
+:root[data-theme="grove"] .bar__mark { opacity: 0.85; }
+:root[data-theme="grove"] .sheet { padding-top: 48px; }
+:root[data-theme="grove"] .hello .block__body { align-items: flex-start; text-align: left; }
+:root[data-theme="grove"] .hello__greet { gap: 14px; font-weight: 550; }
+:root[data-theme="grove"] .hello__mark { width: 38px; height: 38px; }
+:root[data-theme="grove"] .hello__lead { margin: 12px 0 0 52px; }
+:root[data-theme="grove"] .hello__frame {
+  width: 100%;
+  margin-top: 32px;
+  padding: 20px 16px 12px;
+  background-color: rgba(231, 236, 225, 0.35);
+  border-radius: 3px;
+}
+:root[data-theme="grove"] .frame-title { left: 24px; translate: 0 -50%; }
+:root[data-theme="grove"] .hello__step { width: 100%; }
+:root[data-theme="grove"] .composer { padding-bottom: 22px; }
+:root[data-theme="grove"] .composer__row {
+  padding: 12px;
+  box-shadow: 0 0 0 1px var(--line-strong), 0 8px 24px rgba(48, 67, 52, 0.07);
+}
+:root[data-theme="grove"] .composer__row:focus-within {
+  box-shadow: 0 0 0 1px var(--accent), 0 8px 28px rgba(48, 67, 52, 0.1);
+}
+
+/* 盗梦空间：主面板像一层悬浮在夜色里的场景。 */
+:root[data-theme="inception"] body::before {
+  background: linear-gradient(135deg, rgba(93, 130, 138, 0.08), transparent 40%),
+              repeating-linear-gradient(150deg, transparent 0 150px, rgba(207, 223, 218, 0.025) 151px 152px, transparent 153px 300px),
+              var(--bg);
+}
+:root[data-theme="inception"] .bar { padding-inline: 14px; }
+:root[data-theme="inception"] .bar__mark { filter: invert(1); opacity: 0.8; }
+:root[data-theme="inception"] .side { padding: 8px 14px 14px; background: #111b21; }
+:root[data-theme="inception"] .side::after {
+  content: "现实 / 梦境";
+  flex: none;
+  margin: 12px 8px 2px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  color: var(--faint);
+  font: 11px / 16px var(--font-mono);
+}
+:root[data-theme="inception"] .desk {
+  height: 42px;
+  margin-bottom: 16px;
+  padding-inline: 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(224, 237, 232, 0.035);
+}
+:root[data-theme="inception"] #new-talk {
+  height: 42px;
+  margin-bottom: 4px;
+  border: 1px solid rgba(228, 186, 124, 0.28);
+  border-radius: 6px;
+  background: rgba(228, 186, 124, 0.11);
+  color: #f4d2a0;
+  font-weight: 550;
+}
+:root[data-theme="inception"] #new-talk .nav__icon { color: #e4ba7c; }
+:root[data-theme="inception"] .side__tabs { margin-top: 12px; }
+:root[data-theme="inception"] .status { padding-inline: 18px; }
+:root[data-theme="inception"] .hello .block__body { align-items: flex-start; text-align: left; }
+:root[data-theme="inception"] .dreamscape {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  min-height: 220px;
+  margin-bottom: 24px;
+  padding: 28px 32px;
+  overflow: hidden;
+  border: 1px solid rgba(222, 231, 226, 0.17);
+  border-radius: 5px 18px 5px 18px;
+  background: linear-gradient(90deg, rgba(10, 18, 23, 0.91), rgba(13, 22, 28, 0.66) 42%, rgba(13, 22, 28, 0.08)),
+              #273943 url("inception-city.webp") center 24% / cover no-repeat;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
+}
+:root[data-theme="inception"] .dreamscape::after {
+  content: "";
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  width: 28px;
+  height: 28px;
+  border-top: 1px solid rgba(249, 223, 178, 0.8);
+  border-right: 1px solid rgba(249, 223, 178, 0.8);
+}
+:root[data-theme="inception"] .dreamscape__index { color: #e6bd83; font: 700 10px / 16px var(--font-mono); letter-spacing: 0.14em; }
+:root[data-theme="inception"] .dreamscape__title { margin-top: 14px; color: #f4f5ef; font-size: 30px; line-height: 1.25; font-weight: 700; }
+:root[data-theme="inception"] .dreamscape__caption { margin-top: 14px; color: #d3dcd7; font-size: 12px; }
+:root[data-theme="inception"] .hello__greet { font-size: 22px; line-height: 30px; }
+:root[data-theme="inception"] .hello__lead { margin-top: 5px; }
+:root[data-theme="inception"] .hello__frame {
+  width: 100%;
+  margin-top: 22px;
+  padding: 17px 12px 10px;
+  background-color: rgba(255, 255, 255, 0.025);
+}
+:root[data-theme="inception"] .frame-title { left: 20px; translate: 0 -50%; }
+:root[data-theme="inception"] .hello__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px 8px; }
+:root[data-theme="inception"] .hello__pick { min-height: 44px; }
+:root[data-theme="inception"] .hello__step { width: 100%; }
+:root[data-theme="inception"] .block--you .block__body {
+  padding: 11px 16px;
+  border: 1px solid rgba(228, 186, 124, 0.2);
+  border-radius: 12px 12px 2px 12px;
+  background: #39454b;
+}
+:root[data-theme="inception"] .block--say > .block__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+:root[data-theme="inception"] .block--say > .block__label::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--accent);
+  rotate: 45deg;
+}
+:root[data-theme="inception"] .block--tool::before { border-radius: 1px; rotate: 45deg; }
+:root[data-theme="inception"] .prose blockquote { border-left-color: var(--accent); }
+:root[data-theme="inception"] .composer__row {
+  padding: 12px;
+  border-radius: 12px;
+  background: #273740;
+  box-shadow: 0 0 0 1px var(--line-strong), 0 10px 28px rgba(0, 0, 0, 0.2);
+}
+:root[data-theme="inception"] .composer__row:hover { box-shadow: 0 0 0 1px rgba(228, 186, 124, 0.4), 0 10px 28px rgba(0, 0, 0, 0.2); }
+:root[data-theme="inception"] .composer__row:focus-within { box-shadow: 0 0 0 1px rgba(228, 186, 124, 0.65), 0 10px 28px rgba(0, 0, 0, 0.2); }
+:root[data-theme="inception"] .go { color: #17242a; }
+:root[data-theme="inception"] .go:hover { --face: #f0d2a4; }
+:root[data-theme="inception"] .win--close:hover,
+:root[data-theme="inception"] .btn--danger:hover,
+:root[data-theme="inception"] .act--gone:hover { color: #17242a; }
+
+/* OpenAI 风格：侧栏轻一些，欢迎页与输入区形成一条清晰的中轴。 */
+:root[data-theme="openai"] .side {
+  padding: 10px 12px 16px;
+  border-right: 1px solid var(--line);
+}
+:root[data-theme="openai"] .desk {
+  height: 40px;
+  margin-bottom: 12px;
+  padding-inline: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.65);
+}
+:root[data-theme="openai"] #new-talk {
+  height: 40px;
+  margin-bottom: 4px;
+  border-radius: 11px;
+  background: #202724;
+  color: #fff;
+  font-weight: 550;
+}
+:root[data-theme="openai"] #new-talk .nav__icon { color: #fff; }
+:root[data-theme="openai"] #new-talk:hover { --face: rgba(255, 255, 255, 0.1); }
+:root[data-theme="openai"] .side__tabs { margin-top: 12px; }
+:root[data-theme="openai"] .side__tabs::after { border-radius: 10px; background: #e7eae6; }
+:root[data-theme="openai"] .sheet { padding-top: 40px; }
+:root[data-theme="openai"] .hello__greet { flex-direction: column; gap: 18px; font-size: 28px; line-height: 36px; font-weight: 550; }
+:root[data-theme="openai"] .hello__mark {
+  width: 56px;
+  height: 56px;
+  padding: 13px;
+  border-radius: 18px;
+  background: #e6f2ed;
+  color: #147a60;
+}
+:root[data-theme="openai"] .hello__lead { margin-top: 8px; }
+:root[data-theme="openai"] .hello__frame {
+  width: 100%;
+  margin-top: 28px;
+  padding: 0;
+  background-image: none;
+}
+:root[data-theme="openai"] :is(.frame-title, .frame-corner) { display: none; }
+:root[data-theme="openai"] .hello__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+:root[data-theme="openai"] .hello__pick {
+  min-height: 50px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  font-size: 13px;
+}
+:root[data-theme="openai"] .hello__pick:hover { border-color: var(--line-strong); background: #f7f8f6; }
+:root[data-theme="openai"] .hello__keys { margin-top: 14px; }
+:root[data-theme="openai"] .hello__step { width: min(100%, 36rem); }
+:root[data-theme="openai"] .block--you .block__body { background: #f0f2ef; border-radius: 20px 20px 5px 20px; padding: 10px 16px; }
+:root[data-theme="openai"] .composer { padding-bottom: 22px; }
+:root[data-theme="openai"] .composer__row {
+  padding: 12px;
+  border-radius: 24px;
+  background: #f5f6f3;
+  box-shadow: 0 0 0 1px rgba(30, 43, 36, 0.08);
+}
+:root[data-theme="openai"] .composer__row:hover { box-shadow: 0 0 0 1px var(--line-strong); }
+:root[data-theme="openai"] .composer__row:focus-within { box-shadow: 0 0 0 1px rgba(20, 122, 96, 0.55); }
+:root[data-theme="openai"] .go { border-radius: 50%; }
+
+/* 航海封面和深海侧栏。浮动高亮仍由 Fluid Functionalism 的 fluidHover 管理。 */
+:root[data-theme="grandline"] :is(.bar, .side, .status) {
+  --ink: 238, 245, 235;
+  --text: #f4f4e8;
+  --soft: #d8e8e4;
+  --muted: #bbd1d1;
+  --faint: #a4bfc2;
+  --line: rgba(229, 244, 234, 0.15);
+  --line-strong: rgba(229, 244, 234, 0.28);
+  --raised: #28586a;
+  --ring-focus: rgba(255, 255, 255, 0.55);
+  --hover: rgba(238, 245, 235, 0.09);
+  --selected: rgba(238, 245, 235, 0.14);
+  --tint: rgba(238, 245, 235, 0.09);
+  --tint-hover: rgba(238, 245, 235, 0.15);
+}
+:root[data-theme="grandline"] .bar { padding-inline: 14px; }
+:root[data-theme="grandline"] .bar__mark { filter: invert(1); }
+:root[data-theme="grandline"] .side {
+  padding: 6px 14px 14px;
+  background: #173e50;
+}
+:root[data-theme="grandline"] .side::after {
+  content: "航海日志  /  GRAND LINE";
+  flex: none;
+  margin: 12px 8px 2px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(230, 244, 239, 0.17);
+  font: 10px / 16px var(--font-mono);
+  color: #bdd1cd;
+  letter-spacing: 0.06em;
+}
+:root[data-theme="grandline"] .desk {
+  margin: 0 0 18px;
+  padding-inline: 12px;
+  height: 42px;
+  background: rgba(245, 248, 237, 0.08);
+  box-shadow: 0 0 0 1px var(--line);
+}
+:root[data-theme="grandline"] #new-talk {
+  height: 42px;
+  margin-bottom: 5px;
+  background: #bd4e39;
+  color: #fffaf0;
+  font-weight: 700;
+}
+:root[data-theme="grandline"] #new-talk .nav__icon { color: inherit; }
+:root[data-theme="grandline"] :is(.desk__icon, #new-talk .icon, #nav-shelf .icon) {
+  background: currentColor;
+  mask-position: center;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+}
+:root[data-theme="grandline"] :is(.desk__icon, #new-talk .icon, #nav-shelf .icon) > * { visibility: hidden; }
+:root[data-theme="grandline"] .desk__icon { mask-image: url("voyage/compass.svg"); }
+:root[data-theme="grandline"] #new-talk .icon { mask-image: url("voyage/sail.svg"); }
+:root[data-theme="grandline"] #nav-shelf .icon { mask-image: url("voyage/helm.svg"); }
+:root[data-theme="grandline"] .side__tabs { margin-top: 12px; }
+:root[data-theme="grandline"] .side__tabs::after { background: rgba(245, 248, 237, 0.14); }
+:root[data-theme="grandline"] .status { padding-inline: 18px; }
+:root[data-theme="grandline"] body::before { background: var(--bg); }
+:root[data-theme="grandline"] .hello .block__body { align-items: flex-start; text-align: left; }
+:root[data-theme="grandline"] .voyage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  min-height: 220px;
+  margin-bottom: 26px;
+  padding: 24px 30px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: linear-gradient(90deg, rgba(12, 43, 57, 0.91), rgba(12, 43, 57, 0.55) 43%, transparent 78%),
+              #39768a url("grandline-voyage.webp") center 54% / cover no-repeat;
+  box-shadow: 0 8px 28px rgba(26, 67, 76, 0.16);
+  color: #fffdf3;
+}
+:root[data-theme="grandline"] .voyage__eyebrow { font: 700 10px / 16px var(--font-mono); letter-spacing: 0.14em; color: #f8d288; }
+:root[data-theme="grandline"] .voyage__title { margin-top: 12px; font-size: 30px; line-height: 1.28; font-weight: 700; }
+:root[data-theme="grandline"] .voyage__rule { width: 28px; height: 2px; margin-top: 14px; background: #f0c66c; }
+:root[data-theme="grandline"] .voyage__caption { margin-top: 8px; font-size: 12px; color: #e5f0e8; }
+:root[data-theme="grandline"] .hello__greet { font-size: 22px; line-height: 30px; font-weight: 700; }
+:root[data-theme="grandline"] .hello__mark { color: var(--accent); }
+:root[data-theme="grandline"] .hello__lead { margin-top: 4px; }
+:root[data-theme="grandline"] .hello__frame {
+  width: 100%;
+  margin-top: 22px;
+  padding: 16px 10px 10px;
+  background-color: rgba(225, 214, 187, 0.24);
+}
+:root[data-theme="grandline"] .frame-title { left: 20px; translate: 0 -50%; }
+:root[data-theme="grandline"] .hello__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px 10px; }
+:root[data-theme="grandline"] .hello__pick { min-height: 44px; }
+:root[data-theme="grandline"] .hello__pick::after {
+  transition: opacity 120ms ease, translate var(--voyage-duration, 280ms) var(--voyage-spring, ease-out);
+}
+:root[data-theme="grandline"] .hello__step { width: 100%; }
+:root[data-theme="grandline"] .block--you .block__body::before {
+  content: "";
+  position: absolute;
+  top: -19px;
+  left: -9px;
+  width: 34px;
+  height: 34px;
+  rotate: -15deg;
+  pointer-events: none;
+  background: url("voyage/straw-hat.svg") center / contain no-repeat;
+}
+:root[data-theme="grandline"] .block--you .block__body {
+  position: relative;
+  padding: 11px 16px;
+  border: 1px solid #ddcfac;
+  border-radius: 16px 16px 4px 16px;
+  background: #f1e8d1;
+  box-shadow: 0 2px 0 rgba(100, 78, 42, 0.04);
+}
+:root[data-theme="grandline"] .block--say > .block__label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 9px;
+  color: #516e79;
+  font-size: 12px;
+  font-weight: 700;
+}
+:root[data-theme="grandline"] .block--say > .block__label::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  background: #b34636;
+  mask: url("voyage/compass.svg") center / contain no-repeat;
+}
+:root[data-theme="grandline"] .block--tool::before { border-radius: 1px; rotate: 45deg; }
+:root[data-theme="grandline"] .prose blockquote { border-left-color: #c58f54; }
+:root[data-theme="grandline"] .composer__row {
+  padding: 12px;
+  border-radius: 16px;
+  box-shadow: 0 0 0 1px rgba(35, 76, 91, 0.22), 0 8px 26px rgba(31, 70, 83, 0.1);
+}
+:root[data-theme="grandline"] .composer__row:focus-within {
+  box-shadow: 0 0 0 1px #387e91, 0 6px 22px rgba(31, 70, 83, 0.1);
+}
+:root[data-theme="grandline"] .go {
+  transition: scale var(--voyage-duration, 280ms) var(--voyage-spring, ease-out);
+}
+:root[data-theme="grandline"] .go:hover { scale: 1.08; }
+:root[data-theme="grandline"] .go:active { scale: 0.94; }
+
 /* ============================================================
    窄屏（≤ 736px）：侧栏改成浮在上面的抽屉，主面板铺满
    ============================================================ */
 
 @media (max-width: 46rem) {
   :root { --gut: 0px; }
+  :root[data-theme="grove"] { --gut: 0px; }
+  :root[data-theme="grandline"] { --gut: 0px; }
+  :root[data-theme="inception"] { --gut: 0px; }
   body { grid-template-columns: minmax(0, 1fr); }
   body::before { grid-column: 1; border-radius: 0; box-shadow: none; }
   .sheet, .shelf, .term, .composer, .to-end { grid-column: 1; }
@@ -2557,6 +3078,21 @@ body[data-glide] .composer { transition: translate var(--glide-dur) var(--ease-m
   .shelf__list { max-height: 40%; border-right: 0; border-bottom: 1px solid var(--line); }
   .shelf__pane { padding: var(--space-4); }
   .hello__greet { font-size: 24px; line-height: 30px; }
+  :root[data-theme="grove"] .sheet { padding: var(--space-4) var(--space-3); }
+  :root[data-theme="grove"] .composer { padding: 0 var(--space-3) var(--space-2); }
+  :root[data-theme="grove"] .hello__lead { margin-left: 0; }
+  :root[data-theme="grandline"] .voyage { min-height: 180px; padding: 20px; margin-bottom: 18px; }
+  :root[data-theme="grandline"] .voyage__title { font-size: 25px; }
+  :root[data-theme="grandline"] .hello__list { grid-template-columns: minmax(0, 1fr); }
+  :root[data-theme="grandline"] .side { padding-top: 12px; }
+  :root[data-theme="openai"] .sheet { padding: var(--space-4) var(--space-3); }
+  :root[data-theme="openai"] .composer { padding: 0 var(--space-3) var(--space-2); }
+  :root[data-theme="openai"] .hello__list { grid-template-columns: minmax(0, 1fr); }
+  :root[data-theme="openai"] .hello__greet { font-size: 24px; line-height: 30px; }
+  :root[data-theme="inception"] .dreamscape { min-height: 180px; margin-bottom: 18px; padding: 20px; }
+  :root[data-theme="inception"] .dreamscape__title { font-size: 25px; }
+  :root[data-theme="inception"] .hello__list { grid-template-columns: minmax(0, 1fr); }
+  :root[data-theme="inception"] .side { padding-top: 12px; }
   .to-end { margin-right: var(--space-3); }
 }
 
@@ -2565,6 +3101,9 @@ body[data-glide] .composer { transition: translate var(--glide-dur) var(--ease-m
    ============================================================ */
 
 @media (prefers-reduced-motion: reduce) {
+  :root[data-theme="grandline"] .go { transition: none; }
+  :root[data-theme="grandline"] .go:hover,
+  :root[data-theme="grandline"] .go:active { scale: 1; }
   .block, .to-end, .palette, .models, .pick-bar, .desks { animation-name: fade-in; }
   .hello__mark, .unread::before, .churn__grid,
   .think:not([data-done]) .think__mark, .dot[data-state], .block--tool::before,
