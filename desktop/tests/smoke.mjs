@@ -80,7 +80,7 @@ try {
   await fs.mkdir(path.join(desktop, 'test-results'), { recursive: true });
   await page.screenshot({ path: path.join(desktop, 'test-results/workbench.png') });
   await page.evaluate(dir => goDesk(dir), other);
-  await expect(page.locator('#desk-path')).toHaveAttribute('title', other);
+  await expect(page.locator('#desk-path')).toHaveAttribute('title', await fs.realpath(other));
   await expect(page.getByRole('button', { name: '· second.txt', exact: true })).toBeVisible();
   await expect(page.locator('.file-tabs')).not.toContainText('README.md');
   await page.locator('#nav-shelf').click();
