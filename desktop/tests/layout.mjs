@@ -32,6 +32,7 @@ export async function checkLayout(application,page,content) {
       for (const open of [false,true]) {
         if (await page.locator('body').getAttribute('data-files') !== (open?'on':'off')) await page.locator('#act-files').click();
         await expect(page.locator('.files-panel'))[open?'toBeVisible':'toBeHidden']();
+        if (!open) await expect(page.locator('#nav-shelf')).toBeVisible();
         await page.locator('#input').fill('布局输入 中文 😀');
         await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
         const g = await retainLayout(page,`${content}-${width}x${height}-${open?'on':'off'}`);

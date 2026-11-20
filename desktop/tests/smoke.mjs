@@ -117,6 +117,13 @@ try {
   await expect(page.locator('#desk-path')).toHaveAttribute('title', await fs.realpath(other));
   await expect(page.getByRole('button', { name: '· second.txt', exact: true })).toBeVisible();
   await expect(page.locator('.file-tabs')).not.toContainText('README.md');
+  // Narrow layouts share space with the sidebar: restore it through the visible preview toggle.
+  if (!await page.locator('#nav-shelf').isVisible()) {
+    await expect(page.locator('.files-panel')).toBeVisible();
+    await page.locator('#act-files').click();
+    await expect(page.locator('.files-panel')).toBeHidden();
+  }
+  await expect(page.locator('#nav-shelf')).toBeVisible();
   await page.locator('#nav-shelf').click();
   await expect(page.locator('#shelf')).toBeVisible();
   await checkModelForm(page);
