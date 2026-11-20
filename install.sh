@@ -84,8 +84,8 @@ build_desktop() {
   fi
   local built="$ROOT/desktop/release/linux-unpacked"
   if [ "$(uname -s)" = Darwin ]; then
-    built="$ROOT/desktop/release/mac/Feiyu.app"
-    [ -d "$built" ] || built="$ROOT/desktop/release/mac-arm64/Feiyu.app"
+    built="$ROOT/desktop/release/mac/feiyu-desktop.app"
+    [ -d "$built" ] || built="$ROOT/desktop/release/mac-arm64/feiyu-desktop.app"
   elif [ ! -d "$built" ]; then
     built="$ROOT/desktop/release/linux-arm64-unpacked"
   fi
@@ -99,7 +99,7 @@ build_desktop() {
     return 1
   fi
   executable="$app/feiyu-desktop"
-  [ "$(uname -s)" != Darwin ] || executable="$app/Contents/MacOS/Feiyu"
+  [ "$(uname -s)" != Darwin ] || executable="$app/Contents/MacOS/feiyu-desktop"
   [ -x "$executable" ] || { warn '桌面可执行文件缺失'; return 1; }
   printf '#!/usr/bin/env bash\nexec %q "$@"\n' "$executable" > "$DESK_SHIM.tmp" || return 1
   chmod +x "$DESK_SHIM.tmp" || return 1
@@ -114,19 +114,19 @@ build_desktop() {
   cat > "$apps/feiyu.desktop" <<DESKTOP_ENTRY
 [Desktop Entry]
 Type=Application
-Name=Feiyu
+Name=Biscuit
 Comment=AI coding workbench
 Exec="$entry" %F
 Icon=feiyu
 Terminal=false
 Categories=Development;
-StartupWMClass=Feiyu
+StartupWMClass=feiyu-desktop
 DESKTOP_ENTRY
   [ -s "$apps/feiyu.desktop" ] || return 1
   if command -v update-desktop-database >/dev/null 2>&1; then
     update-desktop-database "$apps" >/dev/null 2>&1 || true
   fi
-  say '桌面版已安装：feiyu-desktop（也可在应用列表中打开 Feiyu）'
+  say '桌面版已安装：feiyu-desktop（也可在应用列表中打开 Biscuit）'
 }
 if [ "$MODE" != cli ]; then
   if ! build_desktop; then

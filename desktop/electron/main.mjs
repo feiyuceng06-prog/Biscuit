@@ -9,6 +9,10 @@ import { AgentProcess, resolveBackend } from './agent.mjs';
 import { underRoot, readBounded, listFiles, previewFile, uploadFile, MAX_IMAGE } from './files.mjs';
 import { pickWorkspace, readLast, writeLast } from './workspace.mjs';
 
+// Preserve Chromium workspace/localStorage identity across the display-name change.
+app.setPath('userData', path.join(app.getPath('appData'), 'feiyu-desktop'));
+app.setName('Biscuit');
+
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '../..');
 const rendererURL = pathToFileURL(path.resolve(here, '../dist/index.html')).href;
@@ -130,7 +134,7 @@ lastFile = path.join(app.getPath('userData'), 'workspace.json');
 options.workspace = pickWorkspace({ given: options.workspace, cwd: process.cwd(), home: os.homedir(), last: readLast(lastFile) });
 Menu.setApplicationMenu(null);
 win = new BrowserWindow({
-  title: 'Feiyu', width: 1440, height: 920, minWidth: 800, minHeight: 560,
+  title: 'Biscuit', width: 1440, height: 920, minWidth: 800, minHeight: 560,
   frame: false, backgroundColor: '#ffffff', show: false,
   icon: path.join(here, '../dist/icon.png'),
   webPreferences: { preload: path.join(here, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true },
@@ -155,4 +159,4 @@ app.on('before-quit', event => {
 app.on('window-all-closed', () => app.quit());
 await win.loadURL(rendererURL);
 
-}).catch(error => { log(error.stack + "\n"); dialog.showErrorBox("Feiyu 启动失败", error.message); app.quit(); });
+}).catch(error => { log(error.stack + "\n"); dialog.showErrorBox("Biscuit 启动失败", error.message); app.quit(); });

@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Feiyu",
+  "productName": "Biscuit",
   "version": "0.87.1",
   "identifier": "com.feiyuz.feiyu",
   "build": {
@@ -9,7 +9,7 @@
   "app": {
     "windows": [
       {
-        "title": "Feiyu",
+        "title": "Biscuit",
         "width": 1240,
         "height": 860,
         "minWidth": 720,

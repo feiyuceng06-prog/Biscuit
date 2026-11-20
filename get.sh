@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 一行装好 Feiyu（桌面版 + 终端版），不用 sudo、不用 Python：
+# 一行装好 Biscuit（桌面版 + 终端版），不用 sudo、不用 Python：
 #
 #   curl -fsSL https://raw.githubusercontent.com/feiyuceng06-prog/feiyu-agent/main/get.sh | bash
 #
@@ -25,7 +25,7 @@ usage() {
 用法: get.sh [AppImage 文件]
 
 不给文件就从 GitHub Releases 下最新的一版。程序装进 ~/.local/share/feiyu-desktop，
-feiyu（终端版）和 feiyu-desktop（桌面版）两个命令放在 ~/.local/bin，应用菜单里叫 Feiyu。
+feiyu（终端版）和 feiyu-desktop（桌面版）两个命令放在 ~/.local/bin，应用菜单里叫 Biscuit。
 不用 sudo。~/.local/bin 不在 PATH 里的话，往 ~/.bashrc（zsh 是 ~/.zshrc，fish 是
 ~/.config/fish/conf.d/feiyu.fish）加一行，新开的终端就找得到 feiyu；不想改就设 FEIYU_NO_MODIFY_PATH=1。
 模型、key 和对话记录在 ~/.config/feiyu 和 ~/.local/state/feiyu，重装、升级都不动它们。
@@ -53,7 +53,7 @@ landed() {
 }
 
 latest_url() {
-  local url tag
+  local url tag candidate brand
   url=$(fetch "https://api.github.com/repos/$REPO/releases/latest" 2>/dev/null \
         | grep -o 'https://[^"]*\.AppImage' | head -n1) || true
   if [ -z "$url" ]; then
@@ -61,7 +61,11 @@ latest_url() {
     tag=$(landed "https://github.com/$REPO/releases/latest" 2>/dev/null) || true
     tag=${tag##*/}
     case "$tag" in
-      desktop-v[0-9]*) url="https://github.com/$REPO/releases/download/$tag/Feiyu-${tag#desktop-v}.AppImage" ;;
+      desktop-v[0-9]*)
+        for brand in Biscuit Feiyu; do
+          candidate="https://github.com/$REPO/releases/download/$tag/$brand-${tag#desktop-v}.AppImage"
+          if landed "$candidate" >/dev/null 2>&1; then url=$candidate; break; fi
+        done ;;
     esac
   fi
   printf '%s' "$url"
@@ -134,7 +138,7 @@ main() {
     || die '解不开这个 AppImage，文件可能没下完整，重跑一遍试试'
   local root="$tmp/squashfs-root"
   { [ -x "$root/AppRun" ] && [ -x "$root/resources/backend/feiyu-backend" ]; } \
-    || die '包里缺东西，这不像是 Feiyu 的 AppImage'
+    || die '包里缺东西，这不像是 Biscuit / Feiyu 的 AppImage'
 
   local version
   if ! version=$("$root/resources/backend/feiyu-backend" --version 2>&1 </dev/null); then
@@ -174,7 +178,7 @@ main() {
   cat > "$apps/feiyu.desktop" <<DESKTOP_ENTRY
 [Desktop Entry]
 Type=Application
-Name=Feiyu
+Name=Biscuit
 Comment=AI coding workbench
 Exec="$entry" %F
 Icon=feiyu
@@ -199,8 +203,8 @@ DESKTOP_ENTRY
     *":$BIN:"*) onpath=yes ;;
     *) rc=$(add_to_path) || rc='' ;;
   esac
-  say "装好了 Feiyu $version"
-  say '桌面版：应用菜单里的 Feiyu，或者运行 feiyu-desktop'
+  say "装好了 Biscuit $version"
+  say '桌面版：应用菜单里的 Biscuit，或者运行 feiyu-desktop'
   if [ -n "$cli" ]; then
     if [ -n "$onpath" ]; then
       say '终端版：运行 feiyu'

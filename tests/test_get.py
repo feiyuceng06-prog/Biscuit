@@ -30,10 +30,14 @@ case "$url" in
   https://api.github.com/*)
     [ "${FAKE_API_FAIL:-}" = 1 ] && exit 22
     printf '{"assets":[{"name":"x.deb","browser_download_url":"https://github.com/o/r/releases/download/desktop-v9.5.0/x.deb"},'
-    printf '{"browser_download_url":"https://github.com/o/r/releases/download/desktop-v9.5.0/Feiyu-9.5.0.AppImage"}]}' ;;
+    printf '{"browser_download_url":"https://github.com/o/r/releases/download/desktop-v9.5.0/%s-9.5.0.AppImage"}]}' "${FAKE_API_BRAND:-Feiyu}" ;;
   */releases/latest)
     printf 'https://github.com/feiyuceng06-prog/feiyu-agent/releases/tag/desktop-v9.6.0' ;;
   *.AppImage)
+    if [[ "$*" == *'%{url_effective}'* ]]; then
+      [[ $url == */"${FAKE_FALLBACK_BRAND:-Feiyu}"-* ]] || exit 22
+      printf '%s' "$url"; exit 0
+    fi
     out=''
     while [ $# -gt 1 ]; do [ "$1" = -o ] && out=$2; shift; done
     printf '%s\n' "$url" >> "$FAKE_LOG"
@@ -108,7 +112,7 @@ class TestGet(unittest.TestCase):
         self.assertEqual((self.home / '.local/share/icons/hicolor/256x256/apps/feiyu.png').read_text(), 'png')
         self.assertEqual(self.apps(), ['app-9.1.0'])
         self.assertEqual(list(self.base.glob('.get-*')), [])
-        self.assertIn('装好了 Feiyu 9.1.0', r.stdout)
+        self.assertIn('装好了 Biscuit 9.1.0', r.stdout)
 
     def test_升级只留这一版和上一版(self):
         for v in ('9.1.0', '9.2.0', '9.3.0'):
@@ -157,6 +161,15 @@ class TestGet(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertEqual(self.log.read_text().split(), [
             'https://github.com/feiyuceng06-prog/feiyu-agent/releases/download/desktop-v9.6.0/Feiyu-9.6.0.AppImage'])
+
+    def test_biscuit_api_and_fallback_assets(self):
+        for fallback in (False, True):
+            with self.subTest(fallback=fallback):
+                r = self.get(env=dict(self.env, FAKE_API_BRAND='Biscuit',
+                                     FAKE_API_FAIL='1' if fallback else '0', FAKE_FALLBACK_BRAND='Biscuit'))
+                self.assertEqual(r.returncode, 0, r.stderr)
+                self.assertIn('/Biscuit-', self.log.read_text().splitlines()[-1])
+                self.assertIn('Name=Biscuit', (self.home / '.local/share/applications/feiyu.desktop').read_text())
 
     def test_不是_x86_64_就不装(self):
         r = self.get(self.image('9.1.0'), env=dict(self.env, FAKE_ARCH='aarch64'))

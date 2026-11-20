@@ -51,9 +51,9 @@ try {
       const r = document.querySelector('#startup').getBoundingClientRect();
       return r.width === innerWidth && r.height === innerHeight && !!document.querySelector('#input').closest('[inert]');
     })).toBe(true);
-    await expect(page.locator('#startup-text')).toHaveText(/^Feiyu/);
-    expect(await page.locator('#startup-text').textContent()).not.toBe('Feiyu Agent帮助您工作。');
-    await expect(page.locator('#startup-text')).toHaveText('Feiyu Agent帮助您工作。', { timeout: 6000 });
+    await expect(page.locator('#startup-text')).toHaveText(/^Biscuit/);
+    expect(await page.locator('#startup-text').textContent()).not.toBe('Biscuit帮助您工作。');
+    await expect(page.locator('#startup-text')).toHaveText('Biscuit帮助您工作。', { timeout: 6000 });
     await expect(page.locator('#startup')).toHaveAttribute('data-phase', 'play');
     if (process.env.FEIYU_SPLASH_SCREENSHOT) {
       await expect(page.locator('#startup')).toHaveAttribute('data-phase', 'play');

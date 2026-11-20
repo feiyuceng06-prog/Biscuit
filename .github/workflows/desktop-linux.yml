@@ -76,7 +76,7 @@ jobs:
 
   windows:
     runs-on: windows-2022
-    timeout-minutes: 40
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -120,14 +120,57 @@ jobs:
           $env:FEIYU_TEST_STAGE = "unpacked"
           $env:FEIYU_TEST_EXECUTABLE = "$PWD/release/win-unpacked/feiyu-desktop.exe"
           npm run test:desktop
+      - name: Checkout original-name UI for upgrade fixture
+        uses: actions/checkout@v4
+        with:
+          ref: 0105edef8361908284707c47c390b7918864a813
+          path: legacy-source
+      - name: Build original-name upgrade fixture with identical backend source
+        shell: pwsh
+        run: |
+          python -c "import pathlib,json,hashlib; p=pathlib.Path('legacy-source'); m=json.loads(pathlib.Path('desktop/tests/independent-taskstore-20261120/baseline-sha256.json').read_bytes()); assert all(hashlib.sha256((p/n).read_bytes()).hexdigest()==h for n,h in m.items())"
+          if ($LASTEXITCODE -ne 0) { throw 'Legacy backend source differs' }
+          Push-Location legacy-source/desktop
+          npm ci
+          if ($LASTEXITCODE -ne 0) { throw 'Legacy fixture dependencies failed' }
+          New-Item -ItemType Directory -Force build | Out-Null
+          Copy-Item ../../desktop/build/backend build/backend -Recurse
+          Copy-Item ../../desktop/build/git build/git -Recurse
+          npm run dist:win
+          if ($LASTEXITCODE -ne 0) { throw 'Legacy fixture NSIS build failed' }
+          Pop-Location
       - name: Install and test the Windows installer
         working-directory: desktop
         shell: pwsh
         run: |
           $installer = (Get-ChildItem release/*.exe | Select-Object -First 1).FullName
           $installDir = Join-Path $env:RUNNER_TEMP 'feiyu-install-test'
-          $process = Start-Process -FilePath $installer -ArgumentList @('/S', "/D=$installDir") -Wait -PassThru
+          $legacyInstaller = (Get-ChildItem ../legacy-source/desktop/release/*.exe | Select-Object -First 1).FullName
+          $legacy = Start-Process -FilePath $legacyInstaller -ArgumentList @('/S', "/D=$installDir") -Wait -PassThru
+          if ($legacy.ExitCode -ne 0) { throw "Legacy installer failed: $($legacy.ExitCode)" }
+          $compat = Join-Path $env:RUNNER_TEMP 'brand-synthetic-upgrade'
+          $legacyExe = Join-Path $installDir 'feiyu-desktop.exe'
+          node tests/measure-legacy.mjs $legacyExe
+          if ($LASTEXITCODE -ne 0) { throw 'Legacy identity measurement failed' }
+          node tests/brand-compat.mjs seed $legacyExe $compat
+          if ($LASTEXITCODE -ne 0) { throw 'Legacy synthetic data seed failed' }
+          $uninstallRoots = @('HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*')
+          $before = @(Get-ItemProperty $uninstallRoots -ErrorAction SilentlyContinue | Where-Object { $_.InstallLocation -eq $installDir })
+          if ($before.Count -ne 1) { throw 'Legacy installation registry identity missing or duplicated' }
+          # Omit /D: the new installer must discover the existing appId-based installation.
+          $process = Start-Process -FilePath $installer -ArgumentList @('/S') -Wait -PassThru
           if ($process.ExitCode -ne 0) { throw "Installer failed: $($process.ExitCode)" }
+          $after = @(Get-ItemProperty $uninstallRoots -ErrorAction SilentlyContinue | Where-Object { $_.InstallLocation -eq $installDir })
+          if ($after.Count -ne 1 -or $after[0].PSPath -ne $before[0].PSPath -or $after[0].DisplayName -ne 'Biscuit 0.87.1') { throw 'Upgrade registry identity/display name changed incorrectly' }
+          node tests/brand-compat.mjs check $legacyExe $compat
+          if ($LASTEXITCODE -ne 0) { throw 'Biscuit upgrade data compatibility failed' }
+          $links = @([Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('Programs'))
+          $shell = New-Object -ComObject WScript.Shell
+          $matched = @(Get-ChildItem $links -Filter '*.lnk' -Recurse | Where-Object { $shell.CreateShortcut($_.FullName).TargetPath -eq $legacyExe })
+          if (-not ($matched | Where-Object Name -eq 'Biscuit.lnk') -or ($matched | Where-Object Name -eq 'Feiyu.lnk')) { throw 'Upgrade shortcuts incorrect' }
+          @{before=$before;after=$after;links=@($matched.FullName);legacyExit=$legacy.ExitCode;upgradeExit=$process.ExitCode} | ConvertTo-Json -Depth 5 | Set-Content test-results/brand-installer-identity.json
+          Copy-Item "$compat/*identity.json" test-results/
+
           $env:FEIYU_TEST_STAGE = 'installed'
           $env:FEIYU_TEST_EXECUTABLE = Join-Path $installDir 'feiyu-desktop.exe'
           if (-not (Test-Path $env:FEIYU_TEST_EXECUTABLE)) { throw "Installed application missing: $env:FEIYU_TEST_EXECUTABLE" }
@@ -145,6 +188,7 @@ jobs:
           retention-days: 14
           path: |
             desktop/build/payload/feiyu-backend/**
+            legacy-source/desktop/release/*.exe
             desktop/test-results/**
       - uses: actions/upload-artifact@v4
         with:
@@ -229,5 +273,5 @@ jobs:
             TAG="desktop-v$(node -p "require('./desktop/package.json').version")"
           fi
           gh release create "$TAG" built/release/*.deb built/release/*.AppImage built-windows/release/*.exe \
-            --target "$GITHUB_SHA" --repo "$GITHUB_REPOSITORY" --title "Feiyu ${TAG#desktop-v}" \
+            --target "$GITHUB_SHA" --repo "$GITHUB_REPOSITORY" --title "Biscuit ${TAG#desktop-v}" \
             --notes "Ubuntu 上用 deb：sudo apt install ./文件名.deb。AppImage：chmod +x 之后双击；它要 libfuse2，Ubuntu 22.04 起默认不装，先 sudo apt install libfuse2（24.04 是 libfuse2t64）。Windows 安装包内含 Git Bash，无需另行安装。安装包未签名，Windows 上未验证真实模型请求；Linux 的 bubblewrap 沙箱不可用于 Windows。第一次打开时按「连接模型」，选个接口、贴上 key 就能用。"

@@ -1,8 +1,10 @@
-# Feiyu Agent
+# Biscuit
 
 简体中文 | [English](README.md)
 
-用自然语言交代任务，让 Feiyu 帮你读代码、改文件、运行命令。
+用自然语言交代任务，让 Biscuit 帮你读代码、改文件、运行命令。
+
+Biscuit 原名 Feiyu，命令和现有数据目录保持不变。
 
 ## Linux 安装
 
@@ -14,7 +16,7 @@ curl -fsSL https://raw.githubusercontent.com/feiyuceng06-prog/feiyu-agent/main/g
 
 不需要预装 Python 或 Node.js，也不需要 sudo。程序安装在用户目录；脚本会在需要时把命令目录加入 Bash 或 Zsh 配置。
 
-安装完成后，从应用菜单打开 **Feiyu**。也可以新开一个终端运行：
+安装完成后，从应用菜单打开 **Biscuit**（旧发行版显示 **Feiyu**）。也可以新开一个终端运行：
 
 ```bash
 feiyu-desktop  # 桌面版

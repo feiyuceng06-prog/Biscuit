@@ -1,7 +1,7 @@
 {
   "name": "feiyu-desktop",
   "version": "0.87.1",
-  "description": "Feiyu agent desktop workbench",
+  "description": "Biscuit desktop workbench",
   "author": {
     "name": "Feiyu",
     "email": "feiyuceng06@gmail.com"
@@ -25,7 +25,7 @@
   },
   "build": {
     "appId": "com.feiyuz.feiyu",
-    "productName": "Feiyu",
+    "productName": "Biscuit",
     "executableName": "feiyu-desktop",
     "directories": {
       "output": "release"
@@ -45,7 +45,16 @@
       }
     ],
     "win": {
-      "extraResources": [{ "from": "build/git", "to": "git" }, { "from": "WINDOWS-THIRD-PARTY.md", "to": "WINDOWS-THIRD-PARTY.md" }]
+      "extraResources": [
+        {
+          "from": "build/git",
+          "to": "git"
+        },
+        {
+          "from": "WINDOWS-THIRD-PARTY.md",
+          "to": "WINDOWS-THIRD-PARTY.md"
+        }
+      ]
     },
     "linux": {
       "target": [
@@ -67,6 +76,10 @@
         "libsecret-1-0",
         "libasound2 | libasound2t64"
       ]
+    },
+    "nsis": {
+      "shortcutName": "Biscuit",
+      "uninstallDisplayName": "Biscuit ${version}"
     }
   },
   "dependencies": {

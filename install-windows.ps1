@@ -19,5 +19,5 @@ try {
     npm run dist:win
     if ($LASTEXITCODE -ne 0) { throw 'Desktop build failed.' }
 } finally { Pop-Location }
-Write-Host 'Built the Windows installer in desktop\release\. Python is bundled inside.'
+Write-Host 'Built the Biscuit Windows installer in desktop\release\. Python is bundled inside.'
 Write-Host 'The installer includes its own Git Bash command environment.'

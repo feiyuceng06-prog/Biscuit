@@ -26,9 +26,13 @@ export async function checkLayout(application,page,content) {
   const original = await application.evaluate(({BrowserWindow}) => BrowserWindow.getAllWindows()[0].getContentSize());
   await application.evaluate(({BrowserWindow}) => BrowserWindow.getAllWindows()[0].unmaximize());
   try {
-    for (const [width,height] of [[800,560],[1024,768],[1100,768],[1101,768],[1440,920]]) {
+    for (const [width,height] of [[800,560],[1024,768],[1098,768],[1102,768],[1440,920]]) {
       await application.evaluate(({BrowserWindow},size) => BrowserWindow.getAllWindows()[0].setContentSize(...size),[width,height]);
-      await expect.poll(() => page.evaluate(() => [innerWidth,innerHeight])).toEqual([width,height]);
+      // Windows fractional device scales round native frame/content bounds by up to 2 CSS px.
+      await expect.poll(async () => {
+        const size = await page.evaluate(() => [innerWidth,innerHeight]);
+        return Math.max(Math.abs(size[0]-width), Math.abs(size[1]-height));
+      }).toBeLessThanOrEqual(process.platform === 'win32' ? 2 : 0);
       for (const open of [false,true]) {
         if (await page.locator('body').getAttribute('data-files') !== (open?'on':'off')) await page.locator('#act-files').click();
         await expect(page.locator('.files-panel'))[open?'toBeVisible':'toBeHidden']();

@@ -1,8 +1,10 @@
-# Feiyu Agent
+# Biscuit
 
 English | [简体中文](README.zh.md)
 
-Describe a task in plain language. Feiyu helps you read code, edit files, and run commands.
+Describe a task in plain language. Biscuit helps you read code, edit files, and run commands.
+
+Biscuit was previously named Feiyu. The commands and existing data locations stay the same.
 
 ## Install on Linux
 
@@ -14,7 +16,7 @@ curl -fsSL https://raw.githubusercontent.com/feiyuceng06-prog/feiyu-agent/main/g
 
 No Python, Node.js, or sudo required. The installer uses your user directory and adds the command directory to your Bash or Zsh configuration when needed.
 
-Once installed, open **Feiyu** from your application menu. Or open a new terminal and run:
+Once installed, open **Biscuit** (previous releases: **Feiyu**) from your application menu. Or open a new terminal and run:
 
 ```bash
 feiyu-desktop  # Desktop app

@@ -11,12 +11,14 @@ No pointer events are disabled and Send still uses the normal click handler.
 
 `tests/layout.mjs` checks input focus, normal Send click actionability, hit testing,
 viewport containment and panel/composer separation at 800×560, 1024×768,
-1100×768, 1101×768 and 1440×920 content sizes, with preview open and closed,
+1098×768, 1102×768 and 1440×920 content sizes, with preview open and closed,
 both empty and showing a file. Each case retains a screenshot and rectangle/hit
 metadata. Windows source GUI repeats at Chromium native device scale factors
 1, 1.25, 1.5 and 2; these are automated device-scale tests, not physical monitor or
 Windows display-settings changes. Actual dimensions and devicePixelRatio are
-recorded, and an unachievable requested size fails the test.
+recorded, and an unachievable requested size fails the test (Windows fractional-scale native
+frame rounding permits up to two CSS pixels; cases straddle the breakpoint beyond
+that tolerance).
 
 The normal GUI smoke sends synthetic Chinese/emoji streaming requests to loopback,
 closes the application, restarts with `--resume`, verifies saved content and sends

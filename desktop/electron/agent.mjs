@@ -6,7 +6,7 @@ import path from 'node:path';
 export function resolveBackend({ packaged, resources, root, env = process.env }) {
   if (packaged) {
     const command = path.join(resources, 'backend', process.platform === 'win32' ? 'feiyu-backend.exe' : 'feiyu-backend');
-    if (!existsSync(command)) throw new Error('安装包中的 agent 后端缺失，请重新安装 Feiyu');
+    if (!existsSync(command)) throw new Error('安装包中的 agent 后端缺失，请重新安装 Biscuit');
     return { command, args: [] };
   }
   if (env.FEIYU_BIN) return { command: env.FEIYU_BIN, args: [] };

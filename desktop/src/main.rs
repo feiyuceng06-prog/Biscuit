@@ -227,7 +227,7 @@ fn notify(title: String, body: String) {
     let title = clip_chars(&title, 80);
     let body = markup_escape(&clip_chars(&body, 240));
     if let Ok(child) = std::process::Command::new("notify-send")
-        .args(["--app-name=Feiyu", "--icon=feiyu", "--hint=string:desktop-entry:feiyu"])
+        .args(["--app-name=Biscuit", "--icon=feiyu", "--hint=string:desktop-entry:feiyu"])
         // 标题和正文是模型给的字：`--` 之后才是位置参数，以 `-` 开头的也不会被当成选项
         .arg("--")
         .arg(title)
