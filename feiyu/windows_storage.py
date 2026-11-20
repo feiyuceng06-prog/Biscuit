@@ -121,6 +121,21 @@ def descriptor():
     finally:
         close(token)
 
+def default_owner_matches(owner):
+    token = W.HANDLE()
+    checked(bind(A, 'OpenProcessToken', [W.HANDLE, W.DWORD, C.POINTER(W.HANDLE)])(
+        bind(K, 'GetCurrentProcess', [], W.HANDLE)(), 8, C.byref(token)))
+    try:
+        size = W.DWORD()
+        get = bind(A, 'GetTokenInformation', [W.HANDLE, C.c_int, W.LPVOID, W.DWORD, C.POINTER(W.DWORD)])
+        get(token, 4, None, 0, C.byref(size))  # TokenOwner, not a username/group lookup
+        buf = C.create_string_buffer(size.value)
+        checked(get(token, 4, buf, size, C.byref(size)))
+        sid = C.cast(buf, C.POINTER(W.LPVOID))[0]
+        return bool(bind(A, 'EqualSid', [W.LPVOID, W.LPVOID])(owner, sid))
+    finally:
+        close(token)
+
 def restrict(h, sd):
     owner, dacl = W.LPVOID(), W.LPVOID()
     present, default = W.BOOL(), W.BOOL()
@@ -130,12 +145,13 @@ def restrict(h, sd):
     if result:
         raise C.WinError(result)
     try:
-        if not bind(A, 'EqualSid', [W.LPVOID, W.LPVOID])(owner, actual):
-            raise ValueError('state directory owner differs from token user')
+        if (not bind(A, 'EqualSid', [W.LPVOID, W.LPVOID])(owner, actual)
+                and not default_owner_matches(actual)):
+            raise ValueError('state directory owner differs from token user/default owner')
     finally:
         free(allocated)
     checked(bind(A, 'GetSecurityDescriptorDacl', [W.LPVOID, C.POINTER(W.BOOL), C.POINTER(W.LPVOID), C.POINTER(W.BOOL)])(sd, C.byref(present), C.byref(dacl), C.byref(default)))
-    result = bind(A, 'SetSecurityInfo', [W.HANDLE, C.c_int, W.DWORD, W.LPVOID, W.LPVOID, W.LPVOID, W.LPVOID], W.DWORD)(h, 1, 0x80000004, None, None, dacl, None)
+    result = bind(A, 'SetSecurityInfo', [W.HANDLE, C.c_int, W.DWORD, W.LPVOID, W.LPVOID, W.LPVOID, W.LPVOID], W.DWORD)(h, 1, 0x80000005, owner, None, dacl, None)
     if result:
         raise C.WinError(result)
 
@@ -150,7 +166,7 @@ def private_dir(path):
             sa = SA(C.sizeof(SA), sd, False)
             if not mkdir(str(p), C.byref(sa)) and C.get_last_error() != 183:
                 raise C.WinError(C.get_last_error())
-            h = open_handle(p, 0x60080, 1)  # READ_CONTROL | WRITE_DAC | attributes
+            h = open_handle(p, 0xe0080, 1)  # READ_CONTROL | WRITE_DAC | WRITE_OWNER | attributes
             try:
                 if not details(h).attrs & 0x10:
                     raise ValueError('not directory')

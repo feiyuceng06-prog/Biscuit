@@ -121,6 +121,18 @@ try:
     assert agent.task_state.requests[0]['text'] == 'synthetic request'
     assert agent.task_state.revision > 0
     assert agent.task_state.budget['attempts'] == 1
+    if sys.platform == 'win32':
+        from tests.fakes import call
+        agent.mode = 'auto'
+        agent.backend.script = [('', [call('bg', 'bash', command='echo forbidden', background=True),
+                                     call('lsp', 'symbol', action='definition', path='x.py', name='x')]),
+                                ('continued after refused tools', [])]
+        with contextlib.redirect_stdout(io.StringIO()):
+            agent.send('exercise unsupported tools')
+        assert not agent._task_store.blocked
+        results = [m['content'] for m in agent.backend.messages if m['role'] == 'tool']
+        assert len(results) == 2, results
+        assert all('Windows' in str(r) for r in results), results
 finally:
     if agent._task_store:
         agent._task_store.close()
@@ -170,7 +182,7 @@ from unittest.mock import patch
 from feiyu import windows_storage as w
 from feiyu.taskstate import atomic_json, PersistenceError
 stage, mode, path = sys.argv[1:]
-def stop(*args):
+def stop(*args, **kwargs):
     if mode == 'crash': os._exit(73)
     # Ask the native API to flush an invalid handle: real Win32 error, not ignored.
     w.flush(-1)
@@ -184,7 +196,7 @@ else:
     target = 'feiyu.windows_storage.flush'
 # Preserve original flush to avoid recursion when testing its failure.
 original = w.flush
-def at_flush(*args):
+def at_flush(*args, **kwargs):
     if mode == 'crash': os._exit(73)
     original(-1)
 try:
@@ -203,3 +215,42 @@ raise AssertionError('write unexpectedly acknowledged')
                     self.assertEqual(done.returncode, 73 if mode == 'crash' else 74, done.stderr)
                     observed = json.loads(_read_safe(path, 1024)[0])
                     self.assertEqual(observed['value'], 'new' if stage == 'after-replace' else 'old')
+
+    @unittest.skipUnless(__import__('os').name == 'nt', 'Windows ACL/identity')
+    def test_windows_owner_migration_acl_and_pinned_directory(self):
+        import ctypes as C
+        from ctypes import wintypes as W
+        import os
+        from feiyu import windows_storage as w
+        # mkdir uses the real token default owner; private_dir must tighten it by handle.
+        parent = Path(self.temporary.name) / 'default-owner'
+        parent.mkdir()
+        w.private_dir(parent)
+        with w.guard(parent):
+            h = w.open_handle(parent, 0x20080, 1)
+            self.addCleanup(w.close, h)
+            sd = W.LPVOID()
+            owner = W.LPVOID()
+            result = w.bind(w.A, 'GetSecurityInfo', [W.HANDLE, C.c_int, W.DWORD,
+                C.POINTER(W.LPVOID), W.LPVOID, W.LPVOID, W.LPVOID, C.POINTER(W.LPVOID)], W.DWORD)(
+                    h, 1, 5, C.byref(owner), None, None, None, C.byref(sd))
+            self.assertEqual(result, 0)
+            text = W.LPWSTR()
+            try:
+                w.checked(w.bind(w.A, 'ConvertSecurityDescriptorToStringSecurityDescriptorW',
+                    [W.LPVOID, W.DWORD, W.DWORD, C.POINTER(W.LPWSTR), W.LPVOID])(
+                        sd, 1, 5, C.byref(text), None))
+                value = text.value
+                sid = value.split('O:')[1].split('D:')[0]
+                self.assertIn('D:P', value)
+                self.assertEqual(value.count('(A;'), 1, value)
+                self.assertIn(';;;' + sid + ')', value)
+            finally:
+                w.free(text)
+                w.free(sd)
+        store = TaskStore(self.root, 'native')
+        self.addCleanup(store.close)
+        with self.assertRaises(OSError):
+            os.rename(store.directory, store.directory.with_name('substituted'))
+        with self.assertRaises(OSError):
+            os.rename(store.directory/'writer.lock', store.directory/'substituted.lock')

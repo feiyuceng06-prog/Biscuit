@@ -1625,6 +1625,9 @@ class Toolbox:
             return result
 
     def _tool_bash(self, args: dict) -> ToolResult:
+        if os.name == 'nt' and args.get('background'):
+            return ToolResult('Windows 暂不支持可靠后台 job；请使用前台命令',
+                              is_error=True, summary='平台不支持后台 job')
         command = args["command"]
         # **reset 要在 background 上面。** 反过来的话 `background + reset` 一起给时
         # 直接从 background 那条路返回了，reset 被默默吃掉 —— 模型以为环境清干净了
@@ -2619,6 +2622,9 @@ class Toolbox:
             callback('symbol')
 
     def _tool_symbol(self, args: dict) -> ToolResult:
+        if os.name == 'nt':
+            return ToolResult('Windows 暂不支持安全 LSP 生命周期；请使用 read_file/search',
+                              is_error=True, summary='平台不支持 LSP')
         self._unisolated_lsp = True
         action = args.get("action")
         allowed = ("definition", "references", "outline") if outline_on() else (

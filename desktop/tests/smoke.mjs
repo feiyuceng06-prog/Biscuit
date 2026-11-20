@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkModelForm } from './model-form.mjs';
+import { dialogueFixture } from './dialogue-fixture.mjs';
 const desktop = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const temporary = await fs.mkdtemp(path.join(os.tmpdir(), 'feiyu-desktop-test-'));
 const workspace = path.join(temporary, 'workspace');
@@ -23,6 +24,11 @@ if (process.platform === 'win32') {
   await fs.mkdir(env.APPDATA, { recursive: true });
   await fs.mkdir(env.LOCALAPPDATA, { recursive: true });
 }
+const fixture = await dialogueFixture();
+const config = path.join(temporary, 'config', 'feiyu');
+await fs.mkdir(config, {recursive:true});
+await fs.writeFile(path.join(config, 'models.json'), JSON.stringify({offline:{kind:'openai',model:'offline',key:'synthetic-not-a-key',base_url:fixture.url}}));
+await fs.writeFile(path.join(config, 'state.json'), JSON.stringify({last:'offline'}));
 delete env.ELECTRON_RUN_AS_NODE;
 let application, page;
 try {
@@ -55,6 +61,22 @@ try {
   await expect(page.locator('#startup')).toHaveCount(0, { timeout: 6500 });
   await expect(page.locator('#input')).toBeFocused();
   await expect(page.locator('.backend-error')).toHaveCount(0);
+  await page.locator('#input').fill('synthetic GUI 中文 😀 𠮷');
+  await page.locator('#send').click();
+  await expect(page.locator('body')).toContainText('GUI reply 1 中文 😀 𠮷', {timeout:30000});
+  const sessionsRoot = path.join(temporary, 'state', 'feiyu', 'sessions');
+  await expect.poll(async () => (await fs.readdir(sessionsRoot, {recursive:true})).filter(p => p.endsWith('.task.json')).length).toBe(1);
+  const journal = (await fs.readdir(sessionsRoot, {recursive:true})).find(p => p.endsWith('.task.json'));
+  const saved = JSON.parse(await fs.readFile(path.join(sessionsRoot, journal), 'utf8')).payload;
+  await page.evaluate(() => send({op:'new'}));
+  await page.evaluate(sid => send({op:'open',id:sid}), saved.session_id);
+  await expect(page.locator('body')).toContainText('GUI reply 1 中文 😀 𠮷', {timeout:30000});
+  await page.locator('#input').fill('synthetic resumed 中文 😀 𠮷');
+  await page.locator('#send').click();
+  await expect(page.locator('body')).toContainText('GUI reply 2 中文 😀 𠮷', {timeout:30000});
+  expect(fixture.requests).toHaveLength(2);
+  expect(fixture.requests[1].messages.filter(m => m.role === 'user').length).toBeGreaterThanOrEqual(2);
+  console.log('PASS: actual GUI streamed synthetic conversation and durable session reopen');
   await expect(page.getByRole('button', { name: '· README.md', exact: true })).toBeVisible();
   await page.getByRole('button', { name: '· README.md', exact: true }).click();
   await expect(page.locator('.file-preview')).toContainText('Electron + Python agent.');
@@ -105,5 +127,6 @@ try {
   throw error;
 } finally {
   await application?.close();
+  await fixture.close();
   await fs.rm(temporary, { recursive: true, force: true });
 }

@@ -23,11 +23,13 @@ jobs:
         python: ['3.10', '3.12', '3.14']
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
       - run: sudo apt-get update && sudo apt-get install -y bubblewrap ripgrep
-      - run: python -m pip install ".[openai]"
+      - run: python -m pip install -c desktop/backend-requirements.txt ".[openai]"
       - name: Python regression tests
         run: python -m unittest discover -s tests -t .
 
@@ -151,7 +153,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install ".[openai]"
+      - run: python -m pip install -c desktop/backend-requirements.txt ".[openai]"
       - name: Native persistence and UTF-8 contracts
         run: python -m unittest -v tests.test_native_persistence tests.test_serve_stdio tests.test_windows_support
 
