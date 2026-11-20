@@ -120,6 +120,8 @@ jobs:
           $env:FEIYU_TEST_STAGE = "unpacked"
           $env:FEIYU_TEST_EXECUTABLE = "$PWD/release/win-unpacked/feiyu-desktop.exe"
           npm run test:desktop
+      - name: Preserve reviewed LF bytes in legacy comparison checkout
+        run: git config --global core.autocrlf false
       - name: Checkout original-name UI for upgrade fixture
         uses: actions/checkout@v4
         with:

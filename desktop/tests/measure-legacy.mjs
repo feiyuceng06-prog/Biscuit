@@ -10,7 +10,7 @@ delete env.ELECTRON_RUN_AS_NODE;
 const executable=process.argv[2];
 const a=await electron.launch({...(executable?{executablePath:executable}:{}),args:executable?[]:[desktop],env,cwd:home,timeout:30000});
 const page=await a.firstWindow();
-await page.waitForFunction(() => document.querySelector('#s-ver')?.textContent !== '—');
+await page.waitForFunction(() => { const el=document.querySelector('#s-ver'); return el && el.textContent !== '—'; });
 try {
   const identity=await a.evaluate(({app})=>({name:app.getName(),appData:app.getPath('appData'),userData:app.getPath('userData'),packaged:app.isPackaged}));
   console.log(JSON.stringify(identity,null,2));
