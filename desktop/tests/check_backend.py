@@ -20,7 +20,7 @@ with tempfile.TemporaryDirectory(prefix="feiyu-payload-test-") as temporary:
             "base_url": "http://127.0.0.1:1", "limit": 32000,
         }}))
         result = subprocess.run([sys.argv[1], "--serve", "--own-window", "-w", temporary, "-m", "smoke"],
-                                input='{"op":"status"}\n', text=True, capture_output=True,
+                                input='{"op":"status"}\n', text=True, encoding='utf-8', capture_output=True,
                                 env=env, timeout=30)
         assert result.returncode == 0, f"{kind} backend failed: {result.stderr}"
         events = [json.loads(line) for line in result.stdout.splitlines() if line.strip()]

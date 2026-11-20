@@ -28,7 +28,7 @@ with tempfile.TemporaryDirectory(prefix='feiyu-frozen-http-parent-') as director
     try:
         result = subprocess.run([str(Path(sys.argv[1]).resolve()), '--serve', '--own-window',
                                  '-w', directory], input='{"op":"status"}\n',
-                                text=True, capture_output=True, env=env, timeout=25)
+                                text=True, encoding='utf-8', capture_output=True, env=env, timeout=25)
         assert result.returncode == 0, result.stderr
         assert len(f.seen) >= 3, (f.seen, result.stdout, result.stderr)
         assert any(h.get('mcp-session-id') for h in f.seen), f.seen
