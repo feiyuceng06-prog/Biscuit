@@ -11,4 +11,3 @@ _LIMIT_IN_ERROR = re.compile(
 # 学到的上限再低也不低于这个 更低多半是把一次异常当成了窗口大小，
 # 会让它之后每两轮就压缩一次
 MIN_LEARNED_LIMIT = 16_000
-

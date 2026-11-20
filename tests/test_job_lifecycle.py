@@ -165,7 +165,7 @@ finally: box.jobs.kill_all()
 
 
     def test_running_recovery_old_pointer_pending_select_and_kill(self):
-        self.run_child(''' 
+        self.run_child('''
 from feiyu.agent import Feiyu
 from feiyu.taskstate import TaskState, workspace_id
 from feiyu import session
