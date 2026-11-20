@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, shell, Notification, Menu } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, shell, Notification, Menu, net } from 'electron';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
@@ -8,10 +8,13 @@ import { createRequire } from 'node:module';
 import { AgentProcess, resolveBackend } from './agent.mjs';
 import { underRoot, readBounded, listFiles, previewFile, uploadFile, MAX_IMAGE } from './files.mjs';
 import { pickWorkspace, readLast, writeLast } from './workspace.mjs';
+import { createUpdateChecker } from './updates.mjs';
 
 // Preserve Chromium workspace/localStorage identity across the display-name change.
 app.setPath('userData', path.join(app.getPath('appData'), 'feiyu-desktop'));
 app.setName('Biscuit');
+const checkUpdates = createUpdateChecker({ current: app.getVersion(), platform: process.platform,
+  arch: process.arch, request: (...args) => net.fetch(...args) });
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '../..');
@@ -83,6 +86,11 @@ ipcMain.handle('feiyu:window', (event, action) => {
 ipcMain.handle('feiyu:command', async (event, command, args = {}) => {
   trusted(event);
   switch (command) {
+    case 'check_updates':
+      if (args.automatic === true && process.env.FEIYU_DISABLE_UPDATE_CHECK === '1') {
+        return { status: 'idle', current: app.getVersion() };
+      }
+      return checkUpdates({ automatic: args.automatic === true });
     case 'connect':
       if (agent?.child && !transition) { emit('feiyu://state', state); return workspace; }
       return startAgent(workspace || options.workspace, options.resume);

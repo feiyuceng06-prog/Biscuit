@@ -158,6 +158,7 @@ class Server:
         self.workspace = workspace
         self.trace = tracer
         self.proto = proto
+        self._status_lock = threading.Lock()
         self.inbox: queue.Queue = queue.Queue()
         self.busy = False
         self.stopped = False
@@ -228,7 +229,10 @@ class Server:
         return out
 
     def push_status(self) -> None:
-        self.proto.send("status", **self.status())
+        # Reader and completion callbacks also publish status. Serialize the
+        # snapshot with its send so an older busy=True cannot follow idle.
+        with self._status_lock:
+            self.proto.send("status", **self.status())
 
     # ---- 会话 ----
 

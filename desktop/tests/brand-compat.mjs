@@ -15,6 +15,7 @@ const config=path.join(env.XDG_CONFIG_HOME,'feiyu');await fs.mkdir(config,{recur
 await fs.writeFile(path.join(config,'models.json'),JSON.stringify({offline:{kind:'openai',model:'offline',key:'synthetic',base_url:fixture.url}}));
 await fs.writeFile(path.join(config,'state.json'),JSON.stringify({last:'offline'}));
 delete env.ELECTRON_RUN_AS_NODE;delete env.FEIYU_BIN;
+env.FEIYU_DISABLE_UPDATE_CHECK='1';
 const args=[...(executable==='source'?[desktop]:[]),...(mode==='seed'?['-w',workspace]:['--resume'])];
 let app;
 try{

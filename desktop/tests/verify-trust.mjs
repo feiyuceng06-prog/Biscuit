@@ -14,7 +14,7 @@ for (const directory of [workspace, other, path.join(temporary, 'config')]) {
   await fs.mkdir(directory, { recursive: true });
 }
 await fs.writeFile(path.join(workspace, 'AGENTS.md'), 'verify: ' + command + '\n');
-const env = { ...process.env, HOME: temporary, XDG_CONFIG_HOME: path.join(temporary, 'config'),
+const env = { ...process.env, FEIYU_DISABLE_UPDATE_CHECK: '1', HOME: temporary, XDG_CONFIG_HOME: path.join(temporary, 'config'),
   XDG_STATE_HOME: path.join(temporary, 'state'), XDG_DATA_HOME: path.join(temporary, 'data'),
   FEIYU_BIN: process.env.FEIYU_TEST_EXECUTABLE ? '/nonexistent-backend-override'
     : path.join(desktop, 'build/backend', process.platform === 'win32' ? 'feiyu-backend.exe' : 'feiyu-backend') };

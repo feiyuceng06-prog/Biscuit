@@ -8,6 +8,7 @@ import { checkModelForm } from './model-form.mjs';
 import { checkLayout, retainLayout } from './layout.mjs';
 import { dialogueFixture } from './dialogue-fixture.mjs';
 import { checkAppearance } from './appearance.mjs';
+import { checkUpdateFailure, checkUpdateNotice } from './update-ui.mjs';
 const desktop = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const temporary = await fs.mkdtemp(path.join(os.tmpdir(), 'feiyu-desktop-test-'));
 const workspace = path.join(temporary, 'workspace');
@@ -16,7 +17,7 @@ await fs.mkdir(workspace); await fs.mkdir(other);
 await fs.writeFile(path.join(workspace, 'README.md'), '# Feiyu Workbench\n\nElectron + Python agent.\n');
 await fs.writeFile(path.join(other, 'second.txt'), 'Second workspace');
 await fs.mkdir(path.join(temporary, 'config'), { recursive: true });
-const env = { ...process.env, HOME: temporary, XDG_CONFIG_HOME: path.join(temporary, 'config'),
+const env = { ...process.env, FEIYU_DISABLE_UPDATE_CHECK: '1', HOME: temporary, XDG_CONFIG_HOME: path.join(temporary, 'config'),
   XDG_STATE_HOME: path.join(temporary, 'state'), XDG_DATA_HOME: path.join(temporary, 'data'),
   FEIYU_BIN: process.env.FEIYU_TEST_EXECUTABLE ? '/nonexistent-backend-override' : path.join(desktop, 'build/backend', process.platform === 'win32' ? 'feiyu-backend.exe' : 'feiyu-backend'), SHELL: '/bin/sh' };
 if (process.platform === 'win32') {
@@ -64,6 +65,7 @@ try {
   await expect(page.locator('#startup')).toHaveCount(0, { timeout: 6500 });
   await expect(page.locator('#input')).toBeFocused();
   await expect(page.locator('.backend-error')).toHaveCount(0);
+  await checkUpdateFailure(application, page);
   await checkLayout(application, page, 'empty');
   await page.locator('#input').fill('synthetic GUI 中文 😀 𠮷');
   await page.locator('#send').click();
@@ -140,6 +142,8 @@ try {
   expect(await page.locator('[inert]').count()).toBe(0);
   expect(errors).toEqual([]);
   console.log('PASS: fullscreen icon-only intro, automatic exit, Escape, reduced motion, focus restoration');
+  await checkUpdateNotice(application, page);
+  expect(errors).toEqual([]);
   console.log('PASS: real backend, file preview, isolated renderer, path boundary, PTY, workspace switching, settings');
 } catch (error) {
   try { await retainLayout(page, 'failure'); } catch {}
