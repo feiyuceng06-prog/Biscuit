@@ -23,7 +23,10 @@ class NativePersistenceTests(unittest.TestCase):
         self.addCleanup(override.stop)
 
     def test_durable_atomic_replace_and_safe_read(self):
-        target = Path(self.temporary.name) / 'snapshot.json'
+        from feiyu.files import private_dir
+        parent = Path(self.temporary.name) / 'private'
+        private_dir(parent)
+        target = parent / 'snapshot.json'
         for value in (TEXT, TEXT * 10000):
             atomic_json(target, {'text': value})
             raw, _ = _read_safe(target, 1024 * 1024)
@@ -131,7 +134,8 @@ finally:
         import os
         import subprocess
         target = Path(self.temporary.name) / 'target'
-        target.mkdir()
+        from feiyu.files import private_dir
+        private_dir(target)
         junction = Path(self.temporary.name) / 'junction'
         done = subprocess.run(['cmd', '/c', 'mklink', '/J', str(junction), str(target)],
                               capture_output=True)
@@ -150,3 +154,52 @@ finally:
             _read_safe(path, 100)
         with self.assertRaises(PersistenceError):
             atomic_json(path, {})
+
+    @unittest.skipUnless(__import__('os').name == 'nt', 'Windows native failure windows')
+    def test_windows_failure_and_crash_windows(self):
+        import subprocess
+        import sys
+        from feiyu.files import private_dir
+        parent = Path(self.temporary.name) / 'private'
+        private_dir(parent)
+        path = parent / 'snapshot.json'
+        # Child runs real NTFS writes; only the precise failure/crash boundary is injected.
+        code = '''
+import os, sys
+from unittest.mock import patch
+from feiyu import windows_storage as w
+from feiyu.taskstate import atomic_json, PersistenceError
+stage, mode, path = sys.argv[1:]
+def stop(*args):
+    if mode == 'crash': os._exit(73)
+    # Ask the native API to flush an invalid handle: real Win32 error, not ignored.
+    w.flush(-1)
+if stage == 'serialize':
+    target = 'json.dump'
+elif stage == 'data-flush':
+    target = 'os.fsync'
+elif stage == 'before-replace':
+    target = 'feiyu.windows_storage.replace'
+else:
+    target = 'feiyu.windows_storage.flush'
+# Preserve original flush to avoid recursion when testing its failure.
+original = w.flush
+def at_flush(*args):
+    if mode == 'crash': os._exit(73)
+    original(-1)
+try:
+    with patch(target, side_effect=at_flush if stage == 'after-replace' else stop):
+        atomic_json(path, {'value':'new'})
+except PersistenceError:
+    sys.exit(74)
+raise AssertionError('write unexpectedly acknowledged')
+'''
+        for stage in ('serialize', 'data-flush', 'before-replace', 'after-replace'):
+            for mode in ('error', 'crash'):
+                with self.subTest(stage=stage, mode=mode):
+                    atomic_json(path, {'value': 'old'})
+                    done = subprocess.run([sys.executable, '-c', code, stage, mode, str(path)],
+                                          capture_output=True, timeout=20)
+                    self.assertEqual(done.returncode, 73 if mode == 'crash' else 74, done.stderr)
+                    observed = json.loads(_read_safe(path, 1024)[0])
+                    self.assertEqual(observed['value'], 'new' if stage == 'after-replace' else 'old')

@@ -31,13 +31,16 @@ for anthropic in (False, True):
             assert kinds[-1] == 'done', kinds
             assert ('event' if stream else 'result') in kinds, kinds
             assert len(requests) == 1
-    for mode in ('complete', 'silent'):
+    # Windows cancellation is exercised through --serve in check_dialogue_backend.py.
+    for mode in (('complete',) if os.name == 'nt' else ('complete', 'silent')):
         with tempfile.TemporaryDirectory(prefix='sdk-frozen-') as directory, SDKWorkerTests().server(mode, anthropic) as (url, ready, requests):
             root = Path(directory)
             config = root/'config/feiyu'; config.mkdir(parents=True)
             (config/'models.json').write_text(json.dumps({'offline':dict(kind=provider,model='offline',key='offline-not-a-real-key',base_url=url)}))
             env = dict(os.environ, HOME=directory, XDG_CONFIG_HOME=str(root/'config'), XDG_STATE_HOME=str(root/'state'),
                        XDG_DATA_HOME=str(root/'data'), XDG_CACHE_HOME=str(root/'cache'), PATH='/no-external-python')
+            if os.name == 'nt':
+                env['USERPROFILE'] = directory
             proc = subprocess.Popen([binary,'-w',directory,'-m','offline','hello'], stdin=subprocess.DEVNULL,
                 stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env)
             try:

@@ -176,12 +176,16 @@ class Writer:
             self.handle = None
             self.chain.__exit__(None, None, None)
 
+def flush(h):
+    checked(bind(K, 'FlushFileBuffers', [W.HANDLE])(h))
+
+
 def replace(source, target):
     # Caller pins the private directory; no cross-volume/copy fallback.
     checked(move(str(source), str(target), 1 | 8))
     h = open_handle(target, 0xc0000000)
     try:
-        checked(bind(K, 'FlushFileBuffers', [W.HANDLE])(h))
+        flush(h)
     finally:
         close(h)
 
