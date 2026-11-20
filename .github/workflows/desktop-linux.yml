@@ -156,21 +156,28 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Legacy identity measurement failed' }
           node tests/brand-compat.mjs seed $legacyExe $compat
           if ($LASTEXITCODE -ne 0) { throw 'Legacy synthetic data seed failed' }
-          $uninstallRoots = @('HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*')
-          $before = @(Get-ItemProperty $uninstallRoots -ErrorAction SilentlyContinue | Where-Object { $_.InstallLocation -eq $installDir })
-          if ($before.Count -ne 1) { throw 'Legacy installation registry identity missing or duplicated' }
+          $guid = node -e "const {UUID}=require('builder-util-runtime');console.log(UUID.v5(require('./package.json').build.appId,UUID.parse('50e065bc-3134-11e6-9bab-38c9862bdaf3')))"
+          if ($LASTEXITCODE -ne 0) { throw 'Installer GUID derivation failed' }
+          $installRoots = @("HKCU:\Software\$guid", "HKLM:\Software\$guid")
+          $uninstallRoots = @("HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\$guid", "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\$guid")
+          $before = @(Get-ItemProperty $installRoots -ErrorAction SilentlyContinue | Where-Object { $_.InstallLocation -eq $installDir })
+          $beforeUninstall = @(Get-ItemProperty $uninstallRoots -ErrorAction SilentlyContinue)
+          @{guid=$guid;install=$before;uninstall=$beforeUninstall;legacyExit=$legacy.ExitCode} | ConvertTo-Json -Depth 5 | Set-Content test-results/brand-before-upgrade.json
+          if ($before.Count -ne 1 -or $beforeUninstall.Count -ne 1) { throw 'Legacy installation registry identity missing or duplicated' }
           # Omit /D: the new installer must discover the existing appId-based installation.
           $process = Start-Process -FilePath $installer -ArgumentList @('/S') -Wait -PassThru
           if ($process.ExitCode -ne 0) { throw "Installer failed: $($process.ExitCode)" }
-          $after = @(Get-ItemProperty $uninstallRoots -ErrorAction SilentlyContinue | Where-Object { $_.InstallLocation -eq $installDir })
-          if ($after.Count -ne 1 -or $after[0].PSPath -ne $before[0].PSPath -or $after[0].DisplayName -ne 'Biscuit 0.87.1') { throw 'Upgrade registry identity/display name changed incorrectly' }
+          $after = @(Get-ItemProperty $installRoots -ErrorAction SilentlyContinue | Where-Object { $_.InstallLocation -eq $installDir })
+          $afterUninstall = @(Get-ItemProperty $uninstallRoots -ErrorAction SilentlyContinue)
+          @{guid=$guid;install=$after;uninstall=$afterUninstall;upgradeExit=$process.ExitCode} | ConvertTo-Json -Depth 5 | Set-Content test-results/brand-after-upgrade.json
+          if ($after.Count -ne 1 -or $after[0].PSPath -ne $before[0].PSPath -or $after[0].ShortcutName -ne 'Biscuit' -or $afterUninstall.Count -ne 1 -or $afterUninstall[0].PSPath -ne $beforeUninstall[0].PSPath -or $afterUninstall[0].DisplayName -ne 'Biscuit 0.87.1') { throw 'Upgrade registry identity/display name changed incorrectly' }
           node tests/brand-compat.mjs check $legacyExe $compat
           if ($LASTEXITCODE -ne 0) { throw 'Biscuit upgrade data compatibility failed' }
           $links = @([Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('Programs'))
           $shell = New-Object -ComObject WScript.Shell
           $matched = @(Get-ChildItem $links -Filter '*.lnk' -Recurse | Where-Object { $shell.CreateShortcut($_.FullName).TargetPath -eq $legacyExe })
           if (-not ($matched | Where-Object Name -eq 'Biscuit.lnk') -or ($matched | Where-Object Name -eq 'Feiyu.lnk')) { throw 'Upgrade shortcuts incorrect' }
-          @{before=$before;after=$after;links=@($matched.FullName);legacyExit=$legacy.ExitCode;upgradeExit=$process.ExitCode} | ConvertTo-Json -Depth 5 | Set-Content test-results/brand-installer-identity.json
+          @{guid=$guid;before=$before;after=$after;beforeUninstall=$beforeUninstall;afterUninstall=$afterUninstall;links=@($matched.FullName);legacyExit=$legacy.ExitCode;upgradeExit=$process.ExitCode} | ConvertTo-Json -Depth 5 | Set-Content test-results/brand-installer-identity.json
           Copy-Item "$compat/*identity.json" test-results/
 
           $env:FEIYU_TEST_STAGE = 'installed'
