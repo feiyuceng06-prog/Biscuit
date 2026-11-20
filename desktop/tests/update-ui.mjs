@@ -26,6 +26,8 @@ export async function checkUpdateFailure(application, page) {
   await expect(panel).toContainText('暂时无法检查更新，请稍后重试');
   await expect(check).toBeEnabled();
   await expect(page.locator('#input')).toBeEditable();
+  await expect(page.locator('#s-ver')).not.toHaveText('—', { timeout: 30000 });
+  await expect(page.locator('#send')).toBeVisible();
   console.log('PASS: offline automatic check is quiet; manual failure is visible and chat remains usable');
 }
 
