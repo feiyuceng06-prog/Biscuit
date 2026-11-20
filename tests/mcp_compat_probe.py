@@ -18,6 +18,11 @@ def smoke(binary=None):
     original = mcp.subprocess.Popen
     def spawn(*args, **kwargs):
         p = original(*args, **kwargs)
+        # Patching subprocess.Popen also observes Windows taskkill cleanup.
+        # Only worker pipes belong to the lifecycle assertions below.
+        if '--_mcp-http-worker' not in p.args:
+            assert os.name == 'nt' and str(p.args[0]).lower().endswith('taskkill'), p.args
+            return p
         procs.append(p)
         if binary:
             assert p.args == [binary, '--_mcp-http-worker'], p.args

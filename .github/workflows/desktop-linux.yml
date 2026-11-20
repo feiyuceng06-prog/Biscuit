@@ -120,6 +120,16 @@ jobs:
           $backend = Join-Path $installDir 'resources/backend/feiyu-backend.exe'
           & ./build/python-build/Scripts/python.exe tests/check_windows_shell.py $backend
           if ($LASTEXITCODE -ne 0) { throw 'Bundled shell test failed' }
+      - name: Retain frozen Windows diagnostic payload
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: feiyu-windows-diagnostic-${{ github.sha }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            desktop/build/payload/feiyu-backend/**
+            desktop/test-results/**
       - uses: actions/upload-artifact@v4
         with:
           name: feiyu-windows-x64
