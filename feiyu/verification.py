@@ -30,6 +30,9 @@ def _identity(st):
 
 
 def _secure_open(path):
+    if os.name == "nt":
+        from .windows_storage import secure_open
+        return secure_open(path)
     # Walk from / using directory descriptors: no ancestor may be a symlink.
     if (os.name != 'posix' or not all(hasattr(os, k) for k in
             ('O_NOFOLLOW', 'O_NONBLOCK', 'O_DIRECTORY')) or
@@ -48,6 +51,9 @@ def _secure_open(path):
 
 
 def _read_safe(path, limit, check=lambda: None):
+    if os.name == "nt":
+        from .windows_storage import read_safe
+        return read_safe(path, limit, check)
     fd = _secure_open(path)
     try:
         before = os.fstat(fd)

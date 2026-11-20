@@ -27,6 +27,13 @@ def private_dir(path) -> None:
     `makedirs(mode=)` 只对新建的那一层生效、而且还要被 umask 削一道，
     所以建完再 chmod 一次 —— 老用户的目录是之前用 0755 建出来的。
     """
+    if os.name == "nt":
+        from .windows_storage import private_dir as native_private_dir
+        native_private_dir(path)
+        for parent in Path(os.path.abspath(path)).parents:
+            if parent.name == "feiyu":
+                native_private_dir(parent)
+        return
     os.makedirs(path, exist_ok=True)
     # 目标本身，加上路上那个叫 feiyu 的父目录 —— sessions / logs / memory 都在
     # `<base>/feiyu/` 下面，只收紧末一层的话，中间那层还是可列的。

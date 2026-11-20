@@ -46,6 +46,12 @@ def critical_write(method):
 
 
 def atomic_json(path, data):
+    if os.name == "nt":
+        from .windows_storage import atomic_json as native_atomic_json
+        try:
+            return native_atomic_json(path, data)
+        except (OSError, TypeError, ValueError) as exc:
+            raise PersistenceError("Windows 关键持久化失败: %s" % path) from exc
     path = Path(path)
     files.private_dir(str(path.parent))
     temporary = None
@@ -71,8 +77,11 @@ def atomic_json(path, data):
 def workspace_identity(root):
     """Read Git linkage without invoking Git, config, hooks or fsmonitor."""
     from .verification import _read_safe, _secure_open
-    root = Path(root).resolve()
+    root = Path(os.path.abspath(root)) if os.name == "nt" else Path(root).resolve()
     def directory(path):
+        if os.name == "nt":
+            from .windows_storage import directory_identity
+            return directory_identity(path)
         fd = _secure_open(path)
         try:
             st = os.fstat(fd)
@@ -321,33 +330,43 @@ class TaskStore:
         self.root = Path(root)
         self.sid = sid
         self.directory = Path(session.folder(root)) / sid
-        # Validate the parent and session directory before chmod/open follows links.
-        from .verification import _secure_open
-        parent = self.directory.parent
-        files.private_dir(str(parent))
-        parent_fd = _secure_open(parent)
-        try:
-            try:
-                os.mkdir(sid, mode=0o700, dir_fd=parent_fd)
-            except FileExistsError:
-                pass
-            fd = os.open(sid, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=parent_fd)
-            os.close(fd)
-        except OSError as exc:
-            raise PersistenceError('不安全的 session journal 目录') from exc
-        finally:
-            os.close(parent_fd)
-        files.private_dir(str(self.directory))
         self._mutex = threading.RLock()
-        self._lock = os.fdopen(os.open(self.directory / 'writer.lock',
-            os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW | os.O_NONBLOCK, 0o600), 'a+b')
-        os.chmod(self.directory / 'writer.lock', 0o600)
-        try:
-            import fcntl
-            fcntl.flock(self._lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except (ImportError, OSError) as exc:
-            self.close()
-            raise PersistenceError('会话已有 writer 或平台不支持安全 writer 锁') from exc
+        if os.name == 'nt':
+            from .windows_storage import Writer
+            try:
+                files.private_dir(self.directory.parent)
+                files.private_dir(self.directory)
+                self._lock = Writer(self.directory)
+            except (OSError, ValueError) as exc:
+                raise PersistenceError('Windows session 安全目录/writer 锁受阻') from exc
+        else:
+            # Validate the parent and session directory before chmod/open follows links.
+            from .verification import _secure_open
+            parent = self.directory.parent
+            files.private_dir(str(parent))
+            parent_fd = _secure_open(parent)
+            try:
+                try:
+                    os.mkdir(sid, mode=0o700, dir_fd=parent_fd)
+                except FileExistsError:
+                    pass
+                fd = os.open(sid, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=parent_fd)
+                os.close(fd)
+            except OSError as exc:
+                raise PersistenceError('不安全的 session journal 目录') from exc
+            finally:
+                os.close(parent_fd)
+            files.private_dir(str(self.directory))
+            self._mutex = threading.RLock()
+            self._lock = os.fdopen(os.open(self.directory / 'writer.lock',
+                os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW | os.O_NONBLOCK, 0o600), 'a+b')
+            os.chmod(self.directory / 'writer.lock', 0o600)
+            try:
+                import fcntl
+                fcntl.flock(self._lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except (ImportError, OSError) as exc:
+                self.close()
+                raise PersistenceError('会话已有 writer 或平台不支持安全 writer 锁') from exc
         self.blocked = False
         self._seen = {}
         self._states = {}
@@ -375,13 +394,15 @@ class TaskStore:
                 raise PersistenceError('任务持久化受阻；需要重新打开并核对')
             path = self.path(state.task_id)
             if path.exists():
-                before = path.read_bytes()
+                from .verification import _read_safe
+                before = _read_safe(path, 64 * 1024 * 1024)[0]
                 expected = self._seen.get(state.task_id)
                 if json.loads(before)['payload'].get('revision', 0) != state.revision:
                     raise PersistenceError('陈旧任务修订；禁止覆盖')
                 if expected is None or hashlib.sha256(before).hexdigest() != expected:
                     self.blocked = True
                     raise PersistenceError('陈旧 writer 或未加载任务；禁止覆盖')
+            from .verification import _read_safe
             payload = asdict(state)
             payload['revision'] = state.revision + 1
             TaskState.read(payload)
@@ -393,7 +414,7 @@ class TaskStore:
                             sha256=hashlib.sha256(packed).hexdigest()))
                 self._states[state.task_id] = state
                 state.revision = payload['revision']
-                self._seen[state.task_id] = hashlib.sha256(self.path(state.task_id).read_bytes()).hexdigest()
+                self._seen[state.task_id] = hashlib.sha256(_read_safe(self.path(state.task_id), 64 * 1024 * 1024)[0]).hexdigest()
             except PersistenceError:
                 self.blocked = True
                 raise
