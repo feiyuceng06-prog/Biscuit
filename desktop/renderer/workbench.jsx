@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import { createPortal } from 'react-dom';
+import { UpdateNotice } from './updates.jsx';
 import './workbench.css';
 
 const desktop = window.feiyuDesktop;
@@ -67,6 +69,7 @@ function Workbench() {
     }
   }
   return <>
+    {createPortal(<UpdateNotice />, document.getElementById('update-slot'))}
     {status.state === 'error' && <div className="backend-error" role="alert">
       <span>{status.message}</span>
       <button onClick={() => { setStatus({ state: 'starting' }); document.dispatchEvent(new Event('feiyu:reconnect')); }}>重新连接</button>
@@ -105,6 +108,9 @@ function Workbench() {
 }
 
 if (desktop) {
+  const updateSlot = document.createElement('div');
+  updateSlot.id = 'update-slot';
+  document.getElementById('side').append(updateSlot);
   document.body.dataset.electron = 'true';
   const host = document.createElement('div');
   host.id = 'workbench';

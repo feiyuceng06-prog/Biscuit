@@ -2,6 +2,17 @@ body[data-electron] .bar, body[data-electron] .bar__drag { -webkit-app-region: d
 body[data-electron] .bar button, body[data-electron] .bar label { -webkit-app-region: no-drag; }
 body[data-electron] .grips { display: none; }
 #workbench { display: contents; }
+#update-slot { flex-shrink: 0; }
+.update-panel { padding: 10px 8px 4px; border-top: 1px solid var(--line); color: var(--muted); font-size: var(--fs-caption); }
+.update-panel p { margin: 0 0 8px; overflow-wrap: anywhere; }
+.update-panel strong { color: var(--text); font-weight: var(--w-semibold); }
+.update-actions { display: flex; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+.update-panel button { border: 0; border-radius: var(--r-sm); background: transparent; color: var(--muted); padding: 4px 8px; min-height: var(--control-c); }
+.update-panel button:hover:not(:disabled) { background: var(--hover); color: var(--text); }
+.update-panel button:disabled { opacity: .6; }
+.update-panel .update-download { background: var(--accent-deep); color: white; }
+.update-panel .update-download:hover:not(:disabled) { background: var(--accent-deeper); color: white; }
+.update-check { margin-left: -8px; }
 
 /* 文件面板是主面板右边的第二块内嵌面板，跟它隔一道缝 */
 body[data-files="on"] { grid-template-columns: var(--side) minmax(340px, 1fr) minmax(300px, 32vw); }
