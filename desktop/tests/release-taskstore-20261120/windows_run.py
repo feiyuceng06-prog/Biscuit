@@ -23,9 +23,15 @@ rows=[]
 for mode in ['conversation','legacy','failure','crash','recover','effect-crash','effect-recover','acl','extra']:
  case='crash' if mode=='recover' else 'effect-crash' if mode=='effect-recover' else mode
  command=[sys.executable,str(probe.parent/'independent-taskstore-20261120/windows_acl_probe.py'),str(out/case)] if mode=='acl' else [sys.executable,str(probe/'product_probe.py'),str(out/case),mode]
- if mode=='extra':command=[sys.executable,str(probe/'extra_native_probe.py'),str(out/case)]
+ child_env=env.copy()
+ if mode=='extra':
+  command=[sys.executable,str(probe/'extra_native_probe.py'),str(out/case)]
+  # This independent script imports the product before creating its own scratch.
+  for name in ('HOME','USERPROFILE','APPDATA','LOCALAPPDATA','XDG_CONFIG_HOME','XDG_STATE_HOME','XDG_CACHE_HOME','XDG_DATA_HOME'):
+   directory=out/'extra-profile'/name;directory.mkdir(parents=True,exist_ok=False)
+   child_env[name]=str(directory)
  try:
-  r=subprocess.run(command,env=env,cwd=repo,capture_output=True,timeout=45)
+  r=subprocess.run(command,env=child_env,cwd=repo,capture_output=True,timeout=45)
   (out/(mode+'.log')).write_bytes(r.stdout+r.stderr)
   rows.append(dict(mode=mode,exit=r.returncode,expected=83 if mode=='crash' else 84 if mode=='effect-crash' else 0))
  except subprocess.TimeoutExpired as e:

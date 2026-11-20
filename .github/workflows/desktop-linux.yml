@@ -31,7 +31,23 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y bubblewrap ripgrep
       - run: python -m pip install ".[openai]" "anthropic==2.8.0"
       - name: Python regression tests
-        run: python -m unittest discover -s tests -t .
+        shell: bash
+        run: |
+          mkdir -p test-results
+          set +e
+          timeout --signal=TERM --kill-after=30s 25m python -u -X faulthandler -m unittest discover -v -s tests -t . 2>&1 | tee test-results/python.log
+          status=("${PIPESTATUS[@]}")
+          printf '%s\n' "${status[0]}" > test-results/python.exit
+          printf '%s\n' "${status[1]}" > test-results/log-writer.exit
+          if [ "${status[0]}" -ne 0 ]; then exit "${status[0]}"; fi
+          exit "${status[1]}"
+      - name: Retain Python regression diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-regression-${{ matrix.python }}-${{ github.sha }}
+          path: test-results/**
+          if-no-files-found: warn
 
   linux:
     if: ${{ github.event_name != 'workflow_dispatch' || !inputs.windows_only }}
