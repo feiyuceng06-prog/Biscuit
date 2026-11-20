@@ -9,3 +9,13 @@ Write UTF-8 temporary file in guarded private directory, flush Python bytes then
 Legacy session snapshots remain read-only on restore; no eager history migration, task schema unchanged. Workspace identity uses volume/file index through checked descriptor. Tests must exercise native runner (cross-process exclusivity/crash release, reparse/hardlink rejection, stale revision, failure windows and synthetic send), then existing frozen/GUI/installer gates. No real user data, provider requests or local installs.
 
 Existing task snapshots and the active-task pointer now opt into file-level owner/DACL migration before their bytes are read. The same checked handle is retained for metadata migration and reading: only the token user/default owner is accepted, and failure blocks recovery. This removes explicit broad ACEs which parent-directory migration cannot remove. Ordinary verification/project reads do not opt in and never change their ACLs. Previously retained handles and prior disclosure cannot be revoked retroactively. Legacy flat session files are outside this task-sidecar migration. The original ACL20 probe remains unchanged and is now a required native regression; Linux skips are not evidence of Windows success.
+
+Release-state regression revision (2026-11-20): the original independent probe
+directory, 59-file baseline and failed CI artifacts are retained unchanged. The
+separate release-taskstore runner binds current files to exact checkout HEAD,
+runs the original ACL probe plus the reviewer's extra active-pointer/file-identity
+probe, and requires all expected exits (including ACL=0). Its conversation fixture
+alone disables a finite cost cap because FakeBackend supplies unknown usage; the
+crash/recover budget=1 and no-refund assertions remain unchanged. This is a revised
+release regression, not a retroactive pass for the original independent review.
+The new state-regression job is a required release dependency.

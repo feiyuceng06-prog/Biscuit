@@ -29,8 +29,8 @@ feiyu          # 终端版
 
 到 [下载页面](https://github.com/feiyuceng06-prog/feiyu-agent/releases/latest) 选择一种格式：
 
-- **deb**：适用于使用 apt 的发行版。下载后在文件所在目录运行 `sudo apt install ./feiyu-desktop_0.87.0_amd64.deb`。
-- **AppImage**：下载后运行 `chmod +x Feiyu-0.87.0.AppImage`，再双击打开。若提示缺少 FUSE，建议使用上方一键安装方式。
+- **deb**：适用于使用 apt 的发行版。下载后在文件所在目录运行 `sudo apt install ./feiyu-desktop_0.87.1_amd64.deb`。
+- **AppImage**：下载后运行 `chmod +x Biscuit-0.87.1.AppImage`，再双击打开。若提示缺少 FUSE，建议使用上方一键安装方式。
 
 安装包未签名。各版本的系统验证范围和已知限制见下载页面。
 
@@ -55,6 +55,10 @@ cd feiyu-agent
 
 若提示缺少 venv，Debian/Ubuntu 可先运行 `sudo apt install python3-venv`。请保留源码目录；更新代码后重新运行安装脚本即可。
 
-## Windows / macOS
+## Windows
 
-当前 0.87.0 发布仅提供 Linux x64 安装包，Windows 和 macOS 暂无本版本安装包。
+到[下载页面](https://github.com/feiyuceng06-prog/feiyu-agent/releases/latest)下载 **Biscuit Setup 0.87.1.exe**，双击安装即可。安装包已包含 Git Bash，升级会保留原有 Feiyu 配置和对话。
+
+安装包尚未签名，Windows 可能显示安全提示；安装前请核对下载来源和发布页的 SHA256。Windows 的已知限制见发布说明。
+
+暂未提供 macOS 安装包。
