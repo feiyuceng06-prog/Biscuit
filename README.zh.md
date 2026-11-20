@@ -11,7 +11,7 @@ Biscuit 原名 Feiyu，命令和现有数据目录保持不变。
 **推荐：一条命令，装好桌面版和终端版。** 适用于 Linux x86_64，需要能联网。
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/feiyuceng06-prog/feiyu-agent/main/get.sh | bash
+curl -fsSL https://raw.githubusercontent.com/feiyuceng06-prog/Biscuit/main/get.sh | bash
 ```
 
 不需要预装 Python 或 Node.js，也不需要 sudo。程序安装在用户目录；脚本会在需要时把命令目录加入 Bash 或 Zsh 配置。
@@ -27,10 +27,10 @@ feiyu          # 终端版
 
 ### 手动下载安装包
 
-到 [下载页面](https://github.com/feiyuceng06-prog/feiyu-agent/releases/latest) 选择一种格式：
+到 [下载页面](https://github.com/feiyuceng06-prog/Biscuit/releases/latest) 选择一种格式：
 
-- **deb**：适用于使用 apt 的发行版。下载后在文件所在目录运行 `sudo apt install ./feiyu-desktop_0.87.1_amd64.deb`。
-- **AppImage**：下载后运行 `chmod +x Biscuit-0.87.1.AppImage`，再双击打开。若提示缺少 FUSE，建议使用上方一键安装方式。
+- **deb**：适用于使用 apt 的发行版。下载后在文件所在目录运行 `sudo apt install ./feiyu-desktop_0.87.2_amd64.deb`。
+- **AppImage**：下载后运行 `chmod +x Biscuit-0.87.2.AppImage`，再双击打开。若提示缺少 FUSE，建议使用上方一键安装方式。
 
 安装包未签名。各版本的系统验证范围和已知限制见下载页面。
 
@@ -47,8 +47,8 @@ feiyu          # 终端版
 需要 Git、Python 3.10+ 和网络连接。在 Linux 终端执行：
 
 ```bash
-git clone https://github.com/feiyuceng06-prog/feiyu-agent.git
-cd feiyu-agent
+git clone https://github.com/feiyuceng06-prog/Biscuit.git
+cd Biscuit
 ./install.sh --cli-only
 ~/.local/bin/feiyu
 ```
@@ -57,7 +57,7 @@ cd feiyu-agent
 
 ## Windows
 
-到[下载页面](https://github.com/feiyuceng06-prog/feiyu-agent/releases/latest)下载 **Biscuit Setup 0.87.1.exe**，双击安装即可。安装包已包含 Git Bash，升级会保留原有 Feiyu 配置和对话。
+到[下载页面](https://github.com/feiyuceng06-prog/Biscuit/releases/latest)下载 **Biscuit Setup 0.87.2.exe**，双击安装即可。安装包已包含 Git Bash，升级会保留原有 Feiyu 配置和对话。
 
 安装包尚未签名，Windows 可能显示安全提示；安装前请核对下载来源和发布页的 SHA256。Windows 的已知限制见发布说明。
 

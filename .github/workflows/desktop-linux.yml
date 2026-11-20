@@ -186,7 +186,8 @@ jobs:
           $after = @(Get-ItemProperty $installRoots -ErrorAction SilentlyContinue | Where-Object { $_.InstallLocation -eq $installDir })
           $afterUninstall = @(Get-ItemProperty $uninstallRoots -ErrorAction SilentlyContinue)
           @{guid=$guid;install=$after;uninstall=$afterUninstall;upgradeExit=$process.ExitCode} | ConvertTo-Json -Depth 5 | Set-Content test-results/brand-after-upgrade.json
-          if ($after.Count -ne 1 -or $after[0].PSPath -ne $before[0].PSPath -or $after[0].ShortcutName -ne 'Biscuit' -or $afterUninstall.Count -ne 1 -or $afterUninstall[0].PSPath -ne $beforeUninstall[0].PSPath -or $afterUninstall[0].DisplayName -ne 'Biscuit 0.87.1') { throw 'Upgrade registry identity/display name changed incorrectly' }
+          $expectedDisplayName = 'Biscuit ' + (Get-Content package.json | ConvertFrom-Json).version
+          if ($after.Count -ne 1 -or $after[0].PSPath -ne $before[0].PSPath -or $after[0].ShortcutName -ne 'Biscuit' -or $afterUninstall.Count -ne 1 -or $afterUninstall[0].PSPath -ne $beforeUninstall[0].PSPath -or $afterUninstall[0].DisplayName -ne $expectedDisplayName) { throw 'Upgrade registry identity/display name changed incorrectly' }
           node tests/brand-compat.mjs check $legacyExe $compat
           if ($LASTEXITCODE -ne 0) { throw 'Biscuit upgrade data compatibility failed' }
           $links = @([Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('Programs'))
@@ -299,6 +300,12 @@ jobs:
           else
             TAG="desktop-v$(node -p "require('./desktop/package.json').version")"
           fi
-          gh release create "$TAG" built/release/*.deb built/release/*.AppImage built-windows/release/*.exe \
+          EXPECTED_TAG="desktop-v$(node -p "require('./desktop/package.json').version")"
+          test "$TAG" = "$EXPECTED_TAG"
+          {
+            (cd built/release && sha256sum *.deb *.AppImage)
+            (cd built-windows/release && sha256sum *.exe)
+          } > SHA256SUMS
+          gh release create "$TAG" built/release/*.deb built/release/*.AppImage built-windows/release/*.exe SHA256SUMS \
             --target "$GITHUB_SHA" --repo "$GITHUB_REPOSITORY" --title "Biscuit ${TAG#desktop-v}" \
-            --notes "Ubuntu 上用 deb：sudo apt install ./文件名.deb。AppImage：chmod +x 之后双击；它要 libfuse2，Ubuntu 22.04 起默认不装，先 sudo apt install libfuse2（24.04 是 libfuse2t64）。Windows 安装包内含 Git Bash，无需另行安装。安装包未签名，Windows 上未验证真实模型请求；Linux 的 bubblewrap 沙箱不可用于 Windows。第一次打开时按「连接模型」，选个接口、贴上 key 就能用。"
+            --notes-file "desktop/releases/${TAG#desktop-v}.md"

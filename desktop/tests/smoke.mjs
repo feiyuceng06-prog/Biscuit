@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { checkModelForm } from './model-form.mjs';
 import { checkLayout, retainLayout } from './layout.mjs';
 import { dialogueFixture } from './dialogue-fixture.mjs';
+import { checkAppearance } from './appearance.mjs';
 const desktop = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const temporary = await fs.mkdtemp(path.join(os.tmpdir(), 'feiyu-desktop-test-'));
 const workspace = path.join(temporary, 'workspace');
@@ -51,9 +52,8 @@ try {
       const r = document.querySelector('#startup').getBoundingClientRect();
       return r.width === innerWidth && r.height === innerHeight && !!document.querySelector('#input').closest('[inert]');
     })).toBe(true);
-    await expect(page.locator('#startup-text')).toHaveText(/^Biscuit/);
-    expect(await page.locator('#startup-text').textContent()).not.toBe('Biscuit帮助您工作。');
-    await expect(page.locator('#startup-text')).toHaveText('Biscuit帮助您工作。', { timeout: 6000 });
+    await expect(page.locator('#startup-text, .startup__caption')).toHaveCount(0);
+    await expect(page.locator('#startup-mark svg')).toBeVisible();
     await expect(page.locator('#startup')).toHaveAttribute('data-phase', 'play');
     if (process.env.FEIYU_SPLASH_SCREENSHOT) {
       await expect(page.locator('#startup')).toHaveAttribute('data-phase', 'play');
@@ -127,6 +127,7 @@ try {
   await page.locator('#nav-shelf').click();
   await expect(page.locator('#shelf')).toBeVisible();
   await checkModelForm(page);
+  await checkAppearance(page);
   await expect(page.locator('#startup')).toHaveCount(0);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.reload();
@@ -138,7 +139,7 @@ try {
   await expect(page.locator('#startup')).toHaveCount(0);
   expect(await page.locator('[inert]').count()).toBe(0);
   expect(errors).toEqual([]);
-  console.log('PASS: fullscreen intro, streamed caption, automatic exit, Escape, reduced motion, focus restoration');
+  console.log('PASS: fullscreen icon-only intro, automatic exit, Escape, reduced motion, focus restoration');
   console.log('PASS: real backend, file preview, isolated renderer, path boundary, PTY, workspace switching, settings');
 } catch (error) {
   try { await retainLayout(page, 'failure'); } catch {}

@@ -97,3 +97,11 @@ model requests. It verifies backend startup, preview, renderer isolation, path
 boundaries, PTY output, workspace switching and settings. A screenshot is saved
 under `test-results/workbench.png`. Existing Python protocol tests are under
 `tests/test_serve.py` in the repository root.
+
+## Appearance
+
+Settings → Appearance offers Light, Dark, and Follow System. New installations
+follow the system; explicit choices persist across restarts. System changes also
+update an open terminal. Removed skins migrate to light, except Inception, which
+migrates to dark. The startup screen keeps only the animated Biscuit icon; Escape
+skips it and the reduced-motion preference suppresses it.

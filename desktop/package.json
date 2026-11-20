@@ -1,6 +1,6 @@
 {
   "name": "feiyu-desktop",
-  "version": "0.87.1",
+  "version": "0.87.2",
   "description": "Biscuit desktop workbench",
   "author": {
     "name": "Feiyu",
@@ -83,7 +83,6 @@
     }
   },
   "dependencies": {
-    "@usefluid/motion": "^0.1.2",
     "node-pty": "^1.1.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
