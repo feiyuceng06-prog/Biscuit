@@ -501,7 +501,8 @@ class _Http:
             release.session, release.version = session, self.version
             release._deleting = True
             try:
-                release.send({}, .5)
+                # Includes cold-starting a frozen worker; Windows exe startup can exceed .5s.
+                release.send({}, 2 if os.name == "nt" else .5)
                 self.release_confirmed = True
                 self.release_error = ''
             except Exception as exc:

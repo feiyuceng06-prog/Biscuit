@@ -123,9 +123,10 @@ try:
     assert agent.task_state.budget['attempts'] == 1
     if sys.platform == 'win32':
         from tests.fakes import call
+        from feiyu.providers import ToolCall
         agent.mode = 'auto'
         agent.backend.script = [('', [call('bg', 'bash', command='echo forbidden', background=True),
-                                     call('lsp', 'symbol', action='definition', path='x.py', name='x')]),
+                                     ToolCall(id='lsp', name='symbol', input=dict(action='definition', path='x.py', name='x'))]),
                                 ('continued after refused tools', [])]
         with contextlib.redirect_stdout(io.StringIO()):
             agent.send('exercise unsupported tools')
@@ -254,3 +255,57 @@ raise AssertionError('write unexpectedly acknowledged')
             os.rename(store.directory, store.directory.with_name('substituted'))
         with self.assertRaises(OSError):
             os.rename(store.directory/'writer.lock', store.directory/'substituted.lock')
+
+    def test_crashed_model_admission_never_refunds_budget(self):
+        import subprocess
+        import sys
+        from feiyu.runcontrol import RunControl, RunStopped
+        code = '''
+import os,sys
+from types import SimpleNamespace
+from feiyu import session
+from feiyu.taskstate import TaskStore, TaskState, workspace_id
+from feiyu.runcontrol import RunControl
+session.DIR=sys.argv[2]
+s=TaskStore(sys.argv[1], 'native')
+t=TaskState('native','task',workspace_id(sys.argv[1]))
+t.revise('synthetic admission')
+c=RunControl(s,t,cost_limit=1)
+t.budget.update(cost=.25,known_cost=.25)
+with c.attempt(SimpleNamespace(tokens_total=0,cost=0,usage_reports=0,model='synthetic')):
+    os._exit(73)
+'''
+        done = subprocess.run([sys.executable, '-c', code, str(self.root), session.DIR],
+                              capture_output=True, timeout=20)
+        self.assertEqual(done.returncode, 73, done.stderr)
+        store = TaskStore(self.root, 'native')
+        self.addCleanup(store.close)
+        state = store.recover()
+        control = RunControl(store, state, cost_limit=2)
+        self.assertEqual(state.budget['attempts'], 1)
+        self.assertEqual(state.budget['pending_attempts'], 1)
+        self.assertEqual(state.budget['known_cost'], .25)
+        self.assertEqual(state.budget['cost_limit'], 1)
+        self.assertIsNone(state.budget['cost'])
+        with self.assertRaises(RunStopped):
+            control.check()
+
+    @unittest.skipUnless(__import__('os').name == 'nt', 'Windows critical flush failure')
+    def test_native_flush_failure_blocks_store_and_preserves_unknown(self):
+        from feiyu import windows_storage as w
+        store = TaskStore(self.root, 'native')
+        self.addCleanup(store.close)
+        state = TaskState('native', 'task', workspace_id(self.root))
+        store.prepare(state, dict(id='operation', call_id='call', name='write_file',
+            source='native-test', cwd=str(self.root), started=1.0, args={}))
+        original = w.flush
+        with patch.object(w, 'flush', side_effect=lambda h: original(-1)):
+            with self.assertRaises(PersistenceError):
+                store.save(state)
+        self.assertTrue(store.blocked)
+        with self.assertRaises(PersistenceError):
+            store.save(state)
+        store.close()
+        restored = TaskStore(self.root, 'native')
+        self.addCleanup(restored.close)
+        self.assertEqual(restored.recover().operations[0]['state'], 'unknown')

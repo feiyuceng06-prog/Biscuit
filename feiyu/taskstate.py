@@ -385,6 +385,12 @@ class TaskStore:
             raise PersistenceError('无效 task id')
         return self.directory / (tid + '.task.json')
 
+    def _snapshot_bytes(self, path):
+        if os.name == 'nt':
+            from .verification import _read_safe
+            return _read_safe(path, 64 * 1024 * 1024)[0]
+        return path.read_bytes()
+
     @critical_write
     def save(self, state):
         with self._mutex:
@@ -394,15 +400,13 @@ class TaskStore:
                 raise PersistenceError('任务持久化受阻；需要重新打开并核对')
             path = self.path(state.task_id)
             if path.exists():
-                from .verification import _read_safe
-                before = _read_safe(path, 64 * 1024 * 1024)[0]
+                before = self._snapshot_bytes(path)
                 expected = self._seen.get(state.task_id)
                 if json.loads(before)['payload'].get('revision', 0) != state.revision:
                     raise PersistenceError('陈旧任务修订；禁止覆盖')
                 if expected is None or hashlib.sha256(before).hexdigest() != expected:
                     self.blocked = True
                     raise PersistenceError('陈旧 writer 或未加载任务；禁止覆盖')
-            from .verification import _read_safe
             payload = asdict(state)
             payload['revision'] = state.revision + 1
             TaskState.read(payload)
@@ -414,7 +418,7 @@ class TaskStore:
                             sha256=hashlib.sha256(packed).hexdigest()))
                 self._states[state.task_id] = state
                 state.revision = payload['revision']
-                self._seen[state.task_id] = hashlib.sha256(_read_safe(self.path(state.task_id), 64 * 1024 * 1024)[0]).hexdigest()
+                self._seen[state.task_id] = hashlib.sha256(self._snapshot_bytes(self.path(state.task_id))).hexdigest()
             except PersistenceError:
                 self.blocked = True
                 raise
