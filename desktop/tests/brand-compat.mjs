@@ -35,8 +35,8 @@ try{
     const old=JSON.parse(await fs.readFile(path.join(base,'legacy-identity.json'),'utf8'));
     expect(identity.userData).toBe(old.userData);expect(identity.name).toBe('Biscuit');
     expect(await page.title()).toBe('Biscuit');
-    expect(await page.evaluate(()=>localStorage.getItem('feiyu.theme'))).toBe(old.theme);
-    await expect(page.locator('html')).toHaveAttribute('data-theme','retro');
+    expect(await page.evaluate(()=>localStorage.getItem('feiyu.theme'))).toBe('light');
+    await expect(page.locator('html')).toHaveAttribute('data-theme','light');
     await expect(page.locator('body')).toContainText('旧名称合成历史 中文 😀');
     await expect(page.locator('body')).toContainText('GUI reply 1 中文 😀 𠮷');
     await page.locator('#input').fill('更名后继续');await page.locator('#send').click();

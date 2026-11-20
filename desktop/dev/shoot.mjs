@@ -12,7 +12,6 @@
  *   2_ask   —— 停在「要你点头」那张卡上（日常那档，中性灰）
  *   2b_danger—— 危险操作那档（rm -rf），全站唯一该见红的地方
  *   0_hello —— 一条消息都没有时的「开始」那块
- *   13_anthropic—— Anthropic 暖色主题（跟复古并存，底色不能撞）
  *   3_narrow—— 390px 宽，看 meta-rail 塌成单列之后还成不成立
  *   23–26  —— 0.80.0：空对话那一组居中、发出第一句落到底、「以下是新的」、确认卡的键帽
  */
@@ -236,7 +235,7 @@ await cdp.call("Runtime.enable");
 await cdp.call("Page.navigate", { url });
 await sleep(1500);
 /* **先把本机偏好清干净。** Chrome 的 profile 目录是跨次保留的，
-   上一轮切成复古主题会留到下一轮，于是"换了主题颜色却没变"——
+   上一轮切成深色主题会留到下一轮，于是"换了主题颜色却没变"——
    夹具自己骗了我一轮（input.mjs 早就这么做了，这边漏了）。 */
 await cdp.eval(`try { localStorage.clear(); } catch {} setTheme("light"); true`);
 
@@ -318,7 +317,7 @@ if (lines.length === 0 || lines.some((w) => w !== "0px")) {
 /* **每个主题下 diff 的加号减号都得分得开。** 复古那套整页暖色，
    加号原来直接用 --accent（赭色），跟减号的砖红糊成一片 —— 眼睛看
    "都是红的"说不清差多少，量 RGB 距离说得清。 */
-for (const t of ["light", "retro"]) {
+for (const t of ["light", "dark"]) {
   await cdp.eval(`setTheme("${t}"); true`);
   await sleep(250);
   const pair = JSON.parse(await cdp.eval(`JSON.stringify({
@@ -915,7 +914,7 @@ if (bad.length) {
   console.log(`技能面板 ${shelf.rows.length} 份，详情是「${shelf.pane}」，正文取回来了`);
 }
 
-/* 复古主题：**只换配色，排版一个字不动**。所以量两样 ——
+/* 深色主题：**只换配色，排版一个字不动**。所以量两样 ——
    颜色真的换了，而版面上的坐标一个都没动。 */
 const before = JSON.parse(await cdp.eval(`JSON.stringify({
   bg: getComputedStyle(document.documentElement).getPropertyValue("--bg").trim(),
@@ -923,7 +922,7 @@ const before = JSON.parse(await cdp.eval(`JSON.stringify({
   box: (() => { const r = document.querySelector("#shelf-list").getBoundingClientRect();
     return [Math.round(r.x), Math.round(r.width)]; })(),
 })`));
-await cdp.eval(`setTheme("retro"); drawShelf(); true`);
+await cdp.eval(`setTheme("dark"); drawShelf(); true`);
 await sleep(400);
 const after = JSON.parse(await cdp.eval(`JSON.stringify({
   bg: getComputedStyle(document.documentElement).getPropertyValue("--bg").trim(),
@@ -938,28 +937,11 @@ if (before.bg === after.bg || before.accent === after.accent) {
   console.error("主题只该换配色，版面动了：", JSON.stringify([before.box, after.box]));
   process.exitCode = 1;
 } else {
-  console.log(`复古主题 ${before.bg} → ${after.bg}，版面一格没动`);
+  console.log(`深色主题 ${before.bg} → ${after.bg}，版面一格没动`);
 }
 
 await cdp.eval(`document.querySelector('[data-tab="skills"]') && 0; true`);
-console.log("拍了", await cdp.shot("12_retro", { width: 1280, height: 900 }));
-
-/* Anthropic 那套从 0.79.0 起**是一整套皮**（claude.ai 的观感），版面本来就变 ——
-   「版面一格不动」那条只剩复古还守着。这儿只量它跟另两套分不分得开
-   （都偏暖，底色撞了就是白加一套）；皮自己承诺的那几件事在文末那一节量。 */
-await cdp.eval(`setTheme("anthropic"); drawShelf(); true`);
-await sleep(400);
-const anth = JSON.parse(await cdp.eval(`JSON.stringify({
-  bg: getComputedStyle(document.documentElement).getPropertyValue("--bg").trim(),
-  accent: getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(),
-})`));
-if (anth.bg === after.bg || anth.bg === before.bg) {
-  console.error("Anthropic 的底色跟别的主题撞了：", anth.bg);
-  process.exitCode = 1;
-} else {
-  console.log(`Anthropic 主题 ${anth.bg} / ${anth.accent}`);
-}
-console.log("拍了", await cdp.shot("13_anthropic", { width: 1280, height: 900 }));
+console.log("拍了", await cdp.shot("12_dark", { width: 1280, height: 900 }));
 
 await cdp.eval(`setTheme("light"); drawShelf(); true`);
 await sleep(300);
@@ -1164,10 +1146,10 @@ for (const width of [1280, 390]) {
   }
 }
 
-/* ── 三套主题只换颜色（0.81.0）──────────────────────────────
-   默认、复古、Anthropic 共用一套布局和字。同一份事件流在三套主题下各灌一遍：
+/* ── 两套主题只换颜色（0.81.0）──────────────────────────────
+   浅色与深色共用一套布局和字。同一份事件流在两套主题下各灌一遍：
    一串元素的盒子一个像素都不许差，而底色、主色必须真的换了；每一套里实心按钮上的字
-   都要够 AA、代码的行号跟代码对齐。16–19 那几张拍的是 Anthropic（用户平时用的那套）。 */
+   都要够 AA、代码的行号跟代码对齐。16–19 那几张拍的是深色主题。 */
 const contrast = (fg, bg) => {
   const lum = (c) => { const [r, g, b] = (c.match(/[\d.]+/g) || [0, 0, 0]).slice(0, 3).map(Number)
     .map((v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
@@ -1179,7 +1161,7 @@ const GEO = [".composer__row", ".block--you .block__body", ".block--say .prose",
   ".ask", ".btn--primary", ".side__tabs", "#find", ".status", "#desk"];
 const skinBad = [];
 const looks = {};
-for (const t of ["light", "retro", "anthropic"]) {
+for (const t of ["light", "dark"]) {
   await cdp.call("Emulation.setDeviceMetricsOverride",
     { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
   await cdp.call("Page.navigate", { url });
@@ -1207,9 +1189,9 @@ for (const t of ["light", "retro", "anthropic"]) {
   const l = looks[t];
   if (!l.goBg || contrast(l.goFg, l.goBg) < 4.5) skinBad.push(`${t}：实心按钮上的字不够 AA（${l.goFg} on ${l.goBg}）`);
   if (!(Math.abs(l.codeDrift) <= 2)) skinBad.push(`${t}：代码行号跟代码错开了 ${l.codeDrift}px`);
-  if (t === "anthropic") console.log("拍了", await cdp.shot("16_anthropic_flow", { width: 1280, height: 900, beyond: false }));
+  if (t === "dark") console.log("拍了", await cdp.shot("16_dark_flow", { width: 1280, height: 900, beyond: false }));
 }
-for (const t of ["retro", "anthropic"]) {
+for (const t of ["dark"]) {
   if (looks[t].bg === looks.light.bg || looks[t].accent === looks.light.accent) skinBad.push(`${t}：颜色没换`);
   const moved = GEO.filter((sel) => looks[t].boxes[sel] !== looks.light.boxes[sel]);
   if (moved.length) skinBad.push(`${t}：版面动了 ` + moved.map((sel) => `${sel} ${looks.light.boxes[sel]} → ${looks[t].boxes[sel]}`).join("、"));
@@ -1217,15 +1199,15 @@ for (const t of ["retro", "anthropic"]) {
 
 await cdp.call("Page.navigate", { url });
 await sleep(1200);
-await cdp.eval(`setTheme("anthropic"); true`);
+await cdp.eval(`setTheme("dark"); true`);
 await feed(TALK);
-console.log("拍了", await cdp.shot("17_anthropic_talk", { width: 1280, height: 900, beyond: false }));
+console.log("拍了", await cdp.shot("17_dark_talk", { width: 1280, height: 900, beyond: false }));
 await feed([{ kind: "cleared" }]);
 await sleep(400);
 const greet = await cdp.eval(`(() => { const h = document.querySelector(".hello__greet");
   return h ? getComputedStyle(h).display + "|" + h.textContent : "没有"; })()`);
 if (!greet.startsWith("flex|") || greet.length < 7) skinBad.push(`空对话那句问候没画出来（${greet}）`);
-console.log("拍了", await cdp.shot("18_anthropic_hello", { width: 1280, height: 900, beyond: false }));
+console.log("拍了", await cdp.shot("18_dark_hello", { width: 1280, height: 900, beyond: false }));
 
 await cdp.call("Emulation.setDeviceMetricsOverride",
   { width: 390, height: 900, deviceScaleFactor: 1, mobile: false });
@@ -1237,13 +1219,13 @@ const wideOut = JSON.parse(await cdp.eval(`JSON.stringify({
   row: Math.round(document.querySelector(".composer__row").getBoundingClientRect().right),
 })`));
 if (wideOut.page > 390 || wideOut.sheet > 1 || wideOut.row > 390) skinBad.push(`390px 下横滚了：${JSON.stringify(wideOut)}`);
-console.log("拍了", await cdp.shot("19_anthropic_narrow", { width: 390, height: 900, beyond: false }));
+console.log("拍了", await cdp.shot("19_dark_narrow", { width: 390, height: 900, beyond: false }));
 
 if (skinBad.length) {
-  console.error("三套主题：", skinBad.join("；"));
+  console.error("两套主题：", skinBad.join("；"));
   process.exitCode = 1;
 } else {
-  console.log(`三套主题版面一格不差、颜色各换各的，实心按钮 ${["light", "retro", "anthropic"]
+  console.log(`两套主题版面一格不差、颜色各换各的，实心按钮 ${["light", "dark"]
     .map((t) => contrast(looks[t].goFg, looks[t].goBg).toFixed(2)).join(" / ")}:1，390px 不横滚`);
 }
 
@@ -1259,8 +1241,8 @@ const MENU_MODELS = { kind: "models", trusted: true, rows: [
   { name: "没配key的", model: "openai/gpt-x", vision: false, has_key: false, using: false },
 ] };
 const menuBad = [];
-for (const [t, width, name] of [["light", 1280, "20_model_menu"], ["anthropic", 1280, "21_anthropic_model_menu"],
-                                 ["anthropic", 390, "22_anthropic_model_menu_narrow"]]) {
+for (const [t, width, name] of [["light", 1280, "20_model_menu"], ["dark", 1280, "21_dark_model_menu"],
+                                 ["dark", 390, "22_dark_model_menu_narrow"]]) {
   await cdp.call("Emulation.setDeviceMetricsOverride", { width, height: 900, deviceScaleFactor: 1, mobile: false });
   await cdp.call("Page.navigate", { url });
   await sleep(1200);
@@ -1304,7 +1286,7 @@ await cdp.call("Page.navigate", { url });
 await sleep(1500);
 // 换过页，报错收集要重新挂 —— 不然文末那条「页面无 JS 报错」量的是一张空表
 await cdp.eval(`window.__errs = []; addEventListener("error", (e) => __errs.push(String(e.message)));
-  setTheme("anthropic"); true`);
+  setTheme("dark"); true`);
 for (let i = 0; i < 60; i++) {
   if (await cdp.eval(`commands.length > 0`)) break;
   await sleep(500);
@@ -1326,7 +1308,7 @@ const g80 = await geo80();
 const share = g80.above / (g80.above + g80.below);
 want80(share > 0.36 && share < 0.48 && g80.helloBottom <= g80.rowTop,
   "空对话那一组没摆在视觉中心（上下留白该是 42:58、问候在输入框上面）", g80);
-console.log("拍了", await cdp.shot("23_anthropic_center", { width: 1280, height: 900, beyond: false }));
+console.log("拍了", await cdp.shot("23_dark_center", { width: 1280, height: 900, beyond: false }));
 const hit80 = await cdp.eval(`(() => { const b = document.getElementById("side-toggle").getBoundingClientRect();
   return document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2)?.id || ""; })()`);
 want80(hit80 === "side-toggle", "抬起来的那一组盖住了标题栏的按钮", hit80);
@@ -1340,8 +1322,8 @@ want80(Math.abs(g3.rowTop - g80.rowTop) <= 1, "空对话里敲字换行，输入
 await cdp.eval(`inputEl.value = ""; inputEl.dispatchEvent(new Event("input")); setTheme("light"); true`);
 await sleep(300);
 const trLight = await cdp.eval(`getComputedStyle(document.querySelector(".composer")).translate`);
-want80(trLight !== "none", "默认主题的空对话没被抬起来（三套主题共用一套版面）", trLight);
-await cdp.eval(`setTheme("anthropic"); true`);
+want80(trLight !== "none", "默认主题的空对话没被抬起来（两套主题共用一套版面）", trLight);
+await cdp.eval(`setTheme("dark"); true`);
 await sleep(300);
 
 // 二、发出第一句：输入框和那句话一起落到底，问候撤干净
@@ -1349,7 +1331,7 @@ await cdp.eval(`glideArm = Date.now();
   handle({ kind: "turn_start", text: "把 build.mjs 里读 frontmatter 那段抽成一个函数" }); true`);
 await sleep(120);
 const mid80 = await cdp.eval(`getComputedStyle(document.querySelector(".composer")).translate`);
-console.log("拍了", await cdp.shot("24_anthropic_glide", { width: 1280, height: 900, beyond: false }));
+console.log("拍了", await cdp.shot("24_dark_glide", { width: 1280, height: 900, beyond: false }));
 const end80 = JSON.parse(await cdp.eval(`JSON.stringify({
   tr: getComputedStyle(document.querySelector(".composer")).translate,
   hello: !!document.getElementById("hello"), leaving: document.querySelectorAll("[data-leaving]").length,
@@ -1401,7 +1383,7 @@ const jump80 = JSON.parse(await cdp.eval(`JSON.stringify((() => {
 })())`));
 want80(jump80.markTop >= 0 && jump80.markTop < jump80.h && jump80.count === 0,
   "点「N 条新」没落到那条线上（线要进视野、看到底之后数清零）", jump80);
-console.log("拍了", await cdp.shot("25_anthropic_unread", { width: 1280, height: 900, beyond: false }));
+console.log("拍了", await cdp.shot("25_dark_unread", { width: 1280, height: 900, beyond: false }));
 
 // 五、人不在跟前才叫：人在的时候一声不吭；不在时要你点头带命令原文，跑完带它的第一句话
 await cdp.eval(`window.__notes = []; notifyUser = (t, b) => __notes.push([t, b]);
@@ -1465,7 +1447,7 @@ const early80 = await cdp.eval(`document.querySelector(".ask").dataset.armed ? "
 await sleep(900);
 const keys80 = JSON.parse(await cdp.eval(`JSON.stringify([...document.querySelectorAll(".ask .btn__key")]
   .map((k) => k.textContent + ":" + getComputedStyle(k).opacity))`));
-console.log("拍了", await cdp.shot("26_anthropic_ask_keys", { width: 1280, height: 900, beyond: false }));
+console.log("拍了", await cdp.shot("26_dark_ask_keys", { width: 1280, height: 900, beyond: false }));
 want80(early80 === "0" && keys80.join() === "1:1,2:1,3:1,4:1",
   "确认卡的键帽不对（四个 1–4，刚出现时不露、到点浮出来）", { early80, keys80 });
 await cdp.eval(`handle({ kind: "status", ready: true, busy: false, mode: "default", name: "m", model: "m" });
@@ -1478,7 +1460,7 @@ await cdp.call("Emulation.setEmulatedMedia",
 await cdp.call("Page.navigate", { url });
 await sleep(1500);
 await cdp.eval(`window.__errs = []; addEventListener("error", (e) => __errs.push(String(e.message)));
-  setTheme("anthropic"); true`);
+  setTheme("dark"); true`);
 for (let i = 0; i < 60; i++) {
   if (await cdp.eval(`commands.length > 0`)) break;
   await sleep(500);

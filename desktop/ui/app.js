@@ -275,20 +275,10 @@ function startSplash() {
   const play = () => {
     if (closed || overlay.dataset.phase !== "wait") return;
     overlay.dataset.phase = "play";
-    const caption = $("startup-text");
-    const letters = [...overlay.querySelector(".startup__caption").getAttribute("aria-label")];
-    let next = 0;
-    const type = () => {
-      if (closed) return;
-      caption.textContent += letters[next++];
-      if (next < letters.length) { later(type, 110); return; }
-      caption.dataset.complete = "true";
-      // 读完文案再退场，定时器延迟时也不会把未输出完的字截掉。
-      later(() => { overlay.dataset.phase = "text-out"; }, 1100);
-      later(() => { overlay.dataset.phase = "overlay-out"; }, 1600);
-      later(close, 2300);
-    };
-    later(type, 1800);
+    // 描边与填充完成后淡出，只保留图标动画。
+    later(() => { overlay.dataset.phase = "mark-out"; }, 2400);
+    later(() => { overlay.dataset.phase = "overlay-out"; }, 2900);
+    later(close, 3600);
   };
   const shown = window.feiyuDesktop ? window.feiyuDesktop.core.invoke("shown").catch(() => {}) : Promise.resolve();
   Promise.race([shown, new Promise(resolve => later(resolve, 1500))]).then(() => {
@@ -320,8 +310,6 @@ function syncHello() {
   el.id = "hello";
   el.className = "block hello";
   el.innerHTML = `<div class="block__label">开始</div><div class="block__body">`
-    + `<div class="voyage" aria-hidden="true"><span class="voyage__eyebrow">FEIYU · GRAND LINE</span><span class="voyage__title">向着下一段<br>旅程出发。</span><span class="voyage__rule"></span><span class="voyage__caption">把好奇心，交给大海。</span></div>`
-    + `<div class="dreamscape" aria-hidden="true"><span class="dreamscape__index">FEIYU / DREAM LEVEL 01</span><span class="dreamscape__title">意识之下，<br>还有一层。</span><span class="dreamscape__caption">每一个问题，都是一次深入。</span></div>`
     + `<h1 class="hello__greet">${DOG}<span class="hello__hi">${greeting()}</span></h1>`
     + `<p class="hello__lead">问它点什么，或者直接把要做的事说出来。</p>`
     + `<div class="hello__step" data-need="model"><p>先连一个模型：选个接口、贴上 key 就能用。</p>`
@@ -1802,37 +1790,17 @@ const KIND_OF = { skills: "skill", tools: "tool", mcp: "mcp" };
    **主题是这个窗口自己的偏好**，跟侧栏收放、置顶一样存在浏览器里，不进协议。
    终端那边有自己的 `/theme`（换的是 ANSI 配色和记号），两边刻意不共用一个值 ——
    同一个名字在两处指的不是同一套东西，共用只会互相踩。 */
-const THEME_KEY = "feiyu.theme";
 const THEMES = [
-  { key: "light", label: "默认", about: "纯白纸、IBM Blue" },
-  { key: "retro", label: "复古", about: "泛黄的纸、暖墨、赭色" },
-  { key: "anthropic", label: "Anthropic",
-    about: "暖白纸面、陶土橘点缀，搭配深色代码块" },
-  { key: "openai", label: "OpenAI", about: "柔和中性色、清晰留白与深绿点缀" },
-  { key: "inception", label: "盗梦空间", about: "折叠城市、深夜蓝与琥珀色梦境" },
-  { key: "grove", label: "松间", about: "暖纸、松绿与陶土色，安静舒展的工作台" },
-  { key: "grandline", label: "伟大航路", about: "海贼王主题：海图、阳光和扬帆的旅程" },
+  { key: "light", label: "浅色", about: "明亮的背景，清晰的阅读层次" },
+  { key: "dark", label: "深色", about: "柔和的深色背景，适合低光环境" },
+  { key: "system", label: "跟随系统", about: "随系统自动切换浅色与深色" },
 ];
-
-function theme() {
-  try { return localStorage.getItem(THEME_KEY) || "light"; } catch { return "light"; }
-}
-
-function setTheme(name) {
-  const want = THEMES.some((t) => t.key === name) ? name : "light";
-  // 默认那套就是裸 :root，不挂属性 —— 常态不占位置
-  if (want === "light") delete document.documentElement.dataset.theme;
-  else document.documentElement.dataset.theme = want;
-  try { localStorage.setItem(THEME_KEY, want); } catch { /* 无痕窗口 */ }
-  // 终端面板的配色是建的时候拿 CSS 变量算出来的一份快照，**换主题要重算**，
-  // 不然它会顶着上一套配色留在那儿（termTheme() 只是算，不会自己应用）
+function theme() { return window.BiscuitTheme.preference; }
+function setTheme(name) { window.BiscuitTheme.set(name); }
+window.addEventListener("biscuit:theme", () => {
   if (term) term.options.theme = termTheme();
-  // 换了皮字号就变了，空对话那一组要重新摆（见 measureLift）。
-  // **放进下一帧**：这个函数在模块求值时就跑一次，那时 rowBase 还在 TDZ 里
   requestAnimationFrame(() => { rowBase = 0; measureLift(); });
-}
-
-setTheme(theme());
+});
 
 /* ── 机器人 ─────────────────────────────────────────────────
    跟"会话"平级摆在侧栏顶上，**不在设置里**：设置是"现在这段对话怎么跑"，
@@ -2056,7 +2024,7 @@ const SETTINGS = [
   // local: 这一项不经服务端，改的是这个窗口自己的偏好
   { key: "theme", name: "外观", local: true,
     meta: () => (THEMES.find((t) => t.key === theme()) || THEMES[0]).label,
-    about: "选择桌面工作台的外观；终端里的 /theme 是另一套，互不相干" },
+    about: "选择浅色、深色，或自动跟随系统外观" },
   { key: "mode", name: "权限模式", meta: (c) => label(c.modes, c.mode),
     about: "它动手之前要不要先问你" },
   { key: "style", name: "回答风格", meta: (c) => label(c.styles, c.style),
@@ -2095,6 +2063,7 @@ function pickRow(now, options, onPick) {
     const one = document.createElement("button");
     one.type = "button";
     one.className = "opt" + (o.key === now ? " opt--now" : "");
+    one.setAttribute("aria-pressed", String(o.key === now));
     one.innerHTML = `<span class="opt__name"></span><span class="opt__about"></span>`;
     one.querySelector(".opt__name").textContent = o.label;
     one.querySelector(".opt__about").textContent = o.about || "";
