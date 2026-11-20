@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { EOL } from 'node:os';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { createInterface } from 'node:readline';
@@ -39,7 +40,7 @@ for (const mode of ['cli', 'frozen-entry']) {
         child.stdin.end(JSON.stringify({ text: messages[1] }) + '\n');
         assert.deepEqual(await done, { code: 0, signal: null }, diagnostic);
         assert.deepEqual(rows, messages.map(text => ({ kind: 'echo', text })));
-        assert.equal(diagnostic, '合成诊断 😀 𠮷\n');
+        assert.equal(diagnostic, `合成诊断 😀 𠮷${EOL}`);
       } finally {
         lines.close();
         if (child.exitCode === null) child.kill('SIGKILL');
