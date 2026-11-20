@@ -1,5 +1,6 @@
 """Portable release contracts: run on the target OS, never mock persistence."""
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -13,6 +14,31 @@ TEXT = '中文 简繁體 😀 𠮷'
 
 
 class NativePersistenceTests(unittest.TestCase):
+    @unittest.skipUnless(os.name == 'nt', 'requires native Windows ACLs')
+    def test_existing_snapshot_acl_is_private_before_recovery(self):
+        import subprocess
+        import sys
+        probe = (Path(__file__).resolve().parents[1] / 'desktop/tests/'
+                 'independent-taskstore-20261120/windows_acl_probe.py')
+        result = subprocess.run([sys.executable, str(probe),
+                                 str(Path(self.temporary.name) / 'acl-probe')],
+                                env=dict(os.environ, PYTHONPATH=str(probe.parents[3])),
+                                capture_output=True, timeout=45)
+        self.assertEqual(result.returncode, 0, repr(result.stdout + result.stderr))
+
+    @unittest.skipUnless(os.name == 'nt', 'requires native Windows ACLs')
+    def test_state_acl_failure_blocks_read_but_project_reads_do_not_migrate(self):
+        from feiyu import windows_storage
+        store = TaskStore(self.root, 'native')
+        self.addCleanup(store.close)
+        state = TaskState('native', 'task', workspace_id(self.root))
+        store.save(state)
+        with patch.object(windows_storage, 'restrict', side_effect=OSError('ACL denied')):
+            self.assertTrue(_read_safe(store.path(state.task_id), 1024 * 1024)[0])
+            with self.assertRaises(PersistenceError):
+                store.recover()
+        self.assertTrue(store.blocked)
+
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix='feiyu-native-')
         self.addCleanup(self.temporary.cleanup)

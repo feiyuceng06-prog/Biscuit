@@ -215,14 +215,21 @@ def directory_identity(path):
         r = details(h)
         return dict(path=str(path), device=r.volume, inode=(r.index_hi << 32) | r.index_lo)
 
-def read_safe(path, limit, check):
+def read_safe(path, limit, check, *, private=False):
     path = canonical(path)
     with guard(path.parent):
-        h = open_handle(path)
+        h = open_handle(path, 0x800e0000 if private else 0x80000000)
         fd = None
         try:
             if details(h).attrs & 0x10:
                 raise ValueError('not regular file')
+            if private:
+                # Only app-owned state opts in; project reads must not change ACLs.
+                sd = descriptor()
+                try:
+                    restrict(h, sd)
+                finally:
+                    free(sd)
             before = key(h)
             fd = msvcrt.open_osfhandle(h, os.O_RDONLY | os.O_BINARY)
             raw = bytearray()

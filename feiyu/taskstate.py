@@ -385,10 +385,10 @@ class TaskStore:
             raise PersistenceError('无效 task id')
         return self.directory / (tid + '.task.json')
 
-    def _snapshot_bytes(self, path):
+    def _snapshot_bytes(self, path, limit=64 * 1024 * 1024):
         if os.name == 'nt':
-            from .verification import _read_safe
-            return _read_safe(path, 64 * 1024 * 1024)[0]
+            from .windows_storage import read_safe
+            return read_safe(path, limit, lambda: None, private=True)[0]
         return path.read_bytes()
 
     @critical_write
@@ -427,7 +427,8 @@ class TaskStore:
         path = self.path(tid)
         try:
             from .verification import _read_safe
-            raw = _read_safe(path, 64 * 1024 * 1024)[0]
+            raw = (self._snapshot_bytes(path) if os.name == 'nt'
+                   else _read_safe(path, 64 * 1024 * 1024)[0])
             data = json.loads(raw)
             if type(data.get('schema_version')) is not int or data['schema_version'] != 1:
                 raise ValueError('version')
@@ -459,7 +460,8 @@ class TaskStore:
         active = None
         path = self.directory / 'active.json'
         try:
-            raw = _read_safe(path, 65536)[0]
+            raw = (self._snapshot_bytes(path, 65536) if os.name == 'nt'
+                   else _read_safe(path, 65536)[0])
         except FileNotFoundError:
             raw = None  # Pre-pointer versions and crashes before activation.
         try:
