@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # 一行装好 Biscuit（桌面版 + 终端版），不用 sudo、不用 Python：
 #
-#   curl -fsSL https://raw.githubusercontent.com/feiyuceng06-prog/feiyu-agent/main/get.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/feiyuceng06-prog/Biscuit/main/get.sh | bash
 #
 # 装的是 Releases 里最新的 AppImage：不挂载，解开放进用户目录，所以也不要 libfuse2；
 # 包里自带的后端就是完整的终端版 feiyu。再跑一遍就是升级。
 # 已经有 AppImage 文件（比如在别的机器上下好拷过来）：bash get.sh Feiyu-x.y.z.AppImage
 set -euo pipefail
 
-REPO=feiyuceng06-prog/feiyu-agent
+REPO=feiyuceng06-prog/Biscuit
 DATA="${XDG_DATA_HOME:-$HOME/.local/share}"
 BASE="$DATA/feiyu-desktop"
 BIN="$HOME/.local/bin"

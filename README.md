@@ -11,7 +11,7 @@ Biscuit was previously named Feiyu. The commands and existing data locations sta
 **Recommended: one command installs both the desktop app and CLI.** Requires Linux x86_64 and an internet connection.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/feiyuceng06-prog/feiyu-agent/main/get.sh | bash
+curl -fsSL https://raw.githubusercontent.com/feiyuceng06-prog/Biscuit/main/get.sh | bash
 ```
 
 No Python, Node.js, or sudo required. The installer uses your user directory and adds the command directory to your Bash or Zsh configuration when needed.
@@ -27,10 +27,10 @@ To update, run the same installation command again.
 
 ### Download an installer
 
-Visit the [download page](https://github.com/feiyuceng06-prog/feiyu-agent/releases/latest) and choose a format:
+Visit the [download page](https://github.com/feiyuceng06-prog/Biscuit/releases/latest) and choose a format:
 
-- **deb**: for distributions using apt. In the download directory, run `sudo apt install ./feiyu-desktop_0.87.1_amd64.deb`.
-- **AppImage**: run `chmod +x Biscuit-0.87.1.AppImage`, then double-click the file. If FUSE is missing, use the one-command installer above.
+- **deb**: for distributions using apt. In the download directory, run `sudo apt install ./feiyu-desktop_0.87.2_amd64.deb`.
+- **AppImage**: run `chmod +x Biscuit-0.87.2.AppImage`, then double-click the file. If FUSE is missing, use the one-command installer above.
 
 Packages are unsigned. See the download page for tested systems and known limitations.
 
@@ -47,8 +47,8 @@ Then select your project folder and describe your task. Obtain an API key from y
 Requires Git, Python 3.10+, and an internet connection. Run in a Linux terminal:
 
 ```bash
-git clone https://github.com/feiyuceng06-prog/feiyu-agent.git
-cd feiyu-agent
+git clone https://github.com/feiyuceng06-prog/Biscuit.git
+cd Biscuit
 ./install.sh --cli-only
 ~/.local/bin/feiyu
 ```
@@ -57,7 +57,7 @@ If venv is missing on Debian/Ubuntu, run `sudo apt install python3-venv` first. 
 
 ## Windows
 
-On the [download page](https://github.com/feiyuceng06-prog/feiyu-agent/releases/latest), download **Biscuit Setup 0.87.1.exe** and run it. Git Bash is included. Existing Feiyu settings and conversations are retained.
+On the [download page](https://github.com/feiyuceng06-prog/Biscuit/releases/latest), download **Biscuit Setup 0.87.2.exe** and run it. Git Bash is included. Existing Feiyu settings and conversations are retained.
 
 The installer is unsigned, so Windows may show a security warning. Check the source and published SHA256 before installing. See the release notes for Windows limitations.
 
