@@ -6,6 +6,7 @@ import {fileURLToPath} from 'node:url';
 const desktop=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const home=await fs.mkdtemp(path.join(os.tmpdir(),'feiyu-legacy-measure-'));
 const env={...process.env,HOME:home,USERPROFILE:home,XDG_CONFIG_HOME:path.join(home,'config'),XDG_STATE_HOME:path.join(home,'state'),XDG_DATA_HOME:path.join(home,'data'),APPDATA:path.join(home,'AppData','Roaming'),LOCALAPPDATA:path.join(home,'AppData','Local')};
+for (const name of ['XDG_CONFIG_HOME','XDG_STATE_HOME','XDG_DATA_HOME','APPDATA','LOCALAPPDATA']) await fs.mkdir(env[name],{recursive:true});
 delete env.ELECTRON_RUN_AS_NODE;
 const executable=process.argv[2];
 const a=await electron.launch({...(executable?{executablePath:executable}:{}),args:executable?[]:[desktop],env,cwd:home,timeout:30000});
