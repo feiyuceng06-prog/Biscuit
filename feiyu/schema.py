@@ -55,9 +55,19 @@ _TYPES = {
 def validate(value, schema: dict, path: str = "") -> list[str]:
     """返回问题列表，空列表表示通过 """
     where = path or "顶层"
+    if isinstance(schema, bool):
+        return [] if schema else ["%s 不允许此值" % where]
+    if not isinstance(schema, dict):
+        raise ValueError("schema 应为 object 或 boolean")
     problems: list[str] = []
 
     kind = schema.get("type")
+    if isinstance(kind, list):
+        if not kind or any(not isinstance(k, str) or k not in _TYPES for k in kind):
+            raise ValueError("无效的联合类型")
+        if all(validate(value, dict(schema, type=k), path) for k in kind):
+            return ["%s 不符合联合类型 %s" % (where, kind)]
+        return []
     if kind:
         wanted = _TYPES.get(kind)
         if wanted is None:
@@ -85,7 +95,7 @@ def validate(value, schema: dict, path: str = "") -> list[str]:
             if name in value:
                 problems += validate(value[name], sub, "%s.%s" % (path, name) if path else name)
 
-    if isinstance(value, list) and isinstance(schema.get("items"), dict):
+    if isinstance(value, list) and isinstance(schema.get("items"), (dict, bool)):
         for i, item in enumerate(value):
             problems += validate(item, schema["items"], "%s[%d]" % (path or "顶层", i))
 

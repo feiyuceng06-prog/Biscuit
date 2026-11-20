@@ -243,7 +243,12 @@ class TestToolLoop(Base):
         self.agent.budget = 0.01
         b = self.use([("", [call("c%d" % i)]) for i in range(40)])
         self.tools_ok()
-        b.priced, b.cost = True, 0.5     # cost 是 property，得从后端那边给
+        b.priced = True
+        original = b.run_turn
+        def charged(**kwargs):
+            b.cost += .5
+            return original(**kwargs)
+        b.run_turn = charged
         out = quiet(self.agent.send, "很贵的任务")
         # 断言要认准是**预算**那道闸停的：轮数那道的措辞里也有"我先停下"，
         # 只断这三个字的话，闸没关它照样绿
@@ -286,15 +291,19 @@ class TestToolLoop(Base):
         b = self.use([("", [call("c%d" % i)]) for i in range(5)])
         self.tools_ok()
         b.priced = True
-        b.cost = 2.5                       # 已经花超了
+        original = b.run_turn
+        def charged(**kwargs):
+            b.cost += 2.5
+            return original(**kwargs)
+        b.run_turn = charged
         out = quiet(self.agent.send, "很贵的任务")
         self.assertIn("上限", out)
         self.assertEqual(b.messages[-1]["role"], "assistant",
                          "不补 assistant 的话下一轮请求角色不交替，直接 400")
-        self.assertEqual(len(self.ran), 1, "超了预算还接着跑")
+        self.assertEqual(len(self.ran), 0, "请求后预算耗尽不应再执行工具")
         self.assertEqual(unpaired(b.messages), set())
 
-    def test_没配价格时预算这道闸自己让开(self):
+    def test_没配价格时有限预算保守停止(self):
         """`self.cost` 是 None（priced=False）—— 0.67.2 刚因为 round(None) 把
         --serve 整个弄死过。没有价格就没法谈预算，只能靠轮数那道闸 """
         self.agent.budget = 1.0
@@ -302,8 +311,9 @@ class TestToolLoop(Base):
         self.tools_ok()
         b.priced = False
         self.assertIsNone(self.agent.cost)
-        self.assertEqual(self.agent._over_budget(), "")
-        self.assertEqual(quiet(self.agent.send, "干活"), "做完了")
+        self.assertIn("未知", self.agent._over_budget())
+        self.assertIn("未知", quiet(self.agent.send, "干活"))
+        self.assertEqual(self.ran, [])
 
     def test_没设预算就不管钱(self):
         self.agent.budget = 0.0
@@ -429,7 +439,7 @@ class TestTimeGate(Base):
         out = quiet(self.agent.send, "很慢的任务")
         # 认准是**时间**那道闸：另外两道的措辞里也有"我先停下"
         self.assertIn("时间上限", out)
-        self.assertEqual(len(self.ran), 1)
+        self.assertLessEqual(len(self.ran), 1)  # durable checkpoint time counts toward the deadline
         self.assertEqual(b.messages[-1]["role"], "assistant")
         self.assertEqual(unpaired(b.messages), set())
 
@@ -1192,7 +1202,7 @@ class TestHelperModel(Base):
 
     def test_子_agent_用_helper_那条配置(self):
         seen = {}
-        def fake_run(prompt, *, entry, workspace, trace=None, lsp=None):
+        def fake_run(prompt, *, entry, workspace, trace=None, lsp=None, control=None, on_usage=None, event_emit=None):
             seen["entry"] = entry
             return "结论", [], {"tokens": 1, "priced": False, "cost": 0}
         real_load, real_run = agent_mod.keys.load, agent_mod.subagent_mod.run
@@ -1505,7 +1515,7 @@ class TestReproduceFirst(Base):
     def fake_run(self, ok, output):
         import feiyu.hooks as hooks_mod
         calls = []
-        def run(hook, payload, cwd):
+        def run(hook, payload, cwd, **kwargs):
             calls.append((hook.command, payload.get("event")))
             return hooks_mod.Outcome(hook=hook, code=0 if ok else 1, output=output)
         self.addCleanup(setattr, hooks_mod, "run", hooks_mod.run)
@@ -1539,15 +1549,15 @@ class TestReproduceFirst(Base):
             quiet(self.agent.send, "修一下")
         self.assertTrue(any(e == "PreWrite" for _, e in calls))
 
-    def test_全绿也要说一声(self):
-        """全绿意味着"没有现成的失败可以照着修"，那多半是加功能不是修 bug ——
-        不说的话模型会去找一个不存在的红灯 """
+    def test_零退出但没有持久证据不能声称当前通过(self):
+        """旧 Outcome mock 没有日志；零退出事实仍须报告，不能升级为当前通过。"""
         self.fake_run(True, "")
         b = self.use_verify([("", [call("c1", "write_file", path="a.py", content="x")]),
                              ("好了", [])])
         quiet(self.agent.send, "加个功能")
         got = [m["content"] for m in b.messages if m["role"] == "tool"][0]
-        self.assertIn("全绿", got)
+        self.assertIn("命令退出码为 0", got)
+        self.assertIn("不能证明当前通过", got)
 
     def test_一个会话只跑一次(self):
         calls = self.fake_run(False, "FAIL: test_x")
@@ -1590,15 +1600,18 @@ class TestReproduceFirst(Base):
         """
         import feiyu.hooks as hooks_mod
         real = hooks_mod.run
-        def maybe_boom(hook, payload, cwd):
+        def maybe_boom(hook, payload, cwd, **kwargs):
             if payload.get("event") == "PreWrite":
                 raise RuntimeError("命令不存在")
-            return real(hook, payload, cwd)
+            return real(hook, payload, cwd, **kwargs)
         self.addCleanup(setattr, hooks_mod, "run", real)
         hooks_mod.run = maybe_boom
         b = self.use_verify([("", [call("c1", "write_file", path="a.py", content="x")]),
                              ("好了", [])])
-        self.assertEqual(quiet(self.agent.send, "改一下"), "好了")
+        from feiyu.taskstate import PersistenceError
+        with self.assertRaises(PersistenceError):
+            quiet(self.agent.send, '改一下')
+        self.assertFalse((self.agent.toolbox.root / 'a.py').exists())
         self.assertEqual(unpaired(b.messages), set())
 
 
@@ -1705,6 +1718,8 @@ class TestOutsideGate(Base):
         self.assertEqual(self.agent.toolbox.outside, "")
 
     def test_MCP_的返回也算(self):
+        self.agent.toolbox.mcp.tools["mcp_fin_quote"] = ("fin", "quote")
+        self.agent.toolbox.mcp.schemas = lambda: [{"name": "mcp_fin_quote", "input_schema": {"type": "object"}}]
         permissions.MCP_SUBJECTS["mcp_fin_quote"] = "fin quote"
         self.addCleanup(permissions.MCP_SUBJECTS.pop, "mcp_fin_quote", None)
         self.use([("", [call("m1", "mcp_fin_quote", symbol="AAPL")]),
@@ -1744,9 +1759,11 @@ class TestOutsideGate(Base):
         self.addCleanup(setattr, session_mod, "DIR", session_mod.DIR)
         session_mod.DIR = os.path.join(self.tmp.name, "sessions")
         keys.add("fake", base_url="http://x", model="m", key="k")
+        self.agent.session_id = "20260923-000000"
         self.run_after_fetch()
         self.agent.name = "fake"
         quiet(session_mod.save, Path(self.tmp.name), self.agent, "20260923-000000")
+        self.agent._task_store.close()
         data = session_mod.load(Path(self.tmp.name), "20260923-000000")
         self.assertEqual(data["outside"], "网页 evil.example")
         fresh = Feiyu(Path(self.tmp.name))

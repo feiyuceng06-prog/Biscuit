@@ -25,6 +25,7 @@ import json
 import os
 import subprocess
 import tempfile
+import signal
 
 from . import files
 from . import sandbox
@@ -180,38 +181,94 @@ def pick(all_hooks: list[Hook], event: str, tool: str = "", subject: str = "") -
 
 
 class Outcome:
-    def __init__(self, hook: Hook, code: int, output: str):
+    def __init__(self, hook: Hook, code: int, output: str, *, timed_out=False,
+                 cancelled=False, environment_error="", evidence_error="", rejected="", log="", log_sha256="",
+                 execution_started=False, stop_reason=""):
+        self.execution_started = execution_started
+        self.stop_reason = stop_reason
+        self.rejected = rejected
+        self.timed_out = timed_out
+        self.cancelled = cancelled
+        self.environment_error = environment_error
+        self.evidence_error = evidence_error
+        self.log = log
+        self.log_sha256 = log_sha256
         self.hook = hook
         self.code = code
         self.output = output[:MAX_OUTPUT]
 
     @property
+    def execution_unknown(self):
+        return self.execution_started and bool(self.cancelled or self.timed_out or self.evidence_error)
+
+    @property
     def ok(self) -> bool:
-        return self.code == 0
+        return self.code == 0 and not (self.timed_out or self.cancelled or self.environment_error or self.evidence_error)
 
 
-def run(hook: Hook, payload: dict, cwd) -> Outcome:
+def run(hook: Hook, payload: dict, cwd, *, offline=False, control=None) -> Outcome:
     """跑一条钩子 钩子自己炸了不能把 agent 带崩，所以异常都转成非 0 """
-    from .tools import _child_env
+    from .processwait import run as wait_process
+    from .tools import _child_env, offline_safe, pinned
+    from . import permissions
+    if permissions.verdict("bash", {"command": hook.command}) == "deny":
+        return Outcome(hook, -1, "被权限规则拒绝", rejected="被权限规则拒绝")
 
+    from .verification import storage
+
+    command = pinned(hook.command) if offline and not sandbox.can_cut_net() and offline_safe(hook.command) else hook.command
+    code, timed_out, cancelled, error = -1, False, False, ""
+    output, log, digest = "", "", ""
+    evidence_error = ""
+    proc = None
     try:
-        # 用户写的钩子和 `verify:` 是 bash 口味的（`source`、`[[`、数组），
-        # 跟 bash 工具走同一个 shell —— 两边不一致的话同一条命令在钩子里跑不起来
-        done = subprocess.run(
-            [sandbox.SHELL, "-c", hook.command], cwd=str(cwd),
-            input=json.dumps(payload, ensure_ascii=False, default=str),
-            capture_output=True, text=True, timeout=hook.timeout,
-            env=_child_env(),
-        )
-    except subprocess.TimeoutExpired:
-        return Outcome(hook, -1, "钩子超过 %d 秒还没结束" % hook.timeout)
+        folder = storage()
+        files.private_dir(str(folder))
+        fd, log = tempfile.mkstemp(prefix="hook-", suffix=".log", dir=str(folder))
+        # File-backed streams keep verbose commands out of memory and retain stderr
+        # even when the compatible successful Outcome.output only shows stdout.
+        with os.fdopen(fd, "wb") as durable, tempfile.TemporaryFile() as stdout, tempfile.TemporaryFile() as stderr:
+            try:
+                proc = wait_process(
+                    (sandbox.wrap(command, workspace=cwd, cwd=cwd, offline=offline)
+                     or [sandbox.SHELL, "-c", command]), cwd=str(cwd),
+                    stdout=stdout, stderr=stderr, env=_child_env(),
+                    payload=json.dumps(payload, ensure_ascii=False, default=str).encode(),
+                    timeout=hook.timeout, control=control)
+                code = proc.code
+                timed_out = proc.reason in ('timeout', 'deadline_stopped')
+                cancelled = bool(proc.reason) and not timed_out
+                evidence_error = proc.error
+                if timed_out or cancelled:
+                    output = ("钩子超过 %d 秒还没结束" % hook.timeout if timed_out else "钩子已取消")
+            except OSError as exc:
+                error = str(exc)
+                output = "钩子跑不起来：%s" % exc
+            h = hashlib.sha256()
+            for label, stream in ((b"stdout\n", stdout), (b"\nstderr\n", stderr)):
+                durable.write(label)
+                h.update(label)
+                stream.seek(0)
+                while chunk := stream.read(65536):
+                    durable.write(chunk)
+                    h.update(chunk)
+            durable.flush()
+            os.fsync(durable.fileno())
+            digest = h.hexdigest()
+            if not output:
+                stdout.seek(0)
+                stderr.seek(0)
+                a = stdout.read(MAX_OUTPUT * 4).decode("utf-8", "replace")
+                b = stderr.read(MAX_OUTPUT * 4).decode("utf-8", "replace")
+                output = ((b + ("\n" + a if a else "")) if code else a).strip()
     except OSError as exc:
-        return Outcome(hook, -1, "钩子跑不起来：%s" % exc)
-    # 拦下时两个流都要：unittest 把失败写 stderr，pytest 写 stdout，
-    # 只取一个的话总有一半工具的报错是空的
-    # 放行时只要 stdout —— UserPromptSubmit 拿它当额外背景，stderr 多是噪音
-    if done.returncode != 0:
-        text = (done.stderr or "") + (("\n" + done.stdout) if done.stdout else "")
-    else:
-        text = done.stdout or ""
-    return Outcome(hook, done.returncode, text.strip())
+        log, digest = "", ""
+        if proc is None:
+            error = "persistent log unavailable: %s" % exc
+            output = "钩子跑不起来：%s" % error
+        else:
+            evidence_error = "persistent log unavailable: %s" % exc
+            output = "命令已执行（退出码 %s），持久日志缺失：%s" % (code, evidence_error)
+    return Outcome(hook, code, output, timed_out=timed_out, cancelled=cancelled,
+                   environment_error=error, evidence_error=evidence_error, log=log, log_sha256=digest,
+                   execution_started=proc is not None, stop_reason=proc.reason if proc else "")

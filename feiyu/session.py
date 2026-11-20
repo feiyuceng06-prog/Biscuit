@@ -24,8 +24,9 @@ import time
 import uuid
 
 from . import files
+from .taskstate import atomic_json, PersistenceError, TaskStore, workspace_id
 
-from .providers import without_images
+from . import native_history, provenance
 
 DIR = os.path.join(
     os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"),
@@ -67,15 +68,7 @@ def new_id() -> str:
 
 
 def _plain(obj):
-    """anthropic 的 messages 里是 SDK 对象，先摊平成能 json 序列化的结构 """
-    if isinstance(obj, dict):
-        return {k: _plain(v) for k, v in obj.items()}
-    if isinstance(obj, (list, tuple)):
-        return [_plain(v) for v in obj]
-    dump = getattr(obj, "model_dump", None)
-    if callable(dump):
-        return _plain(dump())
-    return obj
+    return native_history.plain(obj)
 
 
 def _first_words(messages) -> str:
@@ -111,14 +104,34 @@ def _first_words(messages) -> str:
 
 
 def save(workspace, agent, sid: str | None = None) -> None:
-    if not agent.ready or len(agent.backend.messages) <= 1:
+    if getattr(agent, '_restore_error', False):
+        raise PersistenceError('恢复受阻，禁止覆盖原会话')
+    # Anthropic keeps system outside messages: a lone user message is real history.
+    if not agent.ready or not any(m.get('role') != 'system' for m in agent.backend.messages):
         return
-    if sid is not None and not _ID_OK.match(sid):
-        return
+    if sid is not None and not _ID_OK.fullmatch(sid):
+        raise PersistenceError('无效 session id')
+    sid = sid or getattr(agent, 'session_id', None)
+    if not sid or sid == LEGACY:
+        sid = new_id()
+    state = getattr(agent, 'task_state', None)
+    if state is not None and sid != state.session_id:
+        raise PersistenceError('不能将已绑定任务写入其他 session id')
+    agent.session_id = sid
+    if state is not None:
+        agent._task_checkpoint()
     b = agent.backend
-    messages = without_images(_plain(b.messages))
+    messages = native_history.export_session(b)
     data = {
+        "schema_version": 1,
+        "workspace_id": workspace_id(workspace),
+        "task_ref": state.task_id if state is not None else None,
         "id": sid,
+        "session_id": getattr(agent, "session_id", None),
+        "task_id": getattr(agent, "task_id", None),
+        "verification_pending": bool(getattr(agent, "_code_task", False)),
+        "verification_schema_version": 1,
+        "verifications": agent.verifications.export() if hasattr(agent, "verifications") else None,
         "model": agent.name,
         "style": agent.style,
         "mode": agent.mode,
@@ -128,8 +141,9 @@ def save(workspace, agent, sid: str | None = None) -> None:
         # 读过的第一份外部内容 恢复回来那道闸要照旧落着（见 agent._egress）
         "outside": getattr(agent.toolbox, "outside", "") or None,
         "title": _first_words(messages),
-        # 图片不进存盘：一张就是几十万字，恢复回来也未必是当初那张
+        # 原生图片和协议字段随历史保留；恢复不依赖原文件仍然存在。
         "messages": messages,
+        "source_refs": provenance.collect(agent, workspace),
         "todos": agent.toolbox.todos.items,
         "tokens_total": b.tokens_total,
         "tokens_context": b.tokens_context,
@@ -137,27 +151,26 @@ def save(workspace, agent, sid: str | None = None) -> None:
         "tokens_hit": getattr(b, "tokens_hit", 0),
         "cost": b.cost,
         "priced": b.priced,
+        "unknown_cost": getattr(agent, "cost", b.cost if b.priced else None) is None,
         "saved_at": time.time(),
     }
+    store = getattr(agent, '_task_store', None)
+    temporary_store = None
     try:
-        here = folder(workspace)
-        files.private_dir(here)
-        # **`legacy` 是个读旧位置的别名，不能变成写出去的文件名。**
-        # 写成 folder/legacy.json 的话，listing 从目录里扫出来给它的 id 还是
-        # `legacy`，而 drop 见到这个 id 会去删**旧位置**那份 —— 删不掉，
-        # 于是那一行永远赖在侧栏上，点多少次「删掉」都只是回一句「删掉了」。
-        path = (_legacy_path(workspace) if not sid or sid == LEGACY
-                else _path(workspace, sid))
-        fd, temporary = tempfile.mkstemp(prefix=".feiyu-session-", dir=os.path.dirname(path))
-        try:
-            with os.fdopen(fd, "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False)
-            os.replace(temporary, path)
-        finally:
-            if os.path.exists(temporary):
-                os.unlink(temporary)
-    except (OSError, TypeError, ValueError):
-        return
+        if store is None:
+            temporary_store = TaskStore(workspace, sid)
+            store = temporary_store
+        path = _path(workspace, sid)
+        if os.path.exists(path):
+            _read(path, strict=True)
+        atomic_json(path, data)
+    except PersistenceError:
+        if store is not None:
+            store.blocked = True
+        raise
+    finally:
+        if temporary_store is not None:
+            temporary_store.close()
     _write_card(path, data)
     _prune(workspace)
 
@@ -176,6 +189,10 @@ def _prune(workspace) -> None:
         return
     for name in names[:-MAX_KEPT] if len(names) > MAX_KEPT else []:
         path = os.path.join(here, name)
+        # Durable task history is retained until explicit deletion/export policy exists.
+        data = _read(path)
+        if data is None or data.get('task_ref'):
+            continue
         for one in (path, _card_path(path)):
             try:
                 os.remove(one)
@@ -183,17 +200,40 @@ def _prune(workspace) -> None:
                 pass
 
 
-def _read(path: str) -> dict | None:
+def _read(path: str, strict=False) -> dict | None:
     try:
         with open(path, encoding="utf-8") as f:
             data = json.load(f)
-    except (OSError, ValueError):
+    except FileNotFoundError:
+        return None
+    except (OSError, ValueError) as exc:
+        if strict:
+            raise PersistenceError('会话损坏或不可读，保留原件: ' + path) from exc
+        return None
+    if (not isinstance(data, dict) or not isinstance(data.get('messages'), list)
+            or not data['messages'] or ('schema_version' in data and
+                (type(data['schema_version']) is not int or data['schema_version'] != 1))):
+        if strict:
+            raise PersistenceError('会话格式损坏或版本不支持，保留原件: ' + path)
         return None
     # **messages 必须真的是个列表。** 只判真值的话 `{"messages": "坏了"}` 也算数，
     # restore 会把这个字符串直接装进 backend.messages，下一次请求就是 400 ——
     # 而那时候已经离这儿很远了，看着像"接口坏了"
     return (data if isinstance(data, dict) and isinstance(data.get("messages"), list)
             and data["messages"] else None)
+
+
+def _journal_stub(workspace, sid):
+    """Discovery only; locked restore validates pointer and all sidecars."""
+    directory = os.path.join(folder(workspace), sid)
+    if not _ID_OK.fullmatch(sid) or sid == LEGACY or not os.path.isdir(directory):
+        return None
+    names = os.listdir(directory)
+    if 'active.json' not in names and not any(n.endswith('.task.json') for n in names):
+        return None
+    return dict(schema_version=1, session_id=sid, id=sid, messages=[],
+                journal_only=True, model='', title='任务 journal（可恢复核对）',
+                saved_at=os.stat(directory).st_mtime)
 
 
 def listing(workspace) -> list[dict]:
@@ -214,6 +254,12 @@ def listing(workspace) -> list[dict]:
         data = _card(path) or _read(path)
         if data:
             rows.append(_summary(name[:-5], data))
+    known = {r['id'] for r in rows}
+    for sid in names:
+        if sid not in known:
+            stub = _journal_stub(workspace, sid)
+            if stub:
+                rows.append(_summary(sid, stub))
     old = _read(_legacy_path(workspace))
     if old:
         rows.append(_summary(LEGACY, old))
@@ -295,13 +341,21 @@ def _card(path: str) -> dict | None:
 def load(workspace, sid: str | None = None) -> dict | None:
     """不给 sid 就读最近的一份 """
     if sid == LEGACY:
-        return _read(_legacy_path(workspace))
+        return _read(_legacy_path(workspace), strict=True)
     if sid is not None:
         if not _ID_OK.match(sid):
             return None
-        return _read(_path(workspace, sid))
+        return _read(_path(workspace, sid), strict=True) or _journal_stub(workspace, sid)
     rows = listing(workspace)
-    return load(workspace, rows[0]["id"]) if rows else None
+    if not rows:
+        try:
+            candidates = [n for n in os.listdir(folder(workspace)) if n.endswith('.json') and not n.endswith(CARD_SUFFIX)]
+        except FileNotFoundError:
+            candidates = []
+        if candidates:
+            return _read(os.path.join(folder(workspace), sorted(candidates)[-1]), strict=True)
+        return _read(_legacy_path(workspace), strict=True)
+    return load(workspace, rows[0]["id"])
 
 
 def latest_id(workspace) -> str | None:

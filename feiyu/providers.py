@@ -4,12 +4,16 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
+from contextlib import nullcontext
+from functools import wraps
+import time
 
-from . import pricing
+from .runcontrol import active_control
+
+from . import pricing, native_history
 
 
-# 两个 SDK 自带的重试次数（429 / 5xx / 连接错误，指数退避）
-# 只管请求发出之前；流中途断掉由 agent.send() 那边接
+# Explicit retries are accounted separately; SDK internal retries are disabled.
 RETRIES = 4
 
 # 一次流式请求里，**两个 chunk 之间最多能静多久**（秒）。不是一整轮的上限：
@@ -106,6 +110,10 @@ def _split_usage(usage) -> tuple[int, int, int, int]:
 
 
 def _cache_rejected(exc: Exception) -> bool:
+    if getattr(exc, "sdk_cleanup_error", None):
+        return False
+    if hasattr(exc, "sdk_cache_rejected"):
+        return exc.sdk_cache_rejected
     """这个错是不是"接口不认 cache_control"
 
     官方接口一定认，但用户多半连的是中转站，那边未必透传 认出来就降级重来一次，
@@ -204,16 +212,121 @@ def _as_rates(price) -> tuple | None:
 
 
 
+def _retryable(exc):
+    if getattr(exc, "sdk_cleanup_error", None):
+        return False
+    headers = getattr(getattr(exc, 'response', None), 'headers', {})
+    directive = headers.get('x-should-retry')
+    if directive in ('true', 'false'):
+        return directive == 'true'
+    code = getattr(exc, 'status_code', 0) or 0
+    return code in (408, 409, 429) or code >= 500 or type(exc).__name__ in (
+        'APIConnectionError', 'APITimeoutError', 'RetryableError')
+
+
+def request_attempt(method):
+    @wraps(method)
+    def run(self, *args, **kwargs):
+        control = active_control.get()
+        for retry in range(RETRIES + 1):
+            report = {'complete': False, 'succeeded': False}
+            try:
+                with control.attempt(self, report=report) if control else nullcontext():
+                    self._attempt_usage = {}
+                    self._attempt_event = False
+                    self._attempt_finished = False
+                    history_length = len(self.messages)
+                    try:
+                        result = method(self, *args, **kwargs)
+                        if control:
+                            try:
+                                control.check(inflight=True)
+                            except BaseException:
+                                del self.messages[history_length:]
+                                raise
+                        report['succeeded'] = True
+                        report['complete'] = (method.__name__ == 'ask' or self._attempt_finished) and all(
+                            k in self._attempt_usage for k in ('input', 'output'))
+                    finally:
+                        u = self._attempt_usage
+                        report['usage'] = dict(u)
+                        report['event'] = self._attempt_event
+                        if u:
+                            self._charge(u.get('hit', 0), u.get('miss', 0), u.get('output', 0),
+                                         write=u.get('write', 0), context=method.__name__ != 'ask')
+                        if not report['complete']:
+                            self.priced = False  # sticky unknown total; cost remains a lower bound
+                    return result
+            except Exception as exc:
+                if retry == RETRIES or report.get('event') or not _retryable(exc):
+                    raise
+                delay = min(.5 * 2 ** retry, 8)
+                if control:
+                    control.wait(delay)
+                else:
+                    time.sleep(delay)
+    return run
+
+
 class Billing:
+    def set_context(self, stable: str, volatile: str) -> None:
+        # Keep system's public string contract for custom/Fake backends.
+        self.set_system(stable + volatile)
+        self._stable_system, self._volatile_system = stable, volatile
+
     """两个后端共用的用量与花费统计
 
     tokens_context 是最近一次请求的规模，tokens_total 是累计计费量
     价格表里没有这个模型时 priced 置 False，界面上退回显示 token 数
     """
 
+    attempt_accounting = True
     rates: tuple[float, float, float] | None = None
 
+    def _sdk_call(self, operation, **kwargs):
+        if self.client is getattr(self, '_worker_client', None):
+            from .sdk_worker import Exchange, ask
+            provider, config = self._worker_config
+            observe = lambda u: self._observe(u, anthropic=provider == 'anthropic')
+            if operation == 'ask':
+                return ask(provider, config, kwargs, active_control.get(), observe)
+            return Exchange(provider, config, 'stream', kwargs, active_control.get(), observe)
+        api = self.client.messages if isinstance(self, AnthropicBackend) else self.client.chat.completions
+        return (api.stream(**kwargs) if operation == 'stream' and isinstance(self, AnthropicBackend)
+                else api.create(**kwargs))
+
+    def _observe(self, usage, anthropic=False):
+        if usage is None:
+            return
+        u = self._attempt_usage
+        fields = (("input_tokens", "input"), ("output_tokens", "output"),
+                  ("cache_read_input_tokens", "hit"), ("cache_creation_input_tokens", "write")) if anthropic else (("prompt_tokens", "input"), ("completion_tokens", "output"))
+        for source, target in fields:
+            value = _field(usage, source, None)
+            if type(value) is int and value >= 0:
+                u[target] = max(u.get(target, 0), value)
+        if not u:
+            return
+        if anthropic:
+            u["miss"] = u.get("input", 0)
+        else:
+            details = _field(usage, "prompt_tokens_details", None)
+            hit = _field(usage, "prompt_cache_hit_tokens", None)
+            if hit is None:
+                hit = _field(details, "cached_tokens", 0) or 0
+            write = _field(details, "cache_write_tokens", 0) or 0
+            u["hit"] = max(u.get("hit", 0), hit)
+            u["write"] = max(u.get("write", 0), write)
+            u["miss"] = max(0, u.get("input", 0) - u["hit"] - u["write"])
+
+    def _event(self):
+        self._attempt_event = True
+        control = active_control.get()
+        if control:
+            control.check(inflight=True)
+
     def _reset_usage(self) -> None:
+        self.usage_reports = 0
         self.tokens_total = 0
         self.tokens_context = 0
         self.cost = 0.0
@@ -232,6 +345,7 @@ class Billing:
         """context=False 是旁路请求（摘要、网页提炼）：要算钱，但不是"对话现在多大"
         算进 context 的话，一次网页提炼就能把压缩阈值假撞上
         write 是新写进缓存的输入（anthropic 的 cache_creation），价可能跟普通输入不同 """
+        self.usage_reports += 1
         size = hit + miss + out + write
         if context:
             self.tokens_context = size
@@ -273,11 +387,14 @@ class AnthropicBackend(Billing):
                  max_tokens: int | None = None):
         import anthropic
 
-        # SDK 默认重试 2 次；agent 一跑就是几十轮请求，多给两次更划算
+        # Every retry must pass durable parent admission.
         self.client = anthropic.Anthropic(
-            max_retries=RETRIES, timeout=STREAM_TIMEOUT,
+            max_retries=0, timeout=STREAM_TIMEOUT,
             **{k: v for k, v in (("base_url", base_url), ("api_key", api_key)) if v}
         )
+        self._worker_client = self.client
+        self._worker_config = ('anthropic', dict(api_key=self.client.api_key,
+            base_url=str(self.client.base_url), timeout=STREAM_TIMEOUT))
         self.system = system
         self.tools = tools
         self.model = model
@@ -295,6 +412,7 @@ class AnthropicBackend(Billing):
 
     def set_system(self, text: str) -> None:
         self.system = text
+        self._stable_system, self._volatile_system = text, ""
 
     def set_tools(self, schemas: list[dict]) -> None:
         self.tools = list(schemas)
@@ -317,26 +435,25 @@ class AnthropicBackend(Billing):
                     rows.append("工具返回：" + _brief(without_images(_field(block, "content"))))
         return "\n".join(rows)
 
+    @request_attempt
     def ask(self, prompt: str, max_tokens: int = 2000) -> str:
         """一次性提问，不带工具也不进对话历史 """
-        reply = self.client.messages.create(
+        reply = self._sdk_call('ask',
             model=self.model, max_tokens=max_tokens,
             messages=[{"role": "user", "content": prompt}],
         )
         usage = getattr(reply, "usage", None)
-        if usage is not None:
-            self._charge(getattr(usage, "cache_read_input_tokens", 0) or 0,
-                         usage.input_tokens or 0, usage.output_tokens or 0, context=False)
+        self._observe(usage, anthropic=True)
         return "".join(b.text for b in reply.content if b.type == "text")
 
     def summarize(self) -> str:
         return self.ask(SUMMARY_PROMPT + "\n\n" + self.transcript())
 
     def compact_to(self, summary: str) -> None:
-        self.messages = [
+        native_history.replace(self, [
             {"role": "user", "content": "以下是我们之前对话的交接摘要：\n\n" + summary},
             {"role": "assistant", "content": "好的，我接着往下做 "},
-        ]
+        ])
 
     def list_models(self) -> list[str]:
         try:
@@ -372,13 +489,16 @@ class AnthropicBackend(Billing):
         ]
 
     def _cached_system(self):
-        """system 每轮原样重发，打个断点让它按缓存计价
-
-        风格、模式、memory 一变这里就换一份，缓存跟着作废——那本来就该作废
-        """
+        """Cache the stable rules/project prefix, leaving task facts after it."""
         if not self.cache or not self.system:
             return self.system
-        return [{"type": "text", "text": self.system, "cache_control": CACHE_MARK}]
+        stable = getattr(self, '_stable_system', self.system)
+        volatile = getattr(self, '_volatile_system', '')
+        blocks = ([{"type": "text", "text": stable, "cache_control": CACHE_MARK}]
+                  if stable else [])
+        if volatile:
+            blocks.append({"type": "text", "text": volatile})
+        return blocks
 
     def _cached_tools(self):
         """只在最后一项上挂 缓存按前缀算，一个断点就盖住整个 tools 块 """
@@ -419,14 +539,15 @@ class AnthropicBackend(Billing):
             return self._turn(watch, on_tool, on_think)
         except Exception as exc:
             # 断点是请求参数，不认的话错在发出的那一刻，一个字都还没吐出来，重发是安全的
-            if self.cache and not said and _cache_rejected(exc):
+            if self.cache and not said and not self._attempt_event and _cache_rejected(exc):
                 self.cache = False
                 return self._turn(on_text, on_tool, on_think)
             raise
 
+    @request_attempt
     def _turn(self, on_text, on_tool=None, on_think=None) -> TurnResult:
         self._mark_messages()
-        with self.client.messages.stream(
+        with self._sdk_call('stream',
             model=self.model,
             max_tokens=self.max_tokens,
             system=self._cached_system(),
@@ -439,6 +560,11 @@ class AnthropicBackend(Billing):
         ) as stream:
             name, partial, thought = "", "", 0
             for event in stream:
+                self._observe(getattr(getattr(event, 'message', None), 'usage', None), anthropic=True)
+                self._observe(getattr(event, 'usage', None), anthropic=True)
+                self._event()
+                if event.type == 'message_stop':
+                    self._attempt_finished = True
                 if event.type == "content_block_start":
                     block = getattr(event, "content_block", None)
                     name = _field(block, "name") if _field(block, "type") == "tool_use" else ""
@@ -455,13 +581,11 @@ class AnthropicBackend(Billing):
                     partial += event.delta.partial_json or ""
                     on_tool(name, partial)
             response = stream.get_final_message()
+            self._observe(getattr(response, "usage", None), anthropic=True)
 
         self.messages.append({"role": "assistant", "content": response.content})
         usage = getattr(response, "usage", None)
-        if usage is not None:
-            hit = getattr(usage, "cache_read_input_tokens", 0) or 0
-            written = getattr(usage, "cache_creation_input_tokens", 0) or 0
-            self._charge(hit, usage.input_tokens or 0, usage.output_tokens or 0, write=written)
+        self._observe(usage, anthropic=True)
 
         text = "".join(b.text for b in response.content if b.type == "text")
         calls = [
@@ -499,8 +623,11 @@ class OpenAICompatBackend(Billing):
                 "请先安装：pip install openai"
             ) from exc
 
-        self.client = OpenAI(api_key=api_key, base_url=base_url, max_retries=RETRIES,
+        self.client = OpenAI(api_key=api_key, base_url=base_url, max_retries=0,
                              timeout=STREAM_TIMEOUT)
+        self._worker_client = self.client
+        self._worker_config = ('openai', dict(api_key=self.client.api_key,
+            base_url=str(self.client.base_url), timeout=STREAM_TIMEOUT))
         self.model = model
         self.max_tokens = int(max_tokens or self.MAX_TOKENS)
         self.system = system
@@ -518,6 +645,7 @@ class OpenAICompatBackend(Billing):
 
     def set_system(self, text: str) -> None:
         self.system = text
+        self._stable_system, self._volatile_system = text, ""
         # 历史里的第一条就是 system，就地换掉，对话不受影响
         if self.messages and self.messages[0]["role"] == "system":
             self.messages[0] = {"role": "system", "content": text}
@@ -540,27 +668,26 @@ class OpenAICompatBackend(Billing):
                     call["function"]["name"], _brief(call["function"]["arguments"])))
         return "\n".join(rows)
 
+    @request_attempt
     def ask(self, prompt: str, max_tokens: int = 2000) -> str:
         """一次性提问，不带工具也不进对话历史 """
-        reply = self.client.chat.completions.create(
+        reply = self._sdk_call('ask',
             model=self.model, max_tokens=max_tokens,
             messages=[{"role": "user", "content": prompt}],
         )
         usage = getattr(reply, "usage", None)
-        if usage is not None:
-            hit, miss, out, write = _split_usage(usage)
-            self._charge(hit, miss, out, write=write, context=False)
+        self._observe(usage)
         return reply.choices[0].message.content or ""
 
     def summarize(self) -> str:
         return self.ask(SUMMARY_PROMPT + "\n\n" + self.transcript())
 
     def compact_to(self, summary: str) -> None:
-        self.messages = [
+        native_history.replace(self, [
             {"role": "system", "content": self.system},
             {"role": "user", "content": "以下是我们之前对话的交接摘要：\n\n" + summary},
             {"role": "assistant", "content": "好的，我接着往下做 "},
-        ]
+        ])
 
     def list_models(self) -> list[str]:
         try:
@@ -620,7 +747,15 @@ class OpenAICompatBackend(Billing):
                 and (i + 1 == len(out) or out[i + 1].get("role") not in side)]
         spots = ends[-CACHE_KEEP:]
         if out and out[0].get("role") == "system":
-            spots.insert(0, 0)
+            stable = getattr(self, '_stable_system', self.system)
+            volatile = getattr(self, '_volatile_system', '')
+            if volatile:
+                parts = ([{"type": "text", "text": stable, "cache_control": CACHE_MARK}]
+                         if stable else [])
+                parts.append({"type": "text", "text": volatile})
+                out[0] = {**out[0], "content": parts}
+            else:
+                spots.insert(0, 0)
         for i in spots:
             out[i] = _with_mark(out[i])
         return out
@@ -635,21 +770,31 @@ class OpenAICompatBackend(Billing):
         """
         args = dict(model=self.model, max_tokens=self.max_tokens, tools=self.tools,
                     stream=True, stream_options={"include_usage": True}, **extra)
-        if not self.cache:
-            return self.client.chat.completions.create(messages=self.messages, **args)
-        try:
-            return self.client.chat.completions.create(messages=self._marked(), **args)
-        except Exception as exc:
-            if getattr(exc, "status_code", None) not in (400, 404, 422):
-                raise
-        reply = self.client.chat.completions.create(messages=self.messages, **args)
-        self.cache = False
-        return reply
+        return self._sdk_call('stream',
+            messages=self._marked() if self.cache else self.messages, **args)
 
     def run_turn(self, on_text, on_tool=None, on_think=None) -> TurnResult:
+        try:
+            return self._turn(on_text, on_tool, on_think)
+        except Exception as exc:
+            if getattr(exc, 'sdk_cleanup_error', None) or not self.cache or self._attempt_event or getattr(exc, 'status_code', None) not in (400, 404, 422):
+                raise
+            self.cache = False
+            try:
+                return self._turn(on_text, on_tool, on_think)
+            except BaseException:
+                self.cache = True
+                raise
+
+    @request_attempt
+    def _turn(self, on_text, on_tool=None, on_think=None) -> TurnResult:
         self._mind_thinking()
         extra = {"reasoning_effort": self.effort} if self.effort else {}
         stream = self._open(extra)
+        from .sdk_worker import Exchange
+        worker_stream = isinstance(stream, Exchange)
+        if worker_stream:
+            stream.__enter__()
 
         text = ""
         reasoning = ""
@@ -657,55 +802,54 @@ class OpenAICompatBackend(Billing):
         shown = 0
         finish = ""
         pending: dict[int, dict] = {}
-        usage = None
-        for chunk in stream:
-            # 带 usage 的那个收尾 chunk 没有 choices 只记住最后一份、循环结束再算账：
-            # DeepSeek 有时会在两个 chunk 上都带 usage（数值一样），见一份算一份
-            # 的话累计量和花费恰好翻倍 —— 日志里几次 run 的总量正好是各轮之和的两倍
-            if getattr(chunk, "usage", None) is not None:
-                usage = chunk.usage
-            if not chunk.choices:
-                continue
-            finish = chunk.choices[0].finish_reason or finish
-            delta = chunk.choices[0].delta
-            if getattr(delta, "content", None):
-                on_text(delta.content)
-                text += delta.content
-            # 思考过程要原样带回去 DeepSeek v4 的思考模式下不回传就是 400：
-            # "The `reasoning_content` in the thinking mode must be passed back"
-            # 只有它自己吐过才会带上，所以不会往不认这个字段的接口上乱塞
-            piece = getattr(delta, "reasoning_content", None)
-            if piece:
-                reasoning += piece
-            else:
-                # **OpenRouter 把思考放在 `reasoning`**（Claude / GPT / Qwen 全是这个字段），
-                # 只认 `reasoning_content` 的话，经它跑的模型想十分钟屏幕上一个字都没有 ——
-                # 0.58.0 的字数和 0.77.0 的轨迹对它们从来没亮过（2026-09-23 实测三家都是 0 次）
-                # 不进历史：它那边不要求带回去，实测带不带下一轮都一样
-                piece = getattr(delta, "reasoning", None)
-                if not isinstance(piece, str):
-                    piece = ""
-                shown += len(piece)
-            # **想的过程也要让人看见。** 不报的话思考型模型在那儿想十分钟，
-            # 屏幕上一个字都没有 —— 跟死了长得一模一样（实测过一轮 622 秒，
-            # 全在这儿；数据一直在流，所以连超时都不会响）
-            if piece and on_think:
-                on_think(len(reasoning) + shown, piece)
-            for tc in getattr(delta, "tool_calls", None) or []:
-                slot = pending.setdefault(tc.index, {"id": "", "name": "", "args": ""})
-                if tc.id:
-                    slot["id"] = tc.id
-                if tc.function and tc.function.name:
-                    slot["name"] = tc.function.name
-                if tc.function and tc.function.arguments:
-                    slot["args"] += tc.function.arguments
-                if on_tool and slot["name"]:
-                    on_tool(slot["name"], slot["args"])
+        try:
+            for chunk in stream:
+                # Usage events are cumulative snapshots, including repeated final chunks.
+                self._observe(getattr(chunk, "usage", None))
+                self._event()
+                if not chunk.choices:
+                    continue
+                finish = chunk.choices[0].finish_reason or finish
+                delta = chunk.choices[0].delta
+                if getattr(delta, "content", None):
+                    on_text(delta.content)
+                    text += delta.content
+                # 思考过程要原样带回去 DeepSeek v4 的思考模式下不回传就是 400：
+                # "The `reasoning_content` in the thinking mode must be passed back"
+                # 只有它自己吐过才会带上，所以不会往不认这个字段的接口上乱塞
+                piece = getattr(delta, "reasoning_content", None)
+                if piece:
+                    reasoning += piece
+                else:
+                    # **OpenRouter 把思考放在 `reasoning`**（Claude / GPT / Qwen 全是这个字段），
+                    # 只认 `reasoning_content` 的话，经它跑的模型想十分钟屏幕上一个字都没有 ——
+                    # 0.58.0 的字数和 0.77.0 的轨迹对它们从来没亮过（2026-09-23 实测三家都是 0 次）
+                    # 不进历史：它那边不要求带回去，实测带不带下一轮都一样
+                    piece = getattr(delta, "reasoning", None)
+                    if not isinstance(piece, str):
+                        piece = ""
+                    shown += len(piece)
+                # **想的过程也要让人看见。** 不报的话思考型模型在那儿想十分钟，
+                # 屏幕上一个字都没有 —— 跟死了长得一模一样（实测过一轮 622 秒，
+                # 全在这儿；数据一直在流，所以连超时都不会响）
+                if piece and on_think:
+                    on_think(len(reasoning) + shown, piece)
+                for tc in getattr(delta, "tool_calls", None) or []:
+                    slot = pending.setdefault(tc.index, {"id": "", "name": "", "args": ""})
+                    if tc.id:
+                        slot["id"] = tc.id
+                    if tc.function and tc.function.name:
+                        slot["name"] = tc.function.name
+                    if tc.function and tc.function.arguments:
+                        slot["args"] += tc.function.arguments
+                    if on_tool and slot["name"]:
+                        on_tool(slot["name"], slot["args"])
+        finally:
+            close = getattr(stream, 'close', None)
+            if close:
+                close()
 
-        if usage is not None:
-            hit, miss, out, write = _split_usage(usage)
-            self._charge(hit, miss, out, write=write)
-
+        self._attempt_finished = bool(finish)
         ordered = [pending[i] for i in sorted(pending)]
 
         assistant: dict = {"role": "assistant", "content": text or None}

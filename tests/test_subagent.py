@@ -210,7 +210,10 @@ class TestBilling(Base):
         b = self.use([call("c1", "task", prompt="问题")])
         b.priced = True
         quiet(self.agent.send, "派个人")
-        self.assertGreaterEqual(self.agent.cost, 0.05)
+        self.assertGreaterEqual(self.agent.subagent_cost, 0.05)
+        # The main FakeBackend returned no usage: a known child cost cannot
+        # turn the session's unknown total into a complete bill.
+        self.assertIsNone(self.agent.cost)
 
 
 class TestInLoop(Base):

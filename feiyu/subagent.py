@@ -21,19 +21,19 @@ TOOLS = ("read_file", "list_files", "search", "symbol")
 MAX_ROUNDS = 12
 MAX_REPORT = 6000
 
-SYSTEM = """你是被派出来摸情况的 有人给你一个问题，你去代码库里查清楚，然后写一段回答 
+SYSTEM = """你是被派出来摸情况的 有人给你一个问题，你去代码库里查清楚，然后写一段回答
 
-你只能读：read_file、list_files、search、symbol 改不了任何东西，也上不了网 
+你只能读：read_file、list_files、search、symbol 改不了任何东西，也上不了网
 
 怎么干：
-- 先用 search / list_files 把范围缩小，再读关键的那几个文件 别一上来就整个读一遍 
-- 问的是「谁调用了 / 定义在哪」就用 symbol，文本搜索会把同名的和注释里的混进来 
-- 查到够回答问题就停，不要顺手把周边都摸一遍 
+- 先用 search / list_files 把范围缩小，再读关键的那几个文件 别一上来就整个读一遍
+- 问的是「谁调用了 / 定义在哪」就用 symbol，文本搜索会把同名的和注释里的混进来
+- 查到够回答问题就停，不要顺手把周边都摸一遍
 
 怎么答：
-- 直接写结论 派你来的人看不到你读过什么，所以该说的事实要写在回答里 
-- **凡是提到代码的地方都带上 `文件:行号`**，他要照着去看 
-- 没查到就说没查到，别猜 查到的东西跟问题不完全对得上，也说清楚差在哪 
+- 直接写结论 派你来的人看不到你读过什么，所以该说的事实要写在回答里
+- **凡是提到代码的地方都带上 `文件:行号`**，他要照着去看
+- 没查到就说没查到，别猜 查到的东西跟问题不完全对得上，也说清楚差在哪
 - 不用汇报你的过程，不用写「我搜索了……」 """
 
 
@@ -41,59 +41,90 @@ def describe(prompt: str, limit: int = 60) -> str:
     return " ".join((prompt or "").split())[:limit]
 
 
-def run(prompt: str, *, entry: dict, workspace, trace=None, lsp=None) -> tuple[str, list, dict]:
+def run(prompt: str, *, entry: dict, workspace, trace=None, lsp=None, control=None, on_usage=None, event_emit=None) -> tuple[str, list, dict]:
     """跑一个子 agent 返回 (结论, 给人看的过程行, 用量)
 
     过程行不当场打印而是带回去：并行跑几个子 agent 时，各自往屏幕上写会交叉成
     一团 由调用方在主线程按顺序画
     """
     from .providers import ToolOutput, build_backend
+    from . import provenance
     from .tools import TOOL_SCHEMAS, Toolbox
 
+    sources = []
     schemas = [s for s in TOOL_SCHEMAS if s["name"] in TOOLS]
     backend = build_backend(entry, system=SYSTEM, tools=schemas)
-    # 自己的 Toolbox：cwd、清单这些状态跟主 agent 和别的子 agent 都不共享
-    box = Toolbox(workspace)
-    box.vision = getattr(backend, "vision", False)
-    if lsp is not None:
-        box.lsp = lsp
-    backend.add_user_message(prompt)
+    try:
+        # 自己的 Toolbox：cwd、清单这些状态跟主 agent 和别的子 agent 都不共享
+        box = Toolbox(workspace)
+        if event_emit is not None:
+            box.execution.emit = event_emit
+        elif trace is not None:
+            box.execution.emit = trace.write
+        box.execution.control = control
+        box.vision = getattr(backend, "vision", False)
+        if lsp is not None:
+            box.lsp = lsp
+        backend.add_user_message(prompt)
 
-    lines: list[tuple[str, str]] = []
-    for _ in range(MAX_ROUNDS):
-        turn = backend.run_turn(on_text=lambda _t: None)
-        if not turn.tool_calls:
-            report = (turn.text or "").strip()
-            break
-        outputs = []
-        for call in turn.tool_calls:
-            if call.name not in TOOLS:
-                outputs.append(ToolOutput(
-                    id=call.id, is_error=True,
-                    content="子 agent 只能用 %s" % "、".join(TOOLS)))
-                continue
-            result = box.run(call.name, call.input)
-            lines.append(("", "%s %s" % (
-                call.name, _target(call.input))[:100] + " → " + (result.summary or "")))
-            # **图片要带上。** `box.vision` 上面刚按后端能力打开了，read_file 读图片
-            # 时 content 只是「（下面是 a.png，1024×768）」这一句，图在 result.image 里 ——
-            # 不抄过来的话子 agent 收到的就只有这句话 主 agent 那两处（_run_parallel、
-            # _note_jobs）是同一个坑，这是第三处
-            outputs.append(ToolOutput(id=call.id, content=result.content,
-                                      is_error=result.is_error, image=result.image))
-        backend.add_tool_results(outputs)
-    else:
-        report = "（查了 %d 轮还没收敛，先停了 问题可能太大，拆小一点再派）" % MAX_ROUNDS
+        lines: list[tuple[str, str]] = []
+        for _ in range(MAX_ROUNDS):
+            if control is None:
+                turn = backend.run_turn(on_text=lambda _t: None)
+            else:
+                with control.attempt(backend):
+                    turn = backend.run_turn(on_text=lambda _t: None)
+            if not turn.tool_calls:
+                report = (turn.text or "").strip()
+                break
+            outputs = []
+            try:
+                for call in turn.tool_calls:
+                    if call.name not in TOOLS:
+                        outputs.append(ToolOutput(
+                            id=call.id, is_error=True,
+                            content="子 agent 只能用 %s" % "、".join(TOOLS)))
+                        continue
+                    from . import permissions
+                    problem = call.error or box.execution.problem(call.name, call.input)
+                    if not problem and permissions.verdict(call.name, call.input) == "deny":
+                        problem = "被权限规则拒绝"
+                    if problem:
+                        box.execution.reject(call.name, problem, source="investigation")
+                        outputs.append(ToolOutput(id=call.id, content=problem, is_error=True))
+                        continue
+                    result = box.execution.dispatch(call, box.run)
+                    lines.append(("", "%s %s" % (
+                        call.name, _target(call.input))[:100] + " → " + (result.summary or "")))
+                    # **图片要带上。** `box.vision` 上面刚按后端能力打开了，read_file 读图片
+                    # 时 content 只是「（下面是 a.png，1024×768）」这一句，图在 result.image 里 ——
+                    # 不抄过来的话子 agent 收到的就只有这句话 主 agent 那两处（_run_parallel、
+                    # _note_jobs）是同一个坑，这是第三处
+                    sources.append(provenance.ref("external_data", result.content, identity=call.id))
+                    outputs.append(ToolOutput(id=call.id, content=result.content,
+                                              is_error=result.is_error, image=result.image))
+            finally:
+                done = {o.id for o in outputs}
+                outputs.extend(ToolOutput(id=c.id, content="调查已中断，不自动重试", is_error=True)
+                               for c in turn.tool_calls if c.id not in done)
+                backend.add_tool_results(outputs)
+        else:
+            report = "（查了 %d 轮还没收敛，先停了 问题可能太大，拆小一点再派）" % MAX_ROUNDS
 
-    if not report:
-        report = "（什么都没查到）"
-    # 子 agent 的用量不进主对话，但照样是要付钱的 —— 不带回去就成了看不见的开销
-    used = {"tokens": getattr(backend, "tokens_total", 0),
-            "cost": getattr(backend, "cost", 0.0),
-            "priced": getattr(backend, "priced", False)}
-    if trace is not None:
-        trace.write("subagent", prompt=prompt, rounds=len(lines), **used)
-    return report[:MAX_REPORT], lines, used
+        if not report:
+            report = "（什么都没查到）"
+        # 子 agent 的用量不进主对话，但照样是要付钱的 —— 不带回去就成了看不见的开销
+        used = {"tokens": getattr(backend, "tokens_total", 0),
+                "cost": getattr(backend, "cost", 0.0),
+                "priced": getattr(backend, "priced", False)}
+        if trace is not None:
+            trace.write("subagent", prompt=prompt, rounds=len(lines), **used)
+        return provenance.report(report[:MAX_REPORT], sources), lines, used
+    finally:
+        if on_usage is not None:
+            on_usage(dict(tokens=getattr(backend, 'tokens_total', 0),
+                          cost=getattr(backend, 'cost', 0.0),
+                          priced=getattr(backend, 'priced', False)))
 
 
 def _target(args: dict) -> str:

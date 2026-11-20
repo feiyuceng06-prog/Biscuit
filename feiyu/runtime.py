@@ -40,3 +40,24 @@ def configure_frozen_environment():
         if context.cert_store_stats()['x509_ca']:
             os.environ['SSL_CERT_FILE'] = path
             return
+
+
+def configure_serve_stdio():
+    """Use UTF-8 for desktop JSON lines, before any stdin read.
+
+    Reconfigure the live wrappers rather than relying on interpreter startup
+    environment variables (which may be overridden or absent in a frozen host).
+    Leave terminal sessions and private binary worker IPC to their own entries.
+    StringIO/embedder streams without reconfigure, including None, are retained.
+    """
+    for name in ('stdin', 'stdout', 'stderr'):
+        stream = getattr(sys, name, None)
+        reconfigure = getattr(stream, 'reconfigure', None)
+        if callable(reconfigure):
+            # Protocol data must round-trip without replacement. Diagnostics may
+            # contain an unpaired surrogate from an OS path/exception; escape it.
+            options = {'encoding': 'utf-8',
+                       'errors': 'backslashreplace' if name == 'stderr' else 'strict'}
+            if name != 'stdin':
+                options['write_through'] = True
+            reconfigure(**options)

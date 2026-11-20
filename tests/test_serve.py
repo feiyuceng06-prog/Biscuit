@@ -251,6 +251,9 @@ class TestDeleteSession(unittest.TestCase):
             self.reset_called = False
             self.ready = True
 
+        def _guard_task_switch(self):
+            pass
+
         def reset(self):
             self.reset_called = True
 

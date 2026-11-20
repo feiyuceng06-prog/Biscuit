@@ -1,89 +1,159 @@
-"""结构化事件：让 ui 除了画到终端，还能把同一件事报给别的前端
+"""Run-owned diagnostic routing; never an execution grant or durable journal."""
+from contextvars import ContextVar, copy_context
+from contextlib import contextmanager
+from functools import wraps
+import threading
+import uuid
 
-`feiyu/ui.py` 是唯一给人看的输出层（见 CLAUDE.md 的分层原则），所以「换一个前端」
-的接缝就在这儿，而不是去改 agent.py 里那三十处 `print(ui.xxx(...))`。
-
-装上 sink 之后，ui 的那几个函数照旧返回 ANSI 字符串（终端那条路一个字没变），
-同时把同一件事按结构报一份出来 网页端拿到的是 `{"kind": "tool_start",
-"name": "edit_file", ...}` 而不是画好的字符画——**画什么样是前端的事**，
-把 ANSI 发给浏览器再解析回来是最糟的一种做法。
-
-没装 sink 时 `emit()` 是一次字典查表加一次 falsy 判断，终端跑的就是这条路。
-"""
-
-_sink = None
+_sink = ContextVar('event_sink', default=None)
+_route = ContextVar('event_route', default=None)
 
 
 def install(fn) -> None:
-    """装一个 (kind, payload) -> None 的回调 装第二个会顶掉第一个 """
-    global _sink
-    _sink = fn
+    """Legacy installation affects only the calling context."""
+    _sink.set(fn)
 
 
 def clear() -> None:
-    global _sink
-    _sink = None
+    _sink.set(None)
 
 
 def active() -> bool:
-    return _sink is not None
+    return _sink.get() is not None
 
 
-class paused:
-    """这段里 ui 的输出不报事件
-
-    斜杠命令的那些函数（`__main__._mode` 之类）内部就是拿 `ui.notice()` 拼出来的，
-    不挡的话一条命令会报两遍：内部那次一条、调用方把返回值发出去又一条
-    """
+class binding:
+    def __init__(self, sink, route=None):
+        self.sink, self.route = sink, route
 
     def __enter__(self):
-        global _sink
-        self._saved, _sink = _sink, None
+        self.tokens = (_sink.set(self.sink), _route.set(self.route))
         return self
 
     def __exit__(self, *exc):
-        global _sink
-        _sink = self._saved
+        _route.reset(self.tokens[1])
+        _sink.reset(self.tokens[0])
         return False
 
 
-class capturing:
-    """这段里 ui 的输出不往外报，但**等级留下来**
+class paused(binding):
+    """Suppress presentation only in this context, including nested failures."""
+    def __init__(self):
+        super().__init__(None)
 
-    `paused` 是整个挡掉，而斜杠命令的返回是调用方自己发出去的一条 note ——
-    挡掉的话它就不知道该发 notice 还是 error，于是**所有报错在桌面端
-    都长得像普通提示**（`/mode 没这个模式` 跟切换成功一个样）。
-    这个类把 ui 报过的最高一档留在 `.level` 上。
-    """
 
-    RANK = {"notice": 0, "warn": 1, "error": 2}
+class capturing(binding):
+    RANK = {'notice': 0, 'warn': 1, 'error': 2}
 
     def __init__(self):
-        self.level = "notice"
+        self.level = 'notice'
+        super().__init__(self._take)
 
     def _take(self, kind, payload):
-        if kind != "note":
-            return
-        got = payload.get("level", "notice")
-        if self.RANK.get(got, 0) > self.RANK.get(self.level, 0):
-            self.level = got
+        if kind == 'note':
+            got = payload.get('level', 'notice')
+            if self.RANK.get(got, 0) > self.RANK[self.level]:
+                self.level = got
 
-    def __enter__(self):
-        global _sink
-        self._saved, _sink = _sink, self._take
-        return self
 
-    def __exit__(self, *exc):
-        global _sink
-        _sink = self._saved
-        return False
+def _deliver(sink, kind, payload):
+    if sink is not None:
+        try:
+            sink(kind, payload)
+        except Exception:
+            pass  # Only frontend delivery is best effort.
+
+
+class Route:
+    def __init__(self, sink, session_id=None, task_id=None):
+        self.sink = sink
+        self.session_id, self.task_id = session_id, task_id
+        self.run_id = uuid.uuid4().hex
+        self.seq = 0
+        self.closed = False
+        self.lock = threading.RLock()
+
+    def emit(self, kind, **payload):
+        # Serialize allocation AND delivery so concurrent workers cannot reorder seq.
+        with self.lock:
+            if self.closed:
+                return
+            self.seq += 1
+            payload = dict(payload, session_id=self.session_id, task_id=self.task_id,
+                           run_id=self.run_id, seq=self.seq)
+            _deliver(self.sink, kind, payload)
+
+    def close(self):
+        with self.lock:
+            self.closed = True
 
 
 def emit(kind: str, **payload) -> None:
-    """报一件事 **绝不能因为前端出问题把 agent 弄崩**——理由同 trace.write """
-    if _sink is None:
+    route = _route.get()
+    if route is not None:
+        route.emit(kind, **payload)
+    else:
+        _deliver(_sink.get(), kind, payload)
+
+
+def fact(kind, **payload):
+    emit(kind, **dict({'source_kind': 'program_state'}, **payload))
+
+
+def admitted(session_id, task_id):
+    route = _route.get()
+    if route is not None:
+        route.session_id, route.task_id = session_id, task_id
+
+
+def submit(pool, fn, *args, **kwargs):
+    """One context per submission; never assume threads inherit ContextVars."""
+    return pool.submit(copy_context().run, fn, *args, **kwargs)
+
+
+def running(fn):
+    @wraps(fn)
+    def call(agent, *args, **kwargs):
+        sink = getattr(agent, 'event_sink', None)
+        if sink is None and _route.get() is None:
+            sink = _sink.get()
+        if sink is None:
+            from . import ui
+            sink = ui.runtime_event
+        route = Route(sink, agent.session_id, agent.task_id)
+        route.owner = agent
+        try:
+            with binding(sink, route):
+                return fn(agent, *args, **kwargs)
+        finally:
+            route.close()
+    return call
+
+
+def owned_fact(agent, kind, **payload):
+    route = _route.get()
+    if route is not None and getattr(route, 'owner', None) is agent:
+        route.emit(kind, **dict({'source_kind': 'program_state'}, **payload))
         return
+    # Commands outside send have their own one-fact run. Never borrow another
+    # agent's current route/sink, including in nested calls.
+    sink = getattr(agent, 'event_sink', None)
+    if sink is None and route is None:
+        sink = _sink.get()
+    if sink is None:
+        from . import ui
+        sink = ui.runtime_event
+    command = Route(sink, agent.session_id, agent.task_id)
+    command.emit(kind, **dict({'source_kind': 'program_state'}, **payload))
+    command.close()
+
+
+@contextmanager
+def frontend(agent, sink):
+    previous = getattr(agent, 'event_sink', None)
+    agent.event_sink = sink
     try:
-        _sink(kind, payload)
-    except Exception:
-        pass
+        with binding(sink):
+            yield
+    finally:
+        agent.event_sink = previous

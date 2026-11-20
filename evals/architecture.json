@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "groups": ["executor", "verification", "compaction", "recovery"],
+  "splits": ["development", "holdout"],
+  "repeat": 6,
+  "baseline": "d82d943e64dcf4129e5bc44f4798abff6949da83",
+  "comparison": "confounded_full_snapshot",
+  "live_ready": false,
+  "model": {
+    "provider": "openai",
+    "version": "gpt-4.1-2025-04-14",
+    "temperature": 0,
+    "top_p": 1,
+    "seed": null,
+    "auxiliary": "same_exact_version",
+    "availability_verified": false
+  },
+  "tools": ["read_file", "write_file", "edit_file", "bash"],
+  "budget": {"rounds": 30, "seconds": 120, "cny": 3.0, "attempts": 2},
+  "environment": {
+    "network": "provider_only_after_authorization",
+    "agent_isolation": "separate_uid_no_controller_access",
+    "home": "fresh_per_observation",
+    "dependencies": "both_arms_same_frozen_environment_required",
+    "system_prompt": "source_native_prompt_sha256_per_arm_required",
+    "provider_credentials": "dedicated_evaluation_credentials_only"
+  }
+}

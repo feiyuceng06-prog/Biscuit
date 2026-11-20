@@ -39,6 +39,7 @@ class Base(unittest.TestCase):
         self._saved = session.DIR
         session.DIR = os.path.join(self.tmp.name, "sessions")
         self.ws = Path(self.tmp.name) / "ws"
+        self.ws.mkdir(exist_ok=True)
 
     def tearDown(self):
         session.DIR = self._saved
@@ -77,14 +78,15 @@ class TestRoundTrip(Base):
             stream.write('{"partial":')
             raise OSError("disk full")
         with patch.object(session.json, "dump", side_effect=fail):
-            session.save(self.ws, agent, "one")
+            with self.assertRaises(session.PersistenceError):
+                session.save(self.ws, agent, "one")
         self.assertEqual(Path(session._path(self.ws, "one")).read_bytes(), original)
         self.assertEqual(session.load(self.ws, "one")["model"], "fake")
         self.assertFalse(list(Path(session.folder(self.ws)).glob(".feiyu-session-*")))
 
     def test_权限是_600(self):
         session.save(self.ws, Agentish(self.make()))
-        mode = stat.S_IMODE(os.stat(session._legacy_path(self.ws)).st_mode)
+        mode = stat.S_IMODE(os.stat(session._path(self.ws, session.latest_id(self.ws))).st_mode)
         self.assertEqual(mode, 0o600)
 
     def test_不同工作区互不干扰(self):
@@ -160,7 +162,9 @@ class TestRoundTrip(Base):
 
     def test_老位置那份照样读得到(self):
         """升级之后 feiyu --resume 不能突然说没有上次的对话 """
-        session.save(self.ws, Agentish(self.make()))          # 不给 sid = 写老位置
+        os.makedirs(session.DIR, exist_ok=True)
+        with open(session._legacy_path(self.ws), 'w') as stream:
+            json.dump(dict(model='fake', messages=self.make().messages), stream)
         rows = session.listing(self.ws)
         self.assertEqual([r["id"] for r in rows], [session.LEGACY])
         self.assertIsNotNone(session.load(self.ws, session.LEGACY))
@@ -182,15 +186,17 @@ class TestRoundTrip(Base):
     def test_id_不合法一律不认(self):
         """id 会拼进路径，`../` 这种要挡住 """
         for bad in ("../../etc/passwd", "a/b", "", "x" * 50, "有中文"):
-            session.save(self.ws, Agentish(self.make()), bad)
+            with self.assertRaises(session.PersistenceError):
+                session.save(self.ws, Agentish(self.make()), bad)
             self.assertIsNone(session.load(self.ws, bad), bad)
         self.assertEqual(session.listing(self.ws), [])
 
-    def test_坏文件当作没有(self):
+    def test_坏文件明确报错并保留(self):
         os.makedirs(session.DIR, exist_ok=True)
         with open(session._legacy_path(self.ws), "w", encoding="utf-8") as f:
             f.write("{ 坏了")
-        self.assertIsNone(session.load(self.ws))
+        with self.assertRaises(session.PersistenceError):
+            session.load(self.ws)
 
 
 class TestPlain(Base):
@@ -306,10 +312,9 @@ class TestLegacyId(Base):
     def test_存不出_legacy_json(self):
         session.save(self.ws, self.agent(), session.LEGACY)
         self.assertFalse(os.path.exists(session._path(self.ws, session.LEGACY)))
-        self.assertTrue(os.path.exists(session._legacy_path(self.ws)))
-        # 照样列得出来、读得回来
-        self.assertEqual([r["id"] for r in session.listing(self.ws)], [session.LEGACY])
-        self.assertTrue(session.load(self.ws, session.LEGACY))
+        self.assertFalse(os.path.exists(session._legacy_path(self.ws)))
+        self.assertNotEqual(session.latest_id(self.ws), session.LEGACY)
+        self.assertTrue(session.load(self.ws))
 
     def test_旧版留下的_legacy_json_删得掉(self):
         """0.55.0 以前的 save 会往新目录里写 legacy.json，那份也得删得掉 """
@@ -458,7 +463,7 @@ class TestBrokenFiles(unittest.TestCase):
         session.DIR = os.path.join(self.tmp.name, "sessions")
         self.addCleanup(setattr, session, "DIR", before)
         self.ws = Path(self.tmp.name) / "ws"
-        self.ws.mkdir()
+        self.ws.mkdir(exist_ok=True)
         self.here = Path(session.folder(self.ws))
         self.here.mkdir(parents=True)
 
@@ -484,7 +489,8 @@ class TestBrokenFiles(unittest.TestCase):
         """只判真值的话这个字符串会被装进 backend.messages，下一次请求直接 400 """
         self.put("20260101-000001.json", '{"messages":"不是列表"}')
         self.assertEqual(session.listing(self.ws), [])
-        self.assertIsNone(session.load(self.ws, "20260101-000001"))
+        with self.assertRaises(session.PersistenceError):
+            session.load(self.ws, "20260101-000001")
 
     def test_标题和条数不是那个类型时不崩(self):
         self.put("20260101-000001.json", '{"messages":[{"role":"user","content":"好"}], '

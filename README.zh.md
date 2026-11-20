@@ -16,6 +16,8 @@ Windows x64 安装包将在 Windows 构建通过后的 [Releases](https://github
 
 从源码构建：安装 Python 3.10+、Node.js 22+、MSVC 构建工具和 Git for Windows，在 PowerShell 中运行 `./install-windows.ps1`，安装程序输出在 `desktop/release/`。Windows x64 安装包已通过 Windows 原生 CI 的安装和桌面冒烟测试；尚需更多真实用户环境和模型请求验证。
 
+未发布源码现为桌面/`--serve` JSON 输入输出显式设置 UTF-8；严格 cp936/cp1252 合成管道及 Linux 冻结后端已通过离线 Unicode 验证。这尚不能确认 Windows 0.84.5 部分文字乱码/缺失和对话报错的现场根因或已彻底解决，仍需 Windows 原生验证。既有归档 Linux 安装包早于本次修复，不含此改动。
+
 ### Linux 一行装好（桌面版 + 终端版）
 
 ```bash
@@ -185,7 +187,7 @@ feiyu "给 CLI 加一个 --json 参数"    # 跑完一个任务就退出
 
 **截图可以直接给它看。** `read_file` 读到 png、jpg、gif、webp 会把图交给模型。模型能不能看图在 `/key add` 时填，没标的模型会明说看不了。
 
-**跑很久的命令挂后台。** dev server、watch、长构建让它用 `bash` 的 `background` 参数起，之后用 `job` 取新输出。命令结束时它会收到通知。退出 feiyu 时这些进程会一起被杀掉。
+**跑很久的命令挂后台。** dev server、watch、长构建让它用 `bash` 的 `background` 参数起，之后用 `job` 取新输出。命令结束时它会收到通知。退出 feiyu 时会清理受控 job；进程身份无法核实的仍保持 unknown。
 
 **改文件前必须先读过。** 读过之后文件又被别人改了（你在编辑器里改的，或者格式化工具改的），写操作会被拦下让它重新读。这一道闸挡的是它拿旧内容整份覆盖、把你的改动抹掉的情况。
 
@@ -317,7 +319,12 @@ docker / podman 的 socket 也挡在外面——碰得到它就能 `docker run -
 verify: npm test
 ```
 
-项目文件里的 `verify:` 首次使用时会展示来源和完整命令，请你确认是否信任；约定文件内容变化并重新加载后需要再次确认。拒绝或无人回答时不会执行，`auto` 模式也不会跳过这次信任确认。`/verify <命令>` 是用户主动设置，只作用于当前会话。已信任的命令在首次改动前及每次写完或改完文件后运行；这些命令在 bash 沙箱外执行。没过就把报错交给它自己修。报错会先给一份要点（哪个用例挂了、断言是什么、编译错在哪行），再附原文。
+项目文件里的 `verify:` 首次使用时会展示来源和完整命令，请你确认是否信任；约定文件内容变化并重新加载后需要再次确认。拒绝或无人回答时不会执行，`auto` 模式也不会跳过这次信任确认。`/verify <命令>` 是用户主动设置，只作用于当前会话。已信任的命令在首次改动前及每次写完或改完文件后运行；这些命令遵循共用 Shell 沙箱、命令权限及出网规则。没过就把报错交给它自己修。报错会先给一份要点（哪个用例挂了、断言是什么、编译错在哪行），再附原文。
+
+0.85.0 起，首次复现和自动验证把机器可读证据保存到会话：命令、工作区/cwd、任务/会话 ID、起止时间、退出码、超时/取消、前后内容指纹，以及 `$XDG_STATE_HOME/feiyu/verification`（默认 `~/.local/state` 下）的私有持久 stdout/stderr 日志。执行结果与当前有效性分开保存。编辑、Shell/MCP/hooks、后台工作均保守失效旧结论；消费结论前重新核对内容。恢复记录只作历史证据，须重跑。代码工作结束会展示验证范围与状态；闲聊无需代码验收。
+
+默认覆盖 Git tracked 与非忽略 untracked，无 Git 时有界扫描目录（20,000 文件、每次读取 256 MiB、5 秒；读两次内容）。扫描失败、超限、软链/子模块、后台任务仍运行或日志缺失时不能得到当前通过。状态/日志目录应放在工作区外。忽略依赖、外部服务和动态环境输入未完整覆盖；这不是原子文件系统快照。日志目前无自动清理策略。hooks/verify 分别检查来源信任和命令权限，现在复用 bash 沙箱。
+
 
 **长任务的三道闸。** 同一份约定文件里，另起一行：
 
@@ -578,7 +585,7 @@ stdout 里只有 JSON，界面和日志全走 stderr。不合 schema 会让它�
   变量没设就直接不起这台服务器，不会把字面量 `${VAR}` 发出去换回一个看不懂的 401。
 - 工具以 `mcp_<服务器>_<工具>` 的名字出现，`/mcp` 能看到每个服务器的状态和工具。
 - 项目配置跟项目钩子一样，第一次见到要你点头才启动。
-- 默认模式下每个 MCP 工具都要确认，服务器自报只读的除外。规则 `Mcp(fs:*)` 放行整个服务器，`Mcp(fs read_file)` 放行一个工具。
+- 默认模式下 MCP 工具均需授权，服务器自报只读不能免除授权。规则 `Mcp(fs:*)` 放行整个服务器，`Mcp(fs read_file)` 放行一个工具。
 - 改了配置要重启 feiyu。
 
 ## 模型
@@ -637,3 +644,37 @@ python -m unittest discover -s tests -t .
 ## License
 
 [MIT](LICENSE) © feiyuceng06-prog
+
+0.86.0 起，参数校验先于授权及 PreToolUse hook；共用执行器记录开始/结果，保持只读批次并行、混合写批次串行，不自动重试副作用。hook 和自动 verify 复用 Shell 沙箱与出网边界；项目来源信任与命令授权分开，deny 始终优先。MCP 自报只读不授信任、不扩大并行。执行事件仅供核查；阶段 D 已另加持久任务 journal。当前验收边界见[交付矩阵](docs/architecture-delivery.md)。
+
+阶段 D 开发中（0.87.0，未完成）：任务 journal 增加 Git worktree/common-dir 身份、陈旧 writer 和内层数据检查。`/task` JSON 控制入口录入带原请求引用的约束/验收、绑定真实验证记录并重新核验；模型不能自封验收通过。恢复保存逐操作文件/Git观察，未知副作用阻止继续，须用户明确记录核对依据才能解除阻断，不授予重跑权限；reset/new 不能绕过当前 unknown。完整任务事实回到上下文，取消/异常保存最终 checkpoint。开发树已实现父模型账本和 Linux 后台 job 协议，Shell/hooks/MCP/SDK 取消路径已实现并在记录范围内审过，LSP 实现仍缺受阻的独立审查；任意外部副作用仍需人工核对，不保证恰好一次。见[当前设计与控制命令](docs/architecture-evolution.md#15-d1--d2-unknown-续作0870待-astra-审阅)。
+
+开发说明（未发布0.87.0）：main、helper、压缩、reviewer 和子调查的模型请求已共享持久化任务费用/截止账本。缺失 usage 保留未知；恢复不会补充额度或延长已记录的截止时间。provider retry/部分 usage、动态预算收紧及 Shell/hooks/MCP/SDK 等待取消已有局部审查证据；平台缺口、受阻 LSP 审查及历史警告仍未关闭；SDK 父硬退出仅在交付矩阵规定的普通 Linux 范围有限接受。迁移限制和证据见[设计第17节](docs/architecture-evolution.md)及[进度记录](docs/architecture-progress.md)，不得据此验收 D 完成。
+
+Linux 后台 job 现在保持 journal running，直到监管进程保存真实退出/取消状态与持久输出。`job` 支持 list/status/output/wait/kill，wait 检查取消和截止。恢复仅观测 boot ID/starttime 与持久收据，不重放；signal 必须通过 pidfd 身份校验。日志/退出证据缺失或终态保存失败保持 unknown。running/pending job 阻止切换任务，仍存活的 job 不能人工 resolve。仅控制原进程组，不涵盖主动逃逸的后代；非支持平台拒绝新后台 job。日志尚无自动清理策略。崩溃窗口与限制见[第18节协议](docs/architecture-evolution.md)，后台父限制修复已在 Linux 范围有限接受，不代表 D 整体验收通过。
+
+任务结果控制：`/task {"action":"result","result":"partial","reason":"已交付X，Y尚未完成"}` 记录人工声明；验证无法运行时用 `unverifiable` 并提供原因，撤回结论用 `unfinished`。`/task complete`（或 JSON result `completed`）仍要求当前有效验收事实且无未决副作用。声明不把测试改为通过、不解除 unknown。继续 partial/unverifiable 的工作会将结果清回 unfinished，保留要求和证据；`/task` 与 `/task {"action":"show"}` 分别展示结果和运行状态。CLI 与 serve 共用这些控制。
+
+D10开发更新（未发布0.87.0，F1/F2修复已在审查范围关闭）：内建Anthropic/OpenAI同步生成attempt现使用每次独立SDK worker。父进程可在网络静默和管道背压时观察取消及更早截止，终止并wait回收自身worker后返回。完成未知时usage仅为下界；本地停止不能撤销远端生成或收费。IPC每帧上限64MiB。Linux已测，Windows/macOS未验证；Linux新增独立监管者，在父SIGKILL后终止并回收直接SDK子进程，写有界私有本地收据（已在普通Linux审查范围有限接受）；前提是监管者存活且子进程可杀，收据不证明远端取消或授予重放权限；Fake/custom client保持原接口。兼容和恢复限制见[设计第27节](docs/architecture-evolution.md)，D仍未整体验收。
+
+上下文构建区分稳定规则/项目背景与易变任务事实、近期验证引用、恢复进度；缓存断点放在稳定前缀之后，不保证接口支持或实际缓存收益。原生会话存盘现保留图片、推理/签名和工具字段以供恢复（图片会话会占更多磁盘空间）；文本摘要仍省略图片载荷。摘要压缩先拒绝未配对工具历史，将模型文字标为 assistant_claim，并从 TaskState/job/Ledger 重建程序事实与验证引用；核对、停止检查及候选存盘成功后才替换历史。压缩仍会删除旧图片/推理等原生消息，不是无损归档；原会话备份应另行保留。验证引用消费时重核归属和有效性，未知或过期不能升级为通过。
+
+运行诊断现在携带会话、任务、运行归属及运行内递增序号。执行边界、验证失效和任务停止/恢复事实来自运行层；CLI 工具输出与桌面工具卡片旧协议保持兼容。事件投递仅为展示，不能替代任务 journal 或验证证据。并行工具显式携带原运行路由，运行关闭后迟到事件丢弃。全链路来源及 Dreaming 集成已获 E8/9 有限接受；E 各批验收边界见[交付矩阵](docs/architecture-delivery.md)。
+
+记忆、压缩摘要和子调查报告保留来源引用。生成的文字仍是助手陈述；引用内容不授予权限，也不证明测试通过。Dreaming 应用前重新核对来源与候选指纹，验证仍以执行账本为准。旧记忆继续可读，来源未知时不补造可信类别。
+
+架构评测交付准备（仅离线，不调用远端 provider）：参见
+[可复现配置、命令与尚待接通的真实运行适配](docs/architecture-evaluation.md)。
+程序回归已验证，真实模型收益尚未验证。
+
+离线架构接线：`python -m evals.architecture fake --out <全新绝对目录>` 使用隔离假 provider 实跑冻结基线/当前产品。见[执行协议与限制](docs/architecture-evaluation.md)。程序回归已验证，真实模型收益尚未验证；`live` 仍阻断，不代表获得费用授权。
+
+未发布0.87.0平台范围：历史安装/CI支持不代表本次D/E支持。Windows TaskStore/LSP/持久job仍缺实现，MCP/SDK仍缺原生实机证据；当前 Linux Electron unpacked 发行产物已通过离线 smoke/信任及合成中文流式/会话检查，deb/AppImage 内容与该构建匹配；安装行为及其他平台尚未验证。见[交付矩阵](docs/architecture-delivery.md)。
+
+离线SDK适配：`python -m evals.architecture loopback --out <全新绝对目录>` 通过原生OpenAI SDK和合成本地HTTP服务运行冻结双源码产品。usage固定价格估算与供应商真实账单分列，未知用量停止预算；全部结果仍为synthetic且全快照对照有混杂。`live`仍在读取凭证前拒绝，不代表费用授权或真实收益验证。`python -m evals.architecture anthropic-loopback --out <全新绝对目录>` 新增实际SDK的Anthropic原生Messages、工具往返和辅助压缩，缓存计价也是合成固定价。远端授权/账单仍待后续，见[评测协议](docs/architecture-evaluation.md)。
+
+U6评测准备新增 `python -m evals.architecture_authorization template --plan <candidate.json>` 和 `preflight --plan <plan.json> --authorization <record.json> --observed <observed.json>`。它们校验显式本地计划/批准记录绑定并输出JSON指纹；模板不默认批准。有效收据不证明可信宿主或本会话费用授权，不消费批准，也不开放远端执行。专用凭据路径仅作引用；`live`仍在配置/凭据前拒绝。合成消费/重启预算已在独立持久控制器实现；真实付费运行、凭据与账单仍需另行授权的live路径。详见[评测边界](docs/architecture-evaluation.md)。
+
+实际测量准备：`python -m evals.architecture_measurement prepare --policy <v1-candidate.json> --config <config.json> --out <新目录>` 冻结双源码、测量已安装运行时文件，并在隔离worker中捕获初始原生请求而不派发。输出v2 observed计划、测量manifest和未批准模板。`preflight` 使用同一policy/config，另加 `--plan <v2-plan.json> --authorization <record.json>`，重新测量后严格匹配。系统提示/模板/构造器锁与实际请求hash分列，后续会话提示仍动态产生。这只是本机字节绑定，不是用户费用授权或可信宿主证明；远端仍拒绝。见[测量边界](docs/architecture-evaluation.md)。
+
+新增仅评测用Linux持久预算API，演练合成批准单次消费、物理子进程fake调用前预留/结果落盘及重启恢复。全局次数/原截止/固定估算额度覆盖观察与重试；未决结果阻断重放。本地合成范围已有限接受，包括OpenAI/Python3.14完整96观察调度与权威判题/导出；recovery失败仍保留失败。不赋予真实费用授权；live、真实账单与模型收益仍未验证。见[持久API与恢复协议](docs/architecture-evaluation.md)。

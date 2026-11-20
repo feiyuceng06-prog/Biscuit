@@ -448,7 +448,7 @@ class TestClaudeCacheMarks(unittest.TestCase):
         b.messages.append({"role": "user", "content": "hi"})
         with self.assertRaises(Busy):
             b.run_turn(on_text=lambda t: None)
-        self.assertEqual(len(sent), 1)
+        self.assertEqual(len(sent), providers.RETRIES + 1)
 
     def test_写进缓存的按写入价算(self):
         """OpenRouter 的 cache_write_tokens 包含在 prompt_tokens 里，但价是输入的 1.25 倍 """

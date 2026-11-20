@@ -1048,6 +1048,28 @@ const textsOf = (x) => (Array.isArray(x) ? x.filter((r) => typeof r === "string"
 function handle(ev) {
   const wasDown = atBottom();
   switch (ev.kind) {
+    // Runtime facts are distinct from legacy tool proposal/result cards.
+    case "execution_start":
+    case "execution_end": {
+      const target = toolBlocks.get(ev.call_id || "");
+      const pending = target && target.querySelector(".tool__pending");
+      if (pending) pending.textContent = "执行 · " + ev.name + " · " +
+        (ev.kind === "execution_start" ? "running" : ev.state);
+      break;
+    }
+    case "run_end":
+      break;
+    case "verification_invalidated":
+      if (Array.isArray(ev.verification_refs) && ev.verification_refs.length)
+        handle({kind: "note", level: "notice", text: "验证已失效 · " + ev.verification_refs.length});
+      break;
+    case "task_stopped":
+      handle({kind: "note", level: "warn", text: "任务停止 · " + ev.state});
+      break;
+    case "task_resumed":
+      if (["interrupted", "budget_stopped", "deadline_stopped", "blocked"].includes(ev.previous_state))
+        handle({kind: "note", level: "notice", text: "任务继续 · " + ev.previous_state});
+      break;
     case "hello":
     case "status":
       setStatus(ev);

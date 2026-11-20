@@ -291,7 +291,7 @@ class TestHttp(Base):
         self.assertEqual(label, server.url)
         self.assertNotIn("s3cret", label)
 
-    def test_关掉会去销会话(self):
+    def test_正常关闭有界释放远端session(self):
         server = self.fake()
         self.write_global({"web": {"type": "http", "url": server.url}})
         reg, _ = self.load()
@@ -325,10 +325,10 @@ class TestToolboxAndAgent(Base):
         self.assertIn("echo: x", out.content)
         self.assertIn("echo: x", out.summary)
 
-    def test_只读模式只放自报只读的(self):
+    def test_只读模式不信任自报只读(self):
         self.agent.set_mode("readonly")
         with contextlib.redirect_stdout(io.StringIO()):
-            self.assertTrue(self.agent._gate(call("a", "mcp_fake_echo", text="1"), False)[0])
+            self.assertFalse(self.agent._gate(call("a", "mcp_fake_echo", text="1"), False)[0])
             self.assertFalse(self.agent._gate(call("b", "mcp_fake_write_note", body="1"), False)[0])
 
     def test_权限规则写Mcp(self):
@@ -340,11 +340,11 @@ class TestToolboxAndAgent(Base):
         permissions.add_allow("Mcp(fake:*)")
         self.assertEqual(permissions.verdict("mcp_fake_write_note", {}), "allow")
 
-    def test_default模式下非只读的要问_只读的不问(self):
+    def test_default模式所有MCP都要授权(self):
         self.agent.set_mode("default")
         self.agent.approve = lambda name, args: "no"
         with contextlib.redirect_stdout(io.StringIO()):
-            self.assertTrue(self.agent._gate(call("a", "mcp_fake_echo", text="1"), False)[0])
+            self.assertFalse(self.agent._gate(call("a", "mcp_fake_echo", text="1"), False)[0])
             self.assertFalse(self.agent._gate(call("b", "mcp_fake_write_note", body="1"), False)[0])
 
     def test_一轮端到端(self):

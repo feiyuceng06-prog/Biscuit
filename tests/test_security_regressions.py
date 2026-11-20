@@ -21,7 +21,8 @@ class ProjectVerifyTests(unittest.TestCase):
         self.base = Path(self.tmp.name)
         self.workspace = self.base / "workspace"
         self.workspace.mkdir()
-        self.marker = self.base / "outside.txt"
+        # Source consent is independent of the hook filesystem sandbox.
+        self.marker = self.workspace / "verification-marker.txt"
         self.command = "printf verified > " + shlex.quote(self.marker.as_posix())
         self.context = self.workspace / "AGENTS.md"
         self.context.write_text("verify: " + self.command + "\n", encoding="utf-8")

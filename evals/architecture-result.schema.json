@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Architecture evaluation observation v1",
+  "type": "object",
+  "required": [
+    "group",
+    "split",
+    "task",
+    "arm",
+    "prompt_sha256",
+    "case_sha256",
+    "plan_sha256",
+    "source_sha256",
+    "model_version",
+    "judge_sha256",
+    "schema_version",
+    "synthetic",
+    "accounting_complete",
+    "repeat",
+    "seconds",
+    "human_interventions",
+    "status",
+    "attempts"
+  ],
+  "properties": {
+    "group": {
+      "enum": [
+        "executor",
+        "verification",
+        "compaction",
+        "recovery"
+      ]
+    },
+    "split": {
+      "enum": [
+        "development",
+        "holdout"
+      ]
+    },
+    "task": {
+      "type": "string"
+    },
+    "arm": {
+      "enum": [
+        "head",
+        "snapshot"
+      ]
+    },
+    "prompt_sha256": {
+      "type": "string"
+    },
+    "case_sha256": {
+      "type": "string"
+    },
+    "plan_sha256": {
+      "type": "string"
+    },
+    "source_sha256": {
+      "type": "string"
+    },
+    "model_version": {
+      "type": "string"
+    },
+    "judge_sha256": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "accounting_complete": {
+      "type": "boolean"
+    },
+    "repeat": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "seconds": {
+      "type": "number",
+      "minimum": 0
+    },
+    "human_interventions": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "status": {
+      "enum": [
+        "success",
+        "agent_failure",
+        "environment_failure",
+        "budget_stop",
+        "provider_failure",
+        "judge_failure"
+      ]
+    },
+    "attempts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "kind",
+          "cost_cny"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "primary",
+              "auxiliary",
+              "failed"
+            ]
+          },
+          "cost_cny": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          }
+        }
+      }
+    }
+  }
+}

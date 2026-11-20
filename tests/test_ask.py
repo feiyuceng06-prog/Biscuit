@@ -56,8 +56,8 @@ class TestTool(unittest.TestCase):
 
     def test_选项不是数组也不能崩(self):
         out = self.box("甲").run("ask_user", {"question": "?", "options": "甲"})
-        self.assertFalse(out.is_error)
-        self.assertEqual(self.asked[0][1], [])
+        self.assertTrue(out.is_error)
+        self.assertEqual(self.asked, [])
 
 
 class TestWiring(unittest.TestCase):

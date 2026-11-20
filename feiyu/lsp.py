@@ -8,6 +8,11 @@ definition / references 两个请求，stdio JSON-RPC，不引依赖
 import json
 import os
 import shutil
+import select
+import sys
+from contextlib import contextmanager
+from .processwait import _defer_interrupt
+from .runcontrol import RunStopped
 import subprocess
 import threading
 import time
@@ -76,35 +81,113 @@ def _path(uri: str) -> Path:
 class Client:
     """一个语言服务器进程 请求是同步的，中间收到服务器发来的请求一律回空 """
 
-    def __init__(self, argv: list[str], root: Path):
-        self.argv = argv
-        self.root = root
-        self.proc = subprocess.Popen(
-            argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-            cwd=root, start_new_session=True)
-        self.reader = PipeReader(self.proc.stdout)
+    def __init__(self, argv: list[str], root: Path, *, control=None, durable=None, active=None, closing=None):
+        if sys.platform != 'linux' or not all(hasattr(os, n) for n in ('waitid', 'WNOWAIT', 'WEXITED', 'WNOHANG')):
+            raise RuntimeError('safe Linux LSP lifecycle unavailable')
+        self.argv, self.root, self.control = argv, root, control
+        self.durable, self.service = durable, None
+        self.closing = closing
+        self.proc = None
         self.lock = threading.Lock()
-        self.buf = b""
-        self.seq = 0
-        self.opened: dict[str, int] = {}     # uri -> version
-        # 服务器推过来的诊断 uri -> [诊断]
-        # **原来这些是被丢掉的**：`request()` 的循环只认「服务器的请求」和
-        # 「自己那条回复」，而 publishDiagnostics 有 method 没有 id，两个分支
-        # 都不match，被 while 吃掉。改完代码有没有语法错、用没用错名字，
-        # 本来这一刻就知道，却要等模型自己去跑一遍测试才发现
-        self.warm = False
-        self._initialize()
+        self.lifecycle = threading.RLock()
+        self.stopped = threading.Event()
+        self.buf, self.seq, self.opened, self.warm = b'', 0, {}, False
+        self.deadline = None
+        with _defer_interrupt() as pending:
+            self.pending_interrupt = pending
+            try:
+                self._check(time.monotonic() + FIRST_TIMEOUT)
+                if durable:
+                    store, state = durable
+                    self.service = store.prepare_service(state, active, argv)
+                self.proc = subprocess.Popen(argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                    stderr=subprocess.DEVNULL, cwd=root, start_new_session=True, bufsize=0)
+                os.set_blocking(self.proc.stdin.fileno(), False)
+                self.reader = PipeReader(self.proc.stdout)
+                if pending[0]:
+                    raise RunStopped('cancelled')
+                if durable:
+                    from .jobs import identity
+                    process = identity(self.proc.pid)
+                    if not process:
+                        raise RuntimeError('LSP process identity unavailable')
+                    self.service.update(state='serving', process=process, service_status='initializing')
+                    store.save(state)
+                # Start only after durable identity. It also owns idle-service cleanup.
+                self.monitor = threading.Thread(target=self._monitor, daemon=True)
+                self.monitor.start()
+                self._initialize()
+                if pending[0]:
+                    raise RunStopped('cancelled')
+                if durable:
+                    with self.lifecycle:
+                        if self.stopped.is_set():
+                            raise RuntimeError('LSP exited during initialization')
+                        self.service['service_status'] = 'ready'
+                        store.save(state)
+            except BaseException:
+                self.close(failed=True)
+                raise
 
-    # ---- 传输 ----
+    def _check(self, deadline):
+        if getattr(self, 'pending_interrupt', [False])[0]:
+            raise RunStopped('cancelled')
+        if self.closing is not None and self.closing.is_set():
+            raise RuntimeError("LSP pool closing")
+        if self.control:
+            self.control.check()
+        if self.stopped.is_set():
+            raise RuntimeError('language server stopped')
+        if self.durable and self.durable[0].blocked:
+            from .taskstate import PersistenceError
+            raise PersistenceError('LSP persistence blocked')
+        if time.monotonic() >= deadline:
+            raise RuntimeError('language server timeout')
+
+    @contextmanager
+    def _operation(self, timeout):
+        deadline = time.monotonic() + timeout
+        acquired = False
+        try:
+            while not acquired:
+                self._check(deadline)
+                acquired = self.lock.acquire(timeout=.05)
+            self._check(deadline)
+            self.deadline = deadline
+            yield deadline
+        except BaseException as exc:
+            # Closing never needs the request lock, including another owner's lock.
+            self.close(failed=True)
+            if self.control and isinstance(exc, (OSError, ValueError, RuntimeError)):
+                self.control.check()
+            raise
+        finally:
+            if acquired:
+                self.lock.release()
+
     def _send(self, msg: dict) -> None:
-        body = json.dumps(msg).encode("utf-8")
-        self.proc.stdin.write(b"Content-Length: %d\r\n\r\n" % len(body) + body)
-        self.proc.stdin.flush()
+        body = json.dumps(msg).encode('utf-8')
+        data = memoryview(b'Content-Length: %d\r\n\r\n' % len(body) + body)
+        deadline = self.deadline or time.monotonic() + REQUEST_TIMEOUT
+        while data:
+            self._check(deadline)
+            fd = self.proc.stdin.fileno()
+            if select.select([], [fd], [], min(.05, max(0, deadline-time.monotonic())))[1]:
+                try:
+                    sent = os.write(fd, data[:65536])
+                    if not sent:
+                        raise RuntimeError('language server stdin closed')
+                    data = data[sent:]
+                except BlockingIOError:
+                    pass
 
     def _read(self, deadline: float) -> dict | None:
         """自己维护缓冲、直接 os.read 不能用 BufferedReader：它会把 fd 上的数据
         整段吸进自己的缓冲区，之后 select 看 fd 是空的就一直等，明明消息已经到了 """
         while b"\r\n\r\n" not in self.buf:
+            self._check(deadline)
+            if len(self.buf) > 65536:
+                raise RuntimeError("LSP header too large")
             if not self._fill(deadline):
                 return None
         head, _, self.buf = self.buf.partition(b"\r\n\r\n")
@@ -112,6 +195,8 @@ class Client:
         for line in head.split(b"\r\n"):
             if line.lower().startswith(b"content-length:"):
                 length = int(line.split(b":")[1])
+        if not 0 < length <= 16 * 1024 * 1024:
+            raise RuntimeError("invalid LSP content length")
         while len(self.buf) < length:
             if not self._fill(deadline):
                 return None
@@ -122,20 +207,24 @@ class Client:
             return {}
 
     def _fill(self, deadline: float) -> bool:
-        chunk = self.reader.read(deadline)
-        if not chunk:
-            return False
-        self.buf += chunk
-        return True
+        while True:
+            self._check(deadline)
+            fd = self.proc.stdout.fileno()
+            if select.select([fd], [], [], min(.05, max(0, deadline-time.monotonic())))[0]:
+                chunk = os.read(fd, 65536)
+                if not chunk:
+                    raise RuntimeError('language server EOF')
+                self.buf += chunk
+                return True
 
     def request(self, method: str, params: dict, timeout: float = REQUEST_TIMEOUT):
         """发一个请求等它的回复 返回 result；超时或出错抛 RuntimeError """
-        with self.lock:
+        with self._operation(timeout) as deadline:
             self.seq += 1
             mine = self.seq
             self._send({"jsonrpc": "2.0", "id": mine, "method": method, "params": params})
-            deadline = time.monotonic() + timeout
             while True:
+                self._check(deadline)
                 msg = self._read(deadline)
                 if msg is None:
                     raise RuntimeError("语言服务器 %d 秒没回复" % timeout)
@@ -154,7 +243,7 @@ class Client:
                     return msg.get("result")
 
     def notify(self, method: str, params: dict) -> None:
-        with self.lock:
+        with self._operation(REQUEST_TIMEOUT):
             self._send({"jsonrpc": "2.0", "method": method, "params": params})
 
     # ---- 生命周期 ----
@@ -198,7 +287,10 @@ class Client:
             params["context"] = {"includeDeclaration": True}
         timeout = REQUEST_TIMEOUT if self.warm else FIRST_TIMEOUT
         if not self.warm and kind == "references":
-            time.sleep(WARMUP)
+            end = time.monotonic() + WARMUP
+            while time.monotonic() < end:
+                self._check(end + .1)
+                time.sleep(.02)
         result = self.request("textDocument/" + kind, params, timeout=timeout)
         self.warm = True
         if result is None:
@@ -268,26 +360,62 @@ class Client:
         out.sort(key=lambda x: x["line"])
         return out
 
-    def close(self) -> None:
-        if hasattr(self, "reader"):
-            self.reader.close()
-        try:
-            self.proc.kill()
-        except OSError:
-            pass
-        # **光 kill 不够，还得收尸、关管道。** 不 wait 的话它挂成僵尸，stdin / stdout
-        # 两根管道一直开着 —— 退出时无所谓，可 `--serve` 一跑一整天，语言服务器
-        # 死一次重起一次（`Pool.get`），每次漏一对 fd
-        try:
-            self.proc.wait(timeout=2)
-        except (OSError, subprocess.TimeoutExpired):
-            pass
-        for pipe in (self.proc.stdin, self.proc.stdout):
+    def _monitor(self):
+        while not self.stopped.wait(.05):
             try:
-                if pipe:
-                    pipe.close()
-            except OSError:
-                pass
+                self._check(float('inf'))
+                with self.lifecycle:
+                    if self.stopped.is_set():
+                        return
+                    exited = os.waitid(os.P_PID, self.proc.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT)
+                if exited is not None:
+                    self.close(failed=True)
+                    return
+            except BaseException:
+                self.close(failed=True)
+                return
+
+    def close(self, failed=False) -> None:
+        with _defer_interrupt(), self.lifecycle:
+            if self.stopped.is_set():
+                return
+            self.stopped.set()
+            error = None
+            if self.proc is not None:
+                try:
+                    # No poll/wait elsewhere: unreaped child pins this group ID.
+                    import signal
+                    os.killpg(self.proc.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                except OSError as exc:
+                    error = exc
+                try:
+                    self.proc.wait(timeout=2)
+                except (OSError, subprocess.TimeoutExpired) as exc:
+                    error = error or exc
+                for pipe in (self.proc.stdin, self.proc.stdout):
+                    try:
+                        if pipe:
+                            pipe.close()
+                    except OSError as exc:
+                        error = error or exc
+            if hasattr(self, 'reader'):
+                self.reader.close()
+            if self.service is not None:
+                self.service.update(state='unknown' if failed or error else 'completed',
+                    service_status='unknown' if error else 'stopped', ended=time.time(),
+                    exit_code=self.proc.returncode if self.proc else None,
+                    lifecycle_only=True)
+                try:
+                    self.durable[0].save(self.durable[1])
+                except BaseException:
+                    self.service['state'] = 'unknown'
+                    # Caller and future admission observe blocked/unknown, monitor has no sink.
+                    if not failed:
+                        raise
+            if error and not failed:
+                raise RuntimeError('LSP cleanup unknown: %s' % error)
 
 
 class Pool:
@@ -295,23 +423,44 @@ class Pool:
 
     def __init__(self, root: Path):
         self.root = root
-        self.clients: dict[str, Client] = {}
+        self.clients: dict[tuple, Client] = {}
+        self.closing = threading.Event()
         self.lock = threading.Lock()
 
     def get(self, path: Path) -> Client | None:
         argv = server_for(path)
         if not argv:
             return None
-        key = argv[0]
-        with self.lock:
+        callback = getattr(self, 'on_activity', None)
+        if callback:
+            callback()
+        execution = getattr(self, 'execution', None)
+        control = execution.control if execution else None
+        deadline = time.monotonic() + FIRST_TIMEOUT
+        while True:
+            if self.closing.is_set():
+                raise RuntimeError("LSP pool closing")
+            if control:
+                control.check()
+            if time.monotonic() >= deadline:
+                raise RuntimeError('LSP pool lock timeout')
+            if self.lock.acquire(timeout=.05):
+                break
+        try:
+            key = tuple(argv)
             client = self.clients.get(key)
-            if client is not None and client.proc.poll() is not None:
-                client.close()     # 死了就重起一个，旧的那对管道先关掉
+            if client is not None and client.stopped.is_set():
+                if client.service is not None and client.service['state'] != 'resolved':
+                    raise RuntimeError('LSP service stopped; inspect unknown operation before retry')
                 client = None
             if client is None:
-                client = Client(argv, self.root)
+                client = Client(argv, self.root, control=control,
+                    durable=execution.durable if execution else None,
+                    active=execution.active_operation.get() if execution else None, closing=self.closing)
                 self.clients[key] = client
             return client
+        finally:
+            self.lock.release()
 
     SYMBOL_KIND = {5: "class", 6: "method", 12: "function", 13: "变量", 14: "常量",
                    11: "interface", 23: "struct", 10: "enum", 8: "field", 9: "构造"}
@@ -368,9 +517,23 @@ class Pool:
         return out
 
     def close(self) -> None:
-        for client in self.clients.values():
-            client.close()
-        self.clients.clear()
+        # Cancel initialization before waiting for ownership transfer from get().
+        self.closing.set()
+        if not self.lock.acquire(timeout=3):
+            raise RuntimeError('LSP pool close ownership timeout; cleanup unknown')
+        try:
+            error = None
+            for client in list(self.clients.values()):
+                try:
+                    client.close()
+                except BaseException as exc:
+                    error = error or exc
+            self.clients.clear()
+            if error:
+                raise error
+        finally:
+            self.closing.clear()
+            self.lock.release()
 
 
 def find_position(text: str, name: str, line: int | None) -> tuple[int, int] | None:

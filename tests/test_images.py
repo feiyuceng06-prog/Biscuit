@@ -147,7 +147,7 @@ class TestMessageShape(unittest.TestCase):
 
 
 class TestStripped(unittest.TestCase):
-    """图片进了历史就一直在 摘要和存盘里都不该带 base64 """
+    """摘要不带 base64；原生会话存盘保留图片以供恢复 """
 
     def test_两种形状都剥得掉(self):
         raw = [
@@ -164,7 +164,7 @@ class TestStripped(unittest.TestCase):
                {"role": "tool", "tool_call_id": "c1", "content": "工具结果"}]
         self.assertEqual(providers.without_images(raw), raw)
 
-    def test_存盘里没有_base64(self):
+    def test_原生存盘保留图片(self):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         self.addCleanup(setattr, session, "DIR", session.DIR)
@@ -182,7 +182,7 @@ class TestStripped(unittest.TestCase):
         agent.name, agent.style, agent.mode = "fake", "default", "default"
         agent.toolbox = type("T", (), {"todos": type("D", (), {"items": []})()})()
         session.save(Path(tmp.name), agent)
-        with open(session._legacy_path(Path(tmp.name)), encoding="utf-8") as f:
+        with open(session._path(Path(tmp.name), agent.session_id), encoding="utf-8") as f:
             saved = f.read()
-        self.assertNotIn("SHOULDNOTAPPEAR", saved)
-        self.assertIn(providers.IMAGE_NOTE, saved)
+        self.assertIn("SHOULDNOTAPPEAR", saved)
+        self.assertNotIn(providers.IMAGE_NOTE, saved)

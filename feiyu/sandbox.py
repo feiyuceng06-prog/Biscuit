@@ -31,7 +31,7 @@ glibc 的 nss-resolve 走的是 `/run/systemd/resolve` 下的 Unix socket，**�
 解析得了域名**（实测 `getent hosts example.com` 照样出 IP），把数据编进子域名就送出去了
 Unix socket 不归网络命名空间管，只能从文件系统这一侧挡
 
-钩子和 `verify:` 的命令**不进沙箱**：那是用户自己写在配置里的，不是模型产出的 
+钩子和 `verify:` 命令复用相同沙箱与出网边界；来源信任不代替命令授权。
 """
 
 import json

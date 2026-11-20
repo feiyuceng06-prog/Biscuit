@@ -104,6 +104,8 @@ class Protocol:
             try:
                 self._out.write(line + "\n")
                 self._out.flush()
+            except UnicodeError:
+                raise  # Encoding failures are data errors, not a closed peer.
             except (OSError, ValueError):
                 pass                            # 对面没了，agent 不该因此崩掉
 
@@ -114,8 +116,8 @@ class Protocol:
             rid = self._next_id
             box: queue.Queue = queue.Queue(maxsize=1)
             self._waiting[rid] = box
-        self.send(kind, id=rid, **payload)
         try:
+            self.send(kind, id=rid, **payload)
             return box.get(timeout=REPLY_TIMEOUT)
         except queue.Empty:
             return None
@@ -200,6 +202,10 @@ class Server:
         out = {"ready": agent.ready, "mode": agent.mode, "style": agent.style,
                "profile": agent.profile, "bot": agent.bot, "workspace": str(self.workspace),
                "version": __version__, "busy": self.busy}
+        state = getattr(agent, 'task_state', None)
+        if state is not None:
+            out['task'] = dict(task_id=state.task_id, run_state=state.run_state,
+                               result=state.result, result_details=state.result_details)
         if agent.ready:
             # **`agent.cost` 会是 None**（这条配置没填价格，`priced` 掉成 False）——
             # `round(None)` 抛 TypeError，而这个方法在每一处 push_status 上，
@@ -257,6 +263,8 @@ class Server:
         """
         if not sid:
             return
+        if sid == self.agent.session_id:
+            self.agent._guard_task_switch()
         session_mod.drop(self.workspace, sid)
         if sid == self.agent.session_id:
             self.agent.reset()
@@ -728,7 +736,9 @@ class Server:
 
     def _dispatch(self, cli, head: str, rest: str) -> None:
         agent = self.agent
-        if head == "/clear":
+        if head == "/task":
+            self._say(cli._task(agent, rest))
+        elif head == "/clear":
             agent.reset()
             session_mod.drop(self.workspace, agent.session_id)
             agent.session_id = session_mod.new_id()
@@ -800,7 +810,7 @@ class Server:
             self.proto.send("note", level="warn",
                             text="%s 只在终端里有：%s" % (head, TERMINAL_ONLY[head]))
         elif head == "/sandbox":
-            self._say(cli._sandbox(rest))
+            self._say(cli._sandbox(rest, self.agent))
             self.push_settings()
         elif head == "/help":
             self.push_help()
@@ -885,6 +895,9 @@ class Server:
         elif op == "interrupt":
             # 跟 esc 落在同一处，0.12.0 那套补历史的机制原样生效
             if self.busy:
+                agent = getattr(self, 'agent', None)
+                if agent is not None:
+                    agent.cancel()
                 _thread.interrupt_main()
                 # **主线程要是正卡在等你点头上，光扔中断叫不醒它。** interrupt_main 只是
                 # 立一面旗、不是真信号，`Protocol.request` 里那个阻塞的 box.get 要等满
@@ -1039,6 +1052,8 @@ class Server:
 
 def serve(agent, workspace, tracer, resume: bool = False, *, trusted: bool = False) -> int:
     """把 agent 挂到 stdio 上 返回退出码 """
+    from .runtime import configure_serve_stdio
+    configure_serve_stdio()
     real_stdout = sys.stdout
     proto = Protocol(real_stdout)
     server = Server(agent, workspace, tracer, proto, trusted=trusted)
@@ -1052,9 +1067,9 @@ def serve(agent, workspace, tracer, resume: bool = False, *, trusted: bool = Fal
     agent.approve_mcp = lambda path, names: server.approve_trust("mcp", path, names)
     agent.approve_skills = lambda folder, names: server.approve_trust("skills", folder, names)
 
-    events.install(lambda kind, payload: proto.send(kind, **payload))
+    sink = lambda kind, payload: proto.send(kind, **payload)
     # 人看的那些 ANSI 全挪到 stderr，stdout 只剩协议 —— 跟 --json-schema 同一个做法
-    with contextlib.redirect_stdout(sys.stderr):
+    with events.frontend(agent, sink), contextlib.redirect_stdout(sys.stderr):
         # Startup trust requests also need the reader to receive their replies.
         server.start_reader()
         # 启动时这三句是**环境说明**，不是对话。单独一种事件，让前端摆在别处 ——
@@ -1078,10 +1093,7 @@ def serve(agent, workspace, tracer, resume: bool = False, *, trusted: bool = Fal
         else:
             agent.session_id = session_mod.new_id()
         server.push_sessions()
-        try:
-            return server.run()
-        finally:
-            events.clear()
+        return server.run()
 
 
 def history_view(agent) -> list[dict]:

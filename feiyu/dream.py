@@ -7,7 +7,7 @@ import tempfile
 import threading
 import time
 
-from . import files, memory, session
+from . import files, memory, session, provenance
 
 DIR = os.path.join(os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"),
                    "feiyu", "dreams")
@@ -47,6 +47,8 @@ def sources(workspace):
         if not data:
             continue
         parts = []
+        refs = provenance.clean(data.get("source_refs", []))
+        segments = []
         for msg in data["messages"]:
             if not isinstance(msg, dict) or msg.get("role") not in ("user", "assistant"):
                 continue
@@ -54,10 +56,16 @@ def sources(workspace):
             if text:
                 if msg["role"] == "user":
                     text = text.split("\n\n", 1)[0]
+                kind = 'assistant_claim' if msg['role'] == 'assistant' else 'unknown'
+                digest = provenance.ref('unknown', text)['digest']
+                if msg['role'] == 'user' and any(r['digest'] == digest and r['source_kind'] == 'user_request' for r in refs):
+                    kind = 'user_request'
+                segments.append(provenance.ref(kind, text))
                 parts.append("%s: %s" % (msg["role"], text))
         text = "\n".join(parts)[-min(MAX_PER_SESSION, remaining):]
         if text:
-            result.append({"id": row["id"], "text": text})
+            result.append({"id": row["id"], "text": text, "source_kind": "assistant_claim",
+                           "source_refs": refs + segments})
             remaining -= len(text)
         if remaining <= 0:
             break
@@ -113,7 +121,9 @@ def _parse(reply, items, transcripts):
                                     or new in old_set or new in seen_new):
             continue
         accepted.append({"action": action, "old": old, "new": new, "session": sid,
-                         "quote": quote, "reason": reason[:300]})
+                         "quote": quote, "reason": reason[:300],
+                         "source_kind": "assistant_claim",
+                         "source_refs": provenance.clean(next(s for s in transcripts if s['id'] == sid).get('source_refs', []))})
         seen_old.add(old)
         seen_new.add(new)
         if len(accepted) >= MAX_CHANGES:
@@ -128,7 +138,8 @@ def prepare(workspace, ask, *, only_if_absent=False):
         raise ValueError("这个工作区没有可回顾的会话")
     changes = _parse(ask(_prompt(items, transcripts)), items, transcripts)
     proposal = {"version": 1, "created": time.time(), "base": _fingerprint(items),
-                "changes": changes}
+                "changes": changes, "changes_hash": _fingerprint(changes), "source_hash": _fingerprint(transcripts),
+                "base_provenance": _fingerprint(memory.records(items))}
     if only_if_absent and not changes:
         return proposal
     files.private_dir(DIR)
@@ -261,28 +272,33 @@ def apply(workspace):
     proposal = load(workspace)
     if not proposal or not isinstance(proposal.get("changes"), list):
         raise ValueError("没有待应用的 Dreaming 建议")
+    if proposal.get('changes_hash') is not None and proposal['changes_hash'] != _fingerprint(proposal['changes']):
+        raise ValueError("建议指纹已变化，请重新运行 /dream run")
     items = memory.load(workspace)
     if _fingerprint(items) != proposal.get("base"):
         raise ValueError("记忆在整理后发生了变化，请重新运行 /dream run")
+    transcripts = sources(workspace)
+    if (proposal.get('source_hash') is not None and proposal['source_hash'] != _fingerprint(transcripts)) or (proposal.get('base_provenance') is not None and proposal['base_provenance'] != _fingerprint(memory.records(items))):
+        raise ValueError("来源会话或记忆来源已变化，请重新运行 /dream run")
     changes = _parse(json.dumps({"changes": proposal["changes"]}, ensure_ascii=False),
-                     items, sources(workspace))
+                     items, transcripts)
     if len(changes) != len(proposal["changes"]):
         raise ValueError("来源会话已变化或建议无效，请重新运行 /dream run")
     updated = list(items)
     today = time.strftime("%Y-%m-%d")
     for c in changes:
         if c["action"] == "add":
-            updated.append((today, c["new"]))
+            updated.append(memory.Item(today, c["new"], "assistant_claim", c["source_refs"]))
         else:
             index = next(i for i, (_, text) in enumerate(updated) if text == c["old"])
             if c["action"] == "replace":
-                updated[index] = (today, c["new"])
+                updated[index] = memory.Item(today, c["new"], "assistant_claim", c["source_refs"])
             else:
                 updated.pop(index)
     if len(updated) > memory.MAX_ITEMS or sum(len(t) for _, t in updated) > memory.MAX_CHARS:
         raise ValueError("应用后记忆超出上限，请先手动清理；不会自动删除旧记忆")
     memory.save(workspace, updated)
-    if memory.load(workspace) != updated:
+    if memory.records(memory.load(workspace)) != memory.records(updated):
         raise OSError("记忆写入失败")
     discard(workspace)
     return len(changes)

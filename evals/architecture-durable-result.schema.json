@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Registry-authoritative synthetic SDK export v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_type", "mode", "synthetic", "remote_execution_allowed", "run_id", "plan_sha256", "measurement_lock", "source_lock", "runtime_sha256", "registry_run_sha256", "observations", "requests", "rows"],
+  "properties": {
+    "schema_version": {"const": 2},
+    "artifact_type": {"const": "durable_sdk_loopback_results"},
+    "mode": {"const": "offline_synthetic"},
+    "synthetic": {"const": true},
+    "remote_execution_allowed": {"const": false},
+    "run_id": {"type": "string", "minLength": 1},
+    "plan_sha256": {"$ref": "#/$defs/hash"},
+    "measurement_lock": {"$ref": "#/$defs/hash"},
+    "runtime_sha256": {"$ref": "#/$defs/hash"},
+    "registry_run_sha256": {"$ref": "#/$defs/hash"},
+    "source_lock": {"type": "object", "required": ["head", "snapshot"], "additionalProperties": {"$ref": "#/$defs/hash"}},
+    "observations": {"type": "array", "items": {"type": "object", "required": ["observation"], "properties": {"observation": {"type": "string"}, "state": {"const": "not_started"}, "record": {"type": "object", "required": ["identity", "state", "started", "deadline"]}}, "oneOf": [{"required": ["state"]}, {"required": ["record"]}]}},
+    "requests": {"type": "array", "items": {"type": "object", "required": ["observation", "binding", "state", "cost_cny", "usage_lower_bound", "outcome"]}},
+    "rows": {"type": "array", "items": {"$ref": "architecture-result.schema.json"}}
+  },
+  "$defs": {"hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}
+}

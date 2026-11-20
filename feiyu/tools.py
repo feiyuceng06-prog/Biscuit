@@ -12,6 +12,7 @@ import time
 import re
 import shlex
 import subprocess
+import threading
 import tempfile
 import urllib.error
 import urllib.parse
@@ -92,7 +93,7 @@ TOOL_SCHEMAS = [
             "properties": {
                 "action": {
                     "type": "string",
-                    "enum": ["output", "kill", "list"],
+                    "enum": ["output", "status", "wait", "kill", "list"],
                     "description": "output 看新输出 kill 停掉 list 列出全部 ",
                 },
                 "id": {"type": "integer", "description": "后台命令的编号（list 不用填） "},
@@ -1210,6 +1211,13 @@ class ToolResult:
     # 工作区里的一张图，前端该把它画出来给**人**看 跟 image 是两回事：
     # 那个是喂模型的 base64，这个是路径，走前端自己的读图通道，不进对话历史
     shows: str = ""
+    error_code: str | None = None
+    exit_code: int | None = None
+    duration_ms: int | None = None
+    truncated: bool = False
+    artifacts: list[str] = field(default_factory=list)
+    modified_paths: list[str] = field(default_factory=list)
+    source: str | None = None
 
 
 _TODO_MARK = {todo.DONE: "✓", todo.DOING: "▸", todo.PENDING: "·"}
@@ -1442,6 +1450,8 @@ def preview(name: str, args: dict, root: Path) -> list[tuple[str, str]]:
 class Toolbox:
     def __init__(self, root: Path, ask_model=None, on_remember=None, on_exit_plan=None,
                  spawn=None, ask_user=None):
+        from .execution import Executor
+        self.execution = Executor(self)
         self.root = root.resolve()
         self.ask_model = ask_model      # (提示词) -> 回答，用于 web_fetch 的 prompt 模式
         self.on_remember = on_remember  # 记了新东西就回调，让系统提示当场重拼
@@ -1461,6 +1471,8 @@ class Toolbox:
         # bash 改的文件（sed -i、脚本）看不见，退不了，README 里说明了
         self.undo_stack: list[tuple[Path, bytes | None]] = []
         self.lsp = lsp.Pool(self.root)  # 语言服务器，按需起、退出时杀
+        self.lsp.on_activity = self._lsp_activity
+        self.lsp.execution = self.execution
         # bash 的 shell 状态（导出的变量、函数）第一次用到才建，退出时删
         self.shell_state: str | None = None
         # 技能：名字 -> Skill 由 agent 在载入时写进来（项目那份要先经用户同意）
@@ -1555,10 +1567,43 @@ class Toolbox:
         return target
 
     def run(self, name: str, args: dict) -> ToolResult:
+        for job in self.jobs.all():
+            if isinstance(job, jobs_mod.DurableJob):
+                job.refresh()
+        if name == 'bash' and isinstance(args, dict) and args.get('background') and not self.execution.durable:
+            callback = getattr(self, 'on_background', None)
+            if callback:
+                callback()
+            else:
+                from .taskstate import TaskStore, TaskState, workspace_id
+                from . import session
+                import uuid
+                store = TaskStore(self.root, session.new_id())
+                state = TaskState(store.sid, uuid.uuid4().hex, workspace_id(self.root))
+                store.activate(state)
+                self.execution.durable = (store, state)
+        return self.execution.run(name, args)
+
+    def _run_raw(self, name: str, args: dict) -> ToolResult:
+        # Unknown tools and MCP (including self-declared read-only) may write.
+        if name in self.mcp.tools or name not in {"read_file", "list_files", "search", "glob", "grep", "web_search", "web_fetch", "skill", "job"}:
+            callback = getattr(self, "on_mutation", None)
+            if callback:
+                callback("git_read" if name == "git" and args.get("action") != "commit" else name)
         if name in self.mcp.tools:
-            text, failed = self.mcp.call(name, args)
+            try:
+                text, failed = self.mcp.call(name, args, self.execution.control, facts=True)
+            except mcp.RequestFailure as exc:
+                result = ToolResult(str(exc), is_error=True, summary=str(exc))
+                result.execution_started = exc.started
+                result.execution_unknown = exc.started and not exc.known
+                result.execution_not_run = not exc.started
+                result.stop_reason = exc.stop_reason
+                return result
             first = next((l.strip() for l in text.splitlines()[2:] if l.strip()), "") if not failed else text
-            return ToolResult(text, is_error=failed, summary=_peek_line(first))
+            result = ToolResult(text, is_error=failed, summary=_peek_line(first))
+            result.execution_started = True
+            return result
         try:
             handler = getattr(self, f"_tool_{name}")
         except AttributeError:
@@ -1572,7 +1617,12 @@ class Toolbox:
         try:
             return handler(args)
         except Exception as exc:
-            return ToolResult(f"{type(exc).__name__}: {exc}", is_error=True)
+            from .taskstate import PersistenceError
+            if isinstance(exc, PersistenceError):
+                raise
+            result = ToolResult(f"{type(exc).__name__}: {exc}", is_error=True)
+            result.execution_unknown = True
+            return result
 
     def _tool_bash(self, args: dict) -> ToolResult:
         command = args["command"]
@@ -1600,28 +1650,31 @@ class Toolbox:
         boxed = sandbox.wrap(wrapped, workspace=self.root, cwd=self.cwd,
                              writable=[pwd_file, state], offline=offline)
         try:
-            proc = subprocess.run(
-                boxed or [sandbox.SHELL, "-c", wrapped],
-                cwd=None if boxed else self.cwd,
-                capture_output=True,
-                text=True,
-                timeout=timeout,
-                env=_child_env(),
-            )
+            from .processwait import run as wait_process
+            with tempfile.TemporaryFile() as stdout, tempfile.TemporaryFile() as stderr:
+                proc = wait_process(boxed or [sandbox.SHELL, "-c", wrapped],
+                                    cwd=None if boxed else self.cwd, env=_child_env(),
+                                    stdout=stdout, stderr=stderr, timeout=timeout,
+                                    control=self.execution.control)
+                stdout.seek(0)
+                stderr.seek(0)
+                out = stdout.read(1000000).decode("utf-8", "replace") + stderr.read(1000000).decode("utf-8", "replace")
             self._track_cwd(pwd_file)
-        except subprocess.TimeoutExpired as exc:
-            # 必须自己接住 让它冒到 run() 的兜底 except 里的话，模型只会看到
-            # 一句 "TimeoutExpired: Command [...] timed out"——命令停下前打印的东西
-            # 全丢了，它根本不知道卡在哪一步；沙箱一开，那串 argv 还会把整条
-            # bwrap 命令行灌进上下文
-            return self._timed_out(exc, timeout)
         finally:
             try:
                 os.unlink(pwd_file)
             except OSError:
                 pass
-        out = (proc.stdout or "") + (proc.stderr or "")
-        if proc.returncode != 0:
+        if proc.reason or proc.error:
+            result = ToolResult("%s，退出码: %s\n%s" % (("命令超过 %d 秒还没结束，已经杀掉" % timeout) if proc.reason == "timeout" else "命令已停止（%s）" % (proc.reason or proc.error), proc.code, _truncate(out) if out.strip() else "它一个字都没输出"),
+                                exit_code=proc.code, is_error=True,
+                                summary="超时（%d 秒）" % timeout if proc.reason == 'timeout' else "命令已停止",
+                                error_code=proc.reason or 'cleanup_error')
+            result.execution_unknown = True
+            result.stop_reason = proc.reason
+            result.execution_started = True
+            return result
+        if proc.code != 0:
             out += _venv_hint(command, out, self.root)
             if boxed:
                 out += _sandbox_note(out, sandbox.effective()[0],
@@ -1635,17 +1688,20 @@ class Toolbox:
             body += ("\n\n（提示：这类操作以后直接用 %s 工具，不用经过 bash：不需要确认、"
                      "几条能同时跑、输出也更紧凑 ）" % native)
         lines = [line for line in out.splitlines() if line.strip()]
-        if proc.returncode != 0:
-            summary, detail = f"退出码 {proc.returncode}", _peek(lines, 4)
+        if proc.code != 0:
+            summary, detail = f"退出码 {proc.code}", _peek(lines, 4)
         else:
             summary = lines[0] if lines else "（无输出）"
             detail = _peek(lines[1:]) if len(lines) > 1 else []
-        return ToolResult(
-            f"退出码: {proc.returncode}\n{body}",
-            is_error=proc.returncode != 0,
+        result = ToolResult(
+            f"退出码: {proc.code}\n{body}",
+            exit_code=proc.code, truncated="[已截断 " in out,
+            is_error=proc.code != 0,
             summary=summary,
             detail=detail,
         )
+        result.execution_started = True
+        return result
 
     def _start_job(self, command: str, offline: bool = False, run: str = "") -> ToolResult:
         """挂后台 **继承 shell 状态但不写回**：它跟后面的命令是并行的，
@@ -1657,18 +1713,64 @@ class Toolbox:
         script = (_state_restore(state) + run) if state else run
         boxed = sandbox.wrap(script, workspace=self.root, cwd=self.cwd,
                              writable=[state] if state else (), offline=offline)
-        proc = subprocess.Popen(
-            boxed or [sandbox.SHELL, "-c", script],
-            cwd=None if boxed else self.cwd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            errors="replace",
-            bufsize=1,
-            env=_child_env(),
-            start_new_session=True,   # 自成进程组，之后能连它拉起来的子进程一起杀
-        )
-        job = self.jobs.start(command, proc)
+        execution = self.execution
+        op = execution.active_operation.get()
+        if execution.durable and op is not None:
+            import sys
+            import json
+            from .taskstate import PersistenceError
+            store, task = execution.durable
+            if jobs_mod.identity(os.getpid()) is None or not jobs_mod.pidfd_supported():
+                raise PersistenceError('平台不支持可靠后台进程身份')
+            directory = store.directory / (op['id'] + '.job')
+            directory.mkdir(mode=0o700)
+            op.update(kind='background-job', output_ref=op['id'] + '.job/output')
+            store.save(task)  # prepared and artifact association precede spawn
+            proc = subprocess.Popen([sys.executable, str(Path(jobs_mod.__file__).with_name('jobrunner.py')),
+                                     str(directory), op['id']], stdin=subprocess.PIPE,
+                                    stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                                    start_new_session=True)
+            job = jobs_mod.DurableJob(self.jobs._next, store, task, op, command, proc,
+                                      execution.control)
+            self.jobs._next += 1
+            self.jobs._items[job.id] = job
+            try:
+                import select
+                ready_by = time.monotonic() + 5
+                while not select.select([proc.stdout], [], [], .05)[0]:
+                    if execution.control:
+                        execution.control.check()
+                    if time.monotonic() > ready_by:
+                        raise PersistenceError('job supervisor readiness timeout')
+                if proc.stdout.readline() != b'READY\n':
+                    raise PersistenceError('job supervisor failed before gate')
+                proc.stdout.close()
+                process = jobs_mod.identity(proc.pid)
+                if not process:
+                    raise PersistenceError('监管进程身份不可用')
+                op.update(state='running', process=process,
+                          session_id=task.session_id, task_id=task.task_id)
+                store.save(task)
+                payload = dict(argv=boxed or [sandbox.SHELL, '-c', script],
+                               cwd=None if boxed else str(self.cwd), env=_child_env(),
+                               deadline=task.budget.get('deadline'))
+                proc.stdin.write((json.dumps(payload) + '\n').encode())
+                proc.stdin.flush()
+                os.set_blocking(proc.stdin.fileno(), False)
+                job.sent_deadline = payload['deadline']
+            except BaseException:
+                op['state'] = 'unknown'
+                # The gate is a private pipe: EOF without payload cannot execute.
+                proc.stdin.close()
+                jobs_mod.signal_identity(op.get('process'))
+                proc.wait(timeout=5)
+                raise
+            finally:
+                if not proc.stdout.closed:
+                    proc.stdout.close()
+            threading.Thread(target=job.monitor, daemon=True).start()
+        else:
+            raise RuntimeError('background job requires durable execution boundary')
         return ToolResult(
             "已挂到后台，编号 %d 用 job 工具看它的输出（action=output, id=%d），"
             "或者停掉它（action=kill） " % (job.id, job.id),
@@ -1689,14 +1791,12 @@ class Toolbox:
         if job is None:
             return ToolResult("没有编号为 %s 的后台命令 用 action=list 看有哪些 "
                               % args.get("id"), is_error=True)
+        if action == "wait":
+            job.wait(self.execution.control)
         if action == "kill":
-            was = job.running
             job.kill()
-            return ToolResult(
-                "#%d 已停掉 " % job.id if was else "#%d 本来就已经结束了，退出码 %s " % (
-                    job.id, job.code),
-                summary="停掉 #%d" % job.id if was else "#%d 已结束" % job.id,
-            )
+            return ToolResult('#%d %s' % (job.id, job.status()),
+                              summary='#%d %s' % (job.id, job.status()))
 
         fresh, dropped = job.take()
         head = "#%d %s " % (job.id, job.status())
@@ -1730,7 +1830,7 @@ class Toolbox:
         """装 shell 状态那个文件，第一次用到才建 `mkstemp` 给的就是 0600 ——
         里头是整份导出的环境，权限必须是私有的
         """
-        if self.shell_state is None:
+        if self.shell_state is None or not os.path.exists(self.shell_state):
             fd, path = tempfile.mkstemp(prefix="feiyu-shell-")
             os.close(fd)
             self.shell_state = path
@@ -1744,6 +1844,9 @@ class Toolbox:
         """
         if self.shell_state is None:
             return
+        callback = getattr(self, "on_mutation", None)
+        if callback:
+            callback("shell_reset")
         try:
             os.unlink(self.shell_state)
         except OSError:
@@ -2389,7 +2492,8 @@ class Toolbox:
         return ToolResult("用户回答：" + answer, summary=answer)
 
     def _tool_remember(self, args: dict) -> ToolResult:
-        ok, note = memory.add(self.root, args.get("fact") or "")
+        ok, note = memory.add(self.root, args.get("fact") or "",
+                              source_refs=getattr(self, "memory_sources", lambda: [])())
         if ok and self.on_remember:
             self.on_remember()
         return ToolResult(note, is_error=not ok,
@@ -2508,7 +2612,14 @@ class Toolbox:
         return ToolResult(body, summary="已提交 %s，%d 个文件" % (short.strip(), len(files)),
                           detail=_peek(files, 4))
 
+    def _lsp_activity(self):
+        self._unisolated_lsp = True
+        callback = getattr(self, 'on_mutation', None)
+        if callback:
+            callback('symbol')
+
     def _tool_symbol(self, args: dict) -> ToolResult:
+        self._unisolated_lsp = True
         action = args.get("action")
         allowed = ("definition", "references", "outline") if outline_on() else (
             "definition", "references")
@@ -2537,8 +2648,13 @@ class Toolbox:
             client.open(target, text)
             spots = client.locate(action, target, *spot)
         except (OSError, RuntimeError) as exc:
-            return ToolResult("语言服务器出错：%s 退回用 search 找 " % exc,
+            from .taskstate import PersistenceError
+            if isinstance(exc, PersistenceError):
+                raise
+            result = ToolResult("语言服务器出错：%s 退回用 search 找 " % exc,
                               is_error=True, summary="语言服务器出错")
+            result.execution_unknown = True
+            return result
         rows = []
         capped = len(spots) > lsp.MAX_RESULTS
         file_lines = {}
@@ -2583,8 +2699,13 @@ class Toolbox:
         try:
             rows = self.lsp.get(target).outline(target, text)
         except (OSError, RuntimeError) as exc:
-            return ToolResult("语言服务器出错：%s 退回用 search 找 " % exc,
+            from .taskstate import PersistenceError
+            if isinstance(exc, PersistenceError):
+                raise
+            result = ToolResult("语言服务器出错：%s 退回用 search 找 " % exc,
                               is_error=True, summary="语言服务器出错")
+            result.execution_unknown = True
+            return result
         total = len(text.splitlines())
         if not rows:
             return ToolResult(

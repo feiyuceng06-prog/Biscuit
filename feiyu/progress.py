@@ -105,3 +105,12 @@ def as_prompt(data: dict) -> str:
         "确实要接着做，先自己看一眼现在的代码，确认哪些其实已经做完了 "
         % (data.get("when", "上次"), task, body)
     )
+
+
+def selected(state) -> dict:
+    """Derived view of an explicitly selected task; never workspace-wide truth."""
+    return dict(session_id=state.session_id, task_id=state.task_id,
+                run_state=state.run_state, result=state.result, result_details=state.result_details,
+                task=state.requests[0]['text'] if state.requests else '',
+                items=[dict(item) for item in state.todos], stamp=time.time(),
+                when=time.strftime('%Y-%m-%d'))

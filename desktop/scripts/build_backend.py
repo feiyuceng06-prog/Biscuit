@@ -26,6 +26,8 @@ payload = build / "payload/feiyu-backend"
 binary = payload / ("feiyu-backend.exe" if os.name == "nt" else "feiyu-backend")
 run(binary, "--version")
 run(python, desktop / "tests/check_backend.py", binary)
+run(python, desktop / "tests/check_mcp_backend.py", binary)
+run(python, desktop / "tests/check_sdk_backend.py", binary)
 destination = build / "backend"
 if destination.exists():
     shutil.rmtree(destination)

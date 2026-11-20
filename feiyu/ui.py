@@ -1379,6 +1379,7 @@ class EscInterrupt:
 # ---- 输入区 ----
 
 SLASH = {
+    "/task": "任务状态 / new / complete",
     "/help": "显示帮助",
     "/model": "查看或切换模型",
     "/key": "添加 / 查看 / 删除模型配置",
@@ -1650,3 +1651,30 @@ class InputBox:
         if text.strip():
             print(said(text))
         return text
+
+
+def verification_status(record, *, missing_reason="尚无验证执行记录") -> str:
+    scope = "Git tracked + non-ignored untracked / bounded directory contents"
+    if not record:
+        return "验证：未运行；%s。未验证原因：%s。" % (scope, missing_reason)
+    return "验证：%s / %s；`%s`；范围：%s；%s。外部服务、忽略依赖和动态环境未完整覆盖。日志：%s" % (
+        record["execution"], record["validity"], record["command"], scope,
+        record["reason"] or "执行状态对应扫描内容", record["log"] or "证据不完整")
+
+
+def runtime_event(kind, payload):
+    """CLI adapter for runtime status; legacy tool cards render execution detail."""
+    if kind in ('execution_start', 'execution_end'):
+        with events.paused():
+            print(notice('执行 · ' + payload['name'] + ' · ' +
+                         ('running' if kind == 'execution_start' else payload['state'])))
+    elif kind == 'task_stopped':
+        with events.paused():
+            print(warn('任务停止 · ' + payload['state']))
+    elif kind == 'task_resumed' and payload.get('previous_state') in (
+            'interrupted', 'budget_stopped', 'deadline_stopped', 'blocked'):
+        with events.paused():
+            print(notice('任务继续 · ' + payload['previous_state']))
+    elif kind == 'verification_invalidated' and payload.get('verification_refs'):
+        with events.paused():
+            print(notice('验证已失效 · ' + str(len(payload['verification_refs']))))

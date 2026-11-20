@@ -45,7 +45,9 @@ class TestStart(Base):
         self.assertIn("#1", out.summary)
 
     def test_编号从一开始往上递增(self):
-        self.assertEqual([self.start("true").id, self.start("true").id], [1, 2])
+        first = self.start("true")
+        self.assertTrue(wait(lambda: not first.running))
+        self.assertEqual([first.id, self.start("true").id], [1, 2])
 
     def test_在工作区里跑(self):
         job = self.start("pwd > 记一下.txt")
@@ -74,7 +76,7 @@ class TestOutput(Base):
         jobs_mod.MAX_CHARS = 200
         job = self.start("head -c 100000 /dev/zero | tr '\\0' x; printf END")
         self.assertTrue(wait(lambda: not job.running))
-        self.assertTrue(wait(lambda: job.proc.stdout.closed))
+        self.assertTrue((job.directory / "receipt.json").exists())
         text, dropped = job.take()
         self.assertTrue(dropped)
         self.assertEqual(len(text), 200)
@@ -141,7 +143,9 @@ class TestKill(Base):
         self.assertFalse(self.job("kill", id=job.id).is_error)
 
     def test_kill_all_全停(self):
-        for _ in range(3):
+        self.start("sleep 30")
+        from feiyu.taskstate import PersistenceError
+        with self.assertRaises(PersistenceError):
             self.start("sleep 30")
         self.box.jobs.kill_all()
         self.assertEqual(self.box.jobs.running(), [])

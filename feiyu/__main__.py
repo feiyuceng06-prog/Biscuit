@@ -1,3 +1,18 @@
+import sys
+
+# Dispatch before importing agent/configuration/SDK business modules.
+if sys.platform == 'linux' and len(sys.argv) == 6 and sys.argv[1] == '--_sdk-supervisor':
+    from .sdk_lifecycle import supervise
+    raise SystemExit(supervise(int(sys.argv[2]), int(sys.argv[3]), sys.argv[4], int(sys.argv[5])))
+
+if __name__ == '__main__' and sys.argv[1:] == ['--_sdk-worker']:
+    from .sdk_worker import worker_main
+    raise SystemExit(worker_main())
+
+if __name__ == '__main__' and sys.argv[1:] == ['--_mcp-http-worker']:
+    from .mcp import http_worker_main
+    raise SystemExit(http_worker_main())
+
 import argparse
 import contextlib
 import json
@@ -31,6 +46,13 @@ def _time_arg(text: str) -> float:
 
 
 def main() -> int:
+    from .runtime import configure_serve_stdio
+
+    # Desktop uses this exact flag. Configure before argparse diagnostics or any
+    # agent setup; a positional prompt after -- must not change terminal I/O.
+    argv = sys.argv[1:]
+    if '--serve' in argv[:argv.index('--') if '--' in argv else len(argv)]:
+        configure_serve_stdio()
     parser = argparse.ArgumentParser(prog="feiyu", description="Feiyu 编程助手")
     parser.add_argument("-V", "--version", action="version", version=f"feiyu {__version__}")
     parser.add_argument(
@@ -110,6 +132,8 @@ def main() -> int:
         help="直接跑一个任务，跑完就退出 ",
     )
     args = parser.parse_args()
+    if args.serve:
+        configure_serve_stdio()  # Also covers argparse flag abbreviations.
 
     # 主题要在画任何东西之前生效，欢迎框是打进 scrollback 的，之后换不了
     ui.set_theme(keys.theme() or "default")
@@ -342,6 +366,8 @@ def main() -> int:
                 return _finish(agent, tracer, 0)
             if cmd == "/help":
                 print(_help())
+            elif cmd == "/task":
+                print(_task(agent, arg))
             elif cmd == "/clear":
                 agent.reset()
                 session.drop(workspace, agent.session_id)
@@ -381,7 +407,7 @@ def main() -> int:
             elif cmd == "/hooks":
                 print(_hooks(agent))
             elif cmd == "/sandbox":
-                print(_sandbox(arg))
+                print(_sandbox(arg, agent))
             elif cmd == "/profile":
                 print(_profile(agent, arg))
             elif cmd == "/bot":
@@ -899,16 +925,20 @@ def _help() -> str:
 def _finish(agent: Feiyu, tracer, code: int) -> int:
     # 清单没做完就把进度留下，下次进这个目录时它自己知道上次干到哪
     # 放在三条路径共同的收尾里，一次覆盖全部；全做完时 save 自己会把旧的清掉
-    progress.save(agent.toolbox.root, agent.task, agent.toolbox.todos.items)
-    # 后台命令跟着 feiyu 一起收摊 留着的话用户关掉窗口之后那些进程还在跑，
-    # 而他已经没有任何句柄能找到它们了
-    agent.toolbox.lsp.close()
-    agent.toolbox.mcp.close()
-    agent.toolbox.shell_reset()     # /tmp 里那份 shell 状态，里头是整份环境
-    left = agent.toolbox.jobs.running()
-    if left:
-        agent.toolbox.jobs.kill_all()
-        print(ui.notice("停掉了 %d 个还在跑的后台命令" % len(left)))
+    try:
+        agent._task_checkpoint()
+    finally:
+        pending_error = sys.exc_info()[1]
+        cleanup_error = None
+        for cleanup in (agent.toolbox.lsp.close, agent.toolbox.mcp.close,
+                        agent.toolbox.shell_reset, agent.toolbox.jobs.kill_all):
+            try:
+                cleanup()
+            except Exception as exc:
+                if cleanup_error is None:
+                    cleanup_error = exc
+        if cleanup_error is not None and pending_error is None:
+            raise cleanup_error
     tracer.write("run_end", code=code, tokens=agent.tokens, cost=agent.cost,
                  touched=agent.touched or None, verified=agent.verified_ok)
     return code
@@ -972,10 +1002,12 @@ _SANDBOX_DESC = {
 }
 
 
-def _sandbox(arg: str) -> str:
+def _sandbox(arg: str, agent=None) -> str:
     if arg:
         if arg not in sandbox_mod.LEVELS:
             return ui.error("只能是 %s" % " / ".join(sandbox_mod.LEVELS))
+        if agent is not None:
+            agent.verifications.invalidate()
         sandbox_mod.set_level(arg)
         mode, why = sandbox_mod.effective()
         if mode != arg:
@@ -1311,6 +1343,28 @@ def _run_turn(agent: Feiyu, prompt: str) -> int:
         return 1
     return 0
 
+
+
+def _task(agent, action):
+    if action.lstrip().startswith('{'):
+        import json
+        return json.dumps(agent.task_control(json.loads(action)), ensure_ascii=False)
+    if action == 'new':
+        agent.new_task()
+        return ui.notice('已创建新任务 ' + agent.task_id)
+    if action == 'complete' and agent.task_state is not None:
+        if any(op['state'] in ('prepared', 'unknown') for op in agent.task_state.operations):
+            return ui.warn('存在未知副作用，先核对结果')
+        agent.task_control({'action': 'check'})
+        if any(r.get('status') != 'verified' for r in agent.task_state.acceptance):
+            return ui.warn('验收项尚未绑定当前有效验证；不能完成')
+        agent.task_control({'action': 'result', 'result': 'completed'})
+        agent.task_state.run_state = 'idle'
+        agent._task_checkpoint()
+        return ui.notice('已按用户明确操作结束任务；验证结论仍以验证记录为准')
+    state = agent.task_state
+    return ui.notice(('任务 %s · %s · %s' % (state.task_id, state.run_state, state.result))
+                     if state else '尚无任务；/task new 创建任务，/task complete 明确结束任务')
 
 if __name__ == "__main__":
     raise SystemExit(main())

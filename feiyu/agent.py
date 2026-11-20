@@ -2,6 +2,10 @@ import copy
 import datetime
 import difflib
 import json
+import os
+import sys
+import uuid
+import importlib.metadata
 import platform
 import re
 import subprocess
@@ -11,7 +15,9 @@ import urllib.parse
 from pathlib import Path
 
 from . import pricing, ui
-from . import history, hooks as hooks_mod
+from . import history, native_history, hooks as hooks_mod
+from .context import ContextLayers
+from . import compaction, session
 from . import lessons as lessons_mod
 from . import mentions as mentions_mod
 from . import profiles as profiles_mod
@@ -20,10 +26,14 @@ from . import bots as bots_mod
 from . import credits as credits_mod
 from . import enabled, keys, memory, permissions, sandbox, schema as schema_mod
 from . import skills as skills_mod
+from . import provenance
 from . import subagent as subagent_mod
+from .runcontrol import RunStopped
+from .taskstate import PersistenceError
 from . import todo as todo_mod
 from . import tools as tools_mod
 from . import verify as verify_mod
+from .verification import Ledger
 from .providers import SUMMARY_PROMPT, ToolOutput, build_backend
 from .tools import TOOL_SCHEMAS, Toolbox
 from .trace import Trace
@@ -136,9 +146,7 @@ RETRY_NAMES = ("APIConnectionError", "APITimeoutError", "InternalServerError",
 # 接口说"输入太长"时的措辞 各家不一样，只认关键词：
 # DeepSeek "Input token exceed the limit"、OpenAI "maximum context length"、
 # anthropic "prompt is too long"、中转站 "context_length_exceeded"
-OVERFLOW_WORDS = re.compile(
-    r"(token|context|prompt|input).{0,60}(exceed|too long|too large|limit|maximum)"
-    r"|(exceed|maximum|too long|too large).{0,60}(token|context|length)", re.I | re.S)
+from .sdk_errors import OVERFLOW_WORDS
 # 刚追加、还没发出去的工具结果按这个粗算 token 数 中英混排下三个字符一个 token
 # 偏保守（中文会高估），高估的代价是早压一次，低估的代价是 400
 CHARS_PER_TOKEN = 3
@@ -149,6 +157,10 @@ SHRINK_KEEP = 600
 
 def overflow(exc: Exception) -> bool:
     """这个错是不是"上下文塞不下了" 400 一类才算，网络错误不算 """
+    if getattr(exc, "sdk_cleanup_error", None):
+        return False
+    if hasattr(exc, "sdk_overflow"):
+        return exc.sdk_overflow
     code = getattr(exc, "status_code", None)
     if isinstance(code, int) and code not in (400, 413, 422):
         return False
@@ -157,21 +169,18 @@ def overflow(exc: Exception) -> bool:
 
 def rejected(exc: Exception) -> bool:
     """是不是接口拒收请求那一类的错（不管它怎么措辞）"""
-    return getattr(exc, "status_code", None) in (400, 413, 422)
+    return not getattr(exc, "sdk_cleanup_error", None) and getattr(exc, "status_code", None) in (400, 413, 422)
 
 
 # 报错文本里的上限数字："maximum context length is 65536 tokens"、
 # "213462 tokens > 200000 maximum" 都要认 数字紧挨着 maximum/limit 这类词
-_LIMIT_IN_ERROR = re.compile(
-    r"(?:maximum|max|limit|上限)[^\d]{0,40}(\d{4,8})|(\d{4,8})\s*(?:tokens?\s*)?"
-    r"(?:maximum|max|limit|上限)", re.I)
-# 学到的上限再低也不低于这个 更低多半是把一次异常当成了窗口大小，
-# 会让它之后每两轮就压缩一次
-MIN_LEARNED_LIMIT = 16_000
+from .sdk_errors import _LIMIT_IN_ERROR, MIN_LEARNED_LIMIT
 
 
 def limit_in_error(exc: Exception) -> int:
     """从"输入太长"的报错里抠出接口说的上限 抠不到返回 0 """
+    if hasattr(exc, "sdk_context_limit"):
+        return exc.sdk_context_limit
     for found in _LIMIT_IN_ERROR.finditer(str(exc)):
         value = int(found.group(1) or found.group(2))
         if value >= MIN_LEARNED_LIMIT:
@@ -181,6 +190,8 @@ def limit_in_error(exc: Exception) -> int:
 
 def transient(exc: Exception) -> bool:
     """这个错值不值得再试一次 按状态码和类名判断，不绑任何一家 SDK """
+    if getattr(exc, "sdk_cleanup_error", None):
+        return False
     code = getattr(exc, "status_code", None)
     if isinstance(code, int):
         return code in RETRY_CODES
@@ -339,8 +350,8 @@ VERIFY_AFTER = {"write_file", "edit_file"}
 # bash 不在里面——它共享 self.cwd，两条并发的 cd 会互相盖掉；
 # 写类工具不在里面——同一批里改同一个文件就是竞态；
 # todo / exit_plan / remember 都改 agent 自己的状态，也不能并发
-PARALLEL_SAFE = {"read_file", "list_files", "search", "web_fetch", "web_search", "task", "symbol",
-                 "skill"}
+from .execution import PARALLEL_SAFE
+
 # 上限拦一下：一批十个 web_fetch 同时打同一个站点不礼貌，线程也不是免费的
 MAX_PARALLEL = 4
 
@@ -451,6 +462,9 @@ def _with_image_models(spec: dict, aliases: list[str]) -> dict:
     return out
 
 
+from . import events
+
+
 class Feiyu:
     def __init__(self, workspace: Path, *, model: str = "", trace: Trace | None = None):
         self.toolbox = Toolbox(workspace, ask_model=self._ask_model,
@@ -460,8 +474,13 @@ class Feiyu:
                                ask_user=self._ask_user_cb)
         self.approve_plan = None     # 界面层塞进来：(方案) -> bool
         self.ask_user = None         # 界面层塞进来：(问题, 选项) -> 答复
+        self._provenance_lock = threading.RLock()
+        self._provenance_lock = threading.RLock()
+        self.toolbox.memory_sources = lambda: provenance.collect(self) if self.backend else []
         self.subagent_tokens = 0     # 子 agent 烧掉的量，不进主对话但照样计费
         self.subagent_cost = 0.0
+        self._external_unpriced = False
+        self._control_lock = threading.RLock()
         # 旁活（摘要、网页提炼、子 agent）用的配置 空串就是跟主模型一样
         # 后端按名字缓存一份：每次摘要都重建客户端太浪费
         self.helper = keys.helper()
@@ -478,7 +497,14 @@ class Feiyu:
         self._verify_project = True
         self._verify_decision = None
         self.approve_verify = None
-        self.verified_ok = None      # 最近一次校验过没有：True/False/None（没跑过）
+        self.verifications = Ledger(emit=lambda kind, **data: events.owned_fact(self, kind, **data))
+        self.task_id = uuid.uuid4().hex
+        self.task_state = None
+        self._task_store = None
+        self._code_task = False
+        self.toolbox.execution.emit = self._execution_event
+        self.toolbox.on_mutation = self._verification_mutation
+        self.toolbox.on_background = self._control
         # 动手之前那次"先跑一遍看什么是坏的"跑过没有 一个会话只跑一次
         self._baseline = ""          # 跑出来的要点，附在第一次写文件的结果里
         self._baseline_done = False
@@ -490,7 +516,7 @@ class Feiyu:
         self.skills_note = ""
         # 这一轮存到哪一份会话里 由入口层（__main__ / serve）定：接着上次就沿用
         # 那一份的 id，从头开始就新起一个。存盘和「新对话」都看它
-        self.session_id: str | None = None
+        self.session_id: str | None = uuid.uuid4().hex
         # 接口那边的余额 跟 self.cost（我们自己按你填的价格估的）不是一回事
         self.credits = None
         self.credits_note = ""
@@ -550,7 +576,12 @@ class Feiyu:
         if self.backend is None:
             return ""
         try:
-            return (self._side_backend().ask(prompt) or "").strip()
+            provenance.append(self, 'external_data', prompt)
+            answer = (self._model_call(self._side_backend(), "ask", prompt) or "").strip()
+            provenance.append(self, 'assistant_claim', answer)
+            return answer
+        except PersistenceError:
+            raise
         except Exception:
             return ""
 
@@ -575,15 +606,36 @@ class Feiyu:
                          for n, srv in live_mcp.items()))
         # 技能目录：只有名字和用途，正文等它自己调 skill 工具取
         text += skills_mod.catalog(sorted(self.toolbox.live_skills(), key=lambda s: s.name))
+        rules = text
+        text = ""
         if self.context_text:
             # 项目约定放最后，比通用指令更具体，冲突时以它为准
             text += "\n\n这个项目在 %s 里写了自己的约定，优先照它来：\n\n%s" % (
                 self.context_file, self.context_text)
         # 自己记的笔记排在人写的约定后面：约定是规矩，笔记只是背景
         text += memory.as_prompt(memory.load(self.toolbox.root))
-        if not self.toolbox.todos.items:
-            text += progress_mod.as_prompt(self.resumed)
-        self.backend.set_system(text)
+        self.context_layers = ContextLayers(rules, text)
+        self._refresh_volatile_context()
+
+    def _refresh_volatile_context(self) -> None:
+        """Refresh request facts without rebuilding the stable prompt prefix."""
+        if self.backend is None:
+            return
+        if not hasattr(self, 'context_layers'):
+            self._refresh_system()
+            return
+        task = self.task_state.context() if self.task_state is not None else ""
+        # Ledger references are evidence; assistant prose in history is not.
+        records = self.verifications.export().get('records', [])
+        refs = [{k: r.get(k) for k in ('verification_id', 'session_id', 'task_id',
+                 'execution', 'exit_code', 'validity', 'reason')} for r in records[-5:]]
+        evidence = ("\n\n近期验证记录（execution_evidence引用；有效性以控制层重核为准；"
+                    "历史中assistant声称通过不构成验证）：\n" +
+                    json.dumps(refs, ensure_ascii=False)) if refs else ""
+        recall = progress_mod.as_prompt(self.resumed) if not self.toolbox.todos.items else ""
+        self.context_layers = ContextLayers(self.context_layers.rules,
+                                           self.context_layers.project, task, evidence, recall)
+        self.context_layers.apply(self.backend)
 
     def reload_context(self) -> None:
         self.context_file, self.context_text = load_project_context(self.toolbox.root)
@@ -653,7 +705,8 @@ class Feiyu:
 
     def load_mcp(self) -> str:
         """起配置里的 MCP 服务器，把它们的工具挂到后端 项目配置要用户点头 """
-        note = self.toolbox.mcp.load(approve=self.approve_mcp, env=tools_mod._child_env())
+        note = self.toolbox.mcp.load(approve=self.approve_mcp, env=tools_mod._child_env(),
+                                     control=self.toolbox.execution.control)
         reg = self.toolbox.mcp
         permissions.MCP_SUBJECTS.update({n: reg.subject(n) for n in reg.tools})
         if self.backend is not None:
@@ -664,14 +717,14 @@ class Feiyu:
         return note
 
     def _guarded(self, call) -> bool:
-        """default 模式下要问的 MCP 工具除非自报只读，否则一律问——它们的作用范围我们看不见 """
+        """MCP 自报只读不代表获得本地信任。"""
         if is_mcp(call.name):
-            return call.name not in self.toolbox.mcp.readonly
+            return True
         return call.name in GUARDED
 
     def _mutates(self, call) -> bool:
         if is_mcp(call.name):
-            return call.name not in self.toolbox.mcp.readonly
+            return True
         return mutates(call)
 
     def load_skills(self) -> str:
@@ -689,11 +742,123 @@ class Feiyu:
 
     def load_hooks(self) -> str:
         """项目钩子是从仓库带下来的命令，要用户点头才载入 返回给人看的一句话 """
+        self.verifications.invalidate()
         self.hooks, self.hooks_note = hooks_mod.load(
             self.toolbox.root, approve=self.approve_hooks)
         self.trace.write("hooks", count=len(self.hooks) or None,
                          note=self.hooks_note or None)
         return self.hooks_note
+
+    def _verification_mutation(self, name=""):
+        if name in {"write_file", "edit_file", "bash", "undo", "git"} or name in self.toolbox.mcp.tools:
+            self._code_task = True
+        self.verifications.invalidate()
+
+    def _verification_config(self):
+        from . import sandbox
+        dependencies = {}
+        for name in ("anthropic", "openai", "pillow", "prompt_toolkit"):
+            try:
+                dependencies[name] = importlib.metadata.version(name)
+            except importlib.metadata.PackageNotFoundError:
+                dependencies[name] = None
+        return {"dependencies": dependencies, "command": self.verify, "source": self.context_file if self._verify_project else "user /verify",
+                "context": self.context_text, "sandbox": sandbox.effective(),
+                "verification_sandbox": sandbox.effective(),
+                "python": [sys.executable, sys.version],
+                "environment": {k: os.environ.get(k, "") for k in ("PATH", "LANG", "LC_ALL")},
+                "hooks": [(h.command, h.source, h.timeout) for h in self.hooks],
+                "global_hooks_digest": hooks_mod.digest(hooks_mod.GLOBAL)}
+
+    def _execute_hook(self, hook, payload):
+        from types import SimpleNamespace
+        command = hook.command
+        call = SimpleNamespace(name="bash", input={"command": command}, id="hook", error="")
+        reason = ""
+        key = (hook.source, command, str(self.toolbox.root))
+        approved = getattr(self, "_command_approvals", set())
+        ruling = permissions.verdict("bash", call.input)
+        if not isinstance(command, str) or not command.strip():
+            reason = "钩子命令为空"
+        elif ruling == "deny":
+            reason = "被权限规则拒绝"
+        elif self.mode in ("plan", "readonly"):
+            reason = "当前模式不允许执行自动命令"
+        elif hook.source == "verify:" and not self._allow_verify():
+            reason = "项目 verify 来源尚未获准"
+        else:
+            egress = self._egress(call)
+            explicit = hook.source == "verify:" and not self._verify_project
+            if egress or (ruling != "allow" and self.mode != "auto" and key not in approved and not explicit):
+                answer = self.approve("bash", dict(call.input, cwd=str(self.toolbox.root), source=hook.source)) if self.approve else "no"
+                if answer not in ("yes", "always", "remember"):
+                    reason = egress or "用户拒绝自动命令"
+                elif not egress and answer in ("always", "remember"):
+                    approved.add(key)
+                    self._command_approvals = approved
+        if reason:
+            self.toolbox.execution.reject("bash", reason, source=hook.source)
+            return hooks_mod.Outcome(hook, -1, reason, rejected=reason)
+        self._ensure_task_storage()
+        self._control().check()
+        return self.toolbox.execution.invoke(
+            "bash", call.input,
+            lambda: hooks_mod.run(hook, payload, self.toolbox.root,
+                                 offline=self.toolbox._offline(call.input), control=self._control()), source=hook.source, cwd=self.toolbox.root,
+            authorization=dict(source='hook-gate', decision='allowed', rule=ruling, mode=self.mode, scope='exact-command-cwd-source', reusable=False))
+
+    def _run_hook(self, hook, payload):
+        self.verifications.invalidate()
+        outcome = self._execute_hook(hook, payload)
+        if outcome.stop_reason in ("cancelled", "deadline_stopped", "budget_stopped"):
+            raise RunStopped(outcome.stop_reason)
+        if outcome.cancelled:
+            raise KeyboardInterrupt()
+        return outcome
+
+    def _verification_busy(self):
+        # LSP processes run without write isolation and can write asynchronously.
+        return bool(self.toolbox.jobs.running()) or bool(getattr(self.toolbox, '_unisolated_lsp', False))
+
+    def _run_verification(self, hook, payload, category):
+        config = self._verification_config()
+        r = self.verifications.begin(self.toolbox.root, self.toolbox.cwd, config,
+                                     category, self.session_id, self.task_id)
+        # Keep the established verify cwd (workspace root); shell cwd is separately
+        # fingerprinted so changing it invalidates previous evidence.
+        r["cwd"] = str(self.toolbox.root)
+        busy_before = self._verification_busy()
+        outcome = self._execute_hook(hook, payload)
+        self.verifications.finish(r, outcome, self.toolbox.root, self.toolbox.cwd,
+                                  self._verification_config(), busy_before or self._verification_busy())
+        if outcome.stop_reason in ("cancelled", "deadline_stopped", "budget_stopped"):
+            raise RunStopped(outcome.stop_reason)
+        if outcome.cancelled:
+            raise KeyboardInterrupt()
+        return outcome
+
+    @property
+    def verified_ok(self):
+        r = self.verifications.current(self.toolbox.root, self.toolbox.cwd,
+                                       self._verification_config(), self._verification_busy(),
+                                       owner=(self.session_id, self.task_id))
+        if not r or r["category"] == "baseline" or r["validity"] != "current":
+            return None
+        return {"passed": True, "failed": False}.get(r["execution"])
+
+    @verified_ok.setter
+    def verified_ok(self, value):
+        # Legacy callers can invalidate; only executed evidence grants a pass.
+        self.verifications.invalidate()
+
+    def verification_summary(self):
+        r = self.verifications.current(self.toolbox.root, self.toolbox.cwd,
+                                       self._verification_config(), self._verification_busy(),
+                                       owner=(self.session_id, self.task_id))
+        reason = ("未配置 verify" if not self.verify else
+                  "项目 verify 尚未获准执行" if self._verify_project and self._verify_decision is not True else
+                  "尚未触发复现或写后验证；普通 Shell 不自动归类为验证")
+        return ui.verification_status(r, missing_reason=reason)
 
     @property
     def all_hooks(self) -> list:
@@ -723,12 +888,10 @@ class Feiyu:
                        "tool": tool, "subject": subject}
             payload.update(extra or {})
             began = time.monotonic()
-            outcome = hooks_mod.run(hook, payload, self.toolbox.root)
+            outcome = self._run_verification(hook, payload, "post_change") if hook.source == "verify:" else self._run_hook(hook, payload)
             ms = round((time.monotonic() - began) * 1000)
             self.trace.write("hook", event=event, command=hook.command,
                              code=outcome.code, ms=ms)
-            if hook.source == "verify:":
-                self.verified_ok = outcome.ok
             if outcome.ok:
                 print(ui.hook_line(True, "钩子通过：%s" % ui.clip(hook.command, 60)))
             else:
@@ -783,7 +946,12 @@ class Feiyu:
     @property
     def cost(self) -> float | None:
         """累计花费（人民币） 价格表里没有这个模型时返回 None """
-        if not getattr(self.backend, "priced", False):
+        store = getattr(self, '_task_store', None)
+        if store is not None and any(s.budget and (s.budget.get('cost') is None or
+                s.budget.get('pending_attempts') or s.budget.get('unknown_attempts'))
+                for s in store._states.values()):
+            return None
+        if getattr(self, "_external_unpriced", False) or not getattr(self.backend, "priced", False):
             return None
         side = self._side
         if side is not None and not getattr(side, "priced", True):
@@ -798,16 +966,33 @@ class Feiyu:
         不该要求先配好模型 —— `/clear` 和 `/bot` 都会走到这儿，一个还没 `/key add`
         的新用户敲一下就是 AttributeError。
         """
+        self._guard_task_switch()
         if self.backend is not None:
             self.backend.reset()
         self._forget_history()
         self._pending = 0
         # 读过的外部内容跟着历史一起没了，那道闸也该放下
         self.toolbox.outside = ""
+        self.source_refs = []
         self.lessons.reset()
+        if self._task_store is not None:
+            self._task_store.close()
+        self._task_store = None
+        self.task_state = None
+        self._restore_error = False
+        self._legacy_requests = []
+        self.toolbox.execution.durable = None
+        self.toolbox.execution.control = None
+        self.task_id = uuid.uuid4().hex
+        self._command_approvals = set()
+        self.verifications = Ledger(emit=lambda kind, **data: events.owned_fact(self, kind, **data))
+        self._code_task = False
+        self._baseline = ""
+        self._baseline_done = False
 
     def undo(self) -> str | None:
         """退掉最近一次写文件的改动 只退 write_file / edit_file 的，bash 改的看不见 """
+        self._verification_mutation("undo")
         said = self.toolbox.undo()
         if said:
             self._undone.append(said)
@@ -839,7 +1024,7 @@ class Feiyu:
         if old is not None:
             same = type(fresh) is type(old)
             if same:
-                fresh.messages = old.messages
+                native_history.replace(fresh, native_history.read(old))
                 fresh.tokens_context = old.tokens_context
             else:
                 # 两种后端的 messages 结构不通用，历史丢了，登记的 id 也就没意义
@@ -955,11 +1140,18 @@ class Feiyu:
             return "（没有可用的模型配置，派不出去）", []
         report, lines, used = subagent_mod.run(
             prompt, entry=entry, workspace=self.toolbox.root, trace=self.trace,
-            lsp=self.toolbox.lsp)
-        self.subagent_tokens += used["tokens"]
-        if used["priced"]:
-            self.subagent_cost += used["cost"]
-        return report, lines
+            lsp=self.toolbox.lsp, control=self._control(), on_usage=self._account_external,
+            event_emit=self._execution_event)
+        provenance.merge(self, getattr(report, 'source_refs', []))
+        return json.dumps(dict(source_kind='assistant_claim', text=str(report),
+                               source_refs=provenance.clean(getattr(report, 'source_refs', []))),
+                          ensure_ascii=False), lines
+
+    def _account_external(self, used):
+        self.subagent_tokens += used['tokens']
+        self.subagent_cost += used['cost']
+        if not used['priced']:
+            self._external_unpriced = True
 
     def _exit_plan(self, plan: str) -> tuple[bool, str]:
         """模型交方案，用户点头就切回默认模式 """
@@ -982,7 +1174,286 @@ class Feiyu:
         self.style = name
         self._refresh_system()
 
+    def _ensure_task_storage(self):
+        from .taskstate import TaskState, TaskStore, workspace_id, PersistenceError
+        from . import session
+        if getattr(self, '_restore_error', False):
+            raise PersistenceError('恢复受阻，禁止副作用')
+        if self.session_id is None or self.session_id == session.LEGACY:
+            self.session_id = session.new_id()
+        if self._task_store is None:
+            self._task_store = TaskStore(self.toolbox.root, self.session_id)
+        if self.task_state is None:
+            self.task_state = TaskState(self.session_id, self.task_id, workspace_id(self.toolbox.root))
+            for request in getattr(self, '_legacy_requests', []):
+                self.task_state.revise(request)
+                self.task_state.requests[-1]['source'] = 'unknown/legacy'
+                for goal in self.task_state.goals:
+                    if goal['request_id'] == self.task_state.requests[-1]['id']:
+                        goal['source'] = 'unknown/legacy'
+            self._legacy_requests = []
+        self._task_store.activate(self.task_state)
+        self.toolbox.execution.durable = (self._task_store, self.task_state)
+
+    def _control(self):
+        with self._control_lock:
+            from .runcontrol import RunControl
+            if self.task_state is None:
+                self._ensure_task_storage()
+            control = getattr(self, '_run_control', None)
+            if control is None or control.state is not self.task_state:
+                control = RunControl(self._task_store, self.task_state,
+                                     cost_limit=self.budget, time_limit=self.time_budget)
+                self._run_control = control
+            control.limit_source = lambda: (self.budget, self.time_budget)
+            control.tighten(self.budget, self.time_budget)
+            self.toolbox.execution.control = control
+            return control
+
+    def _model_call(self, backend, method, *args, **kwargs):
+        control = self._control()
+        try:
+            with control.attempt(backend):
+                return getattr(backend, method)(*args, **kwargs)
+        finally:
+            if control.state.budget.get('cost') is None:
+                self._external_unpriced = True
+
+    def _execution_event(self, kind, **record):
+        self.trace.write(kind, **record)
+        events.owned_fact(self, kind, **dict(record, operation_id=record.get('id'),
+                                source_kind='execution_evidence'))
+
+    def cancel(self):
+        control = getattr(self, '_run_control', None)
+        if control is not None:
+            control.cancel()
+        error = None
+        try:
+            self.toolbox.lsp.close()
+        except Exception as exc:
+            error = exc
+        for job in self.toolbox.jobs.all():
+            if getattr(job, 'state', None) is self.task_state:
+                try:
+                    job.kill()
+                except Exception as exc:
+                    error = error or exc
+        if error:
+            raise error
+
+    def _task_checkpoint(self):
+        if self.task_state is None:
+            return
+        state = self.task_state
+        self._check_task_acceptance()
+        state.todos = [dict(item) for item in self.toolbox.todos.items]
+        state.verification_refs = [r.get('verification_id') for r in self.verifications.export().get('records', [])]
+        from .taskstate import PersistenceError
+        try:
+            self._task_store.save(state)
+        except PersistenceError:
+            try:
+                self.toolbox.lsp.close()
+            except Exception:
+                pass
+            try:
+                self.toolbox.jobs.kill_all()
+            except Exception:
+                pass  # Preserve the original critical write error after all cleanup attempts.
+            raise
+        self.resumed = progress_mod.selected(state)
+
+    def _guard_task_switch(self):
+        self.toolbox.lsp.close()
+        from .taskstate import PersistenceError
+        for job in self.toolbox.jobs.all():
+            if hasattr(job, 'refresh'):
+                job.refresh()
+        if getattr(self, '_restore_error', False) or (self._task_store and self._task_store.blocked):
+            raise PersistenceError('恢复或持久化受阻，禁止切换绕过')
+        if self._task_store and self._task_store.pending():
+            raise PersistenceError('存在未知副作用，不能切换任务绕过核对: ' + ', '.join(self._task_store.pending()))
+
+    def _check_task_acceptance(self):
+        state = self.task_state
+        if state is None or not state.acceptance:
+            return
+        self.verifications.current(self.toolbox.root, self.toolbox.cwd, self._verification_config(),
+            busy=bool(self.toolbox.jobs.running()) or getattr(self.toolbox, '_unisolated_lsp', False),
+            owner=(self.session_id, self.task_id))
+        for row in state.acceptance:
+            record = next((r for r in self.verifications.records if r.get('verification_id') == row.get('verification_id')), None)
+            row['status'] = 'verified' if (record and record is self.verifications.records[-1]
+                and record.get('category') != 'baseline' and record.get('execution') == 'passed' and record.get('validity') == 'current'
+                and (record.get('session_id'), record.get('task_id')) == (self.session_id, self.task_id)) else 'unverified'
+
+        if state.result == 'completed' and any(r.get('status') != 'verified' for r in state.acceptance):
+            state.result = 'unfinished'
+            state.result_details = {}
+
+    def task_control(self, command):
+        """Only CLI/serve dispatch this entry; it is not exposed as a model tool."""
+        from .taskstate import PersistenceError
+        state = self.task_state
+        if state is None or self._task_store is None:
+            raise PersistenceError('尚无任务')
+        if not isinstance(command, dict):
+            raise PersistenceError('task 控制参数必须为 JSON object')
+        action = command.get('action')
+        if action == 'pending':
+            return dict(selected=self.task_id, pending=self._task_store.pending(), tasks=list(self._task_store._states))
+        if action == 'select':
+            selected = self._task_store._states.get(command.get('task_id'))
+            if selected is None:
+                raise PersistenceError('未知 task id')
+            self.toolbox.lsp.close()
+            self._task_store.activate(selected, recovery_selection=True)
+            self._command_approvals = set()
+            self.task_state = selected
+            self.task_id = selected.task_id
+            self.toolbox.todos.restore(selected.todos)
+            self.toolbox.execution.durable = (self._task_store, selected)
+            self._task_checkpoint()
+            self._refresh_system()
+            return dict(selected=self.task_id, pending=self._task_store.pending())
+        if action == 'show':
+            from dataclasses import asdict
+            return asdict(state)
+        if action == 'result':
+            if set(command) - {'action', 'result', 'reason'}:
+                raise PersistenceError('结果操作不接受证据、状态或授权字段')
+            result = command.get('result')
+            reason = command.get('reason', '')
+            if (result not in ('unfinished', 'completed', 'partial', 'unverifiable')
+                    or not isinstance(reason, str)
+                    or (result in ('partial', 'unverifiable') and not reason.strip())):
+                raise PersistenceError('无效结果；partial/unverifiable 必须提供人工说明')
+            self._check_task_acceptance()
+            if result == 'completed':
+                self._guard_task_switch()
+                if any(r.get('status') != 'verified' for r in state.acceptance):
+                    raise PersistenceError('验收项尚未绑定当前有效验证；不能完成')
+            if not state.requests:
+                raise PersistenceError('结果必须引用已有请求')
+            state.result = result
+            state.result_details = dict(source='user-control', reason=reason, at=time.time(),
+                request_id=state.requests[-1]['id'],
+                acceptance=[dict(id=r.get('id'), verification_id=r.get('verification_id'),
+                                 status=r.get('status', 'unverified')) for r in state.acceptance],
+                verification_refs=[r['verification_id'] for r in self.verifications.records])
+            self._task_checkpoint()
+            self._refresh_system()
+            from dataclasses import asdict
+            return asdict(state)
+        if action == 'add':
+            row = state.add_requirement(command.get('kind'), command.get('text'), command.get('request_id'))
+            self._task_checkpoint()
+            self._refresh_system()
+            return row
+        if action == 'bind':
+            row = next((r for r in state.acceptance if r.get('id') == command.get('acceptance_id')), None)
+            record = next((r for r in self.verifications.records if r.get('verification_id') == command.get('verification_id')), None)
+            if row is None or record is None or (record.get('session_id'), record.get('task_id')) != (self.session_id, self.task_id):
+                raise PersistenceError('验收项或验证引用无效')
+            row['verification_id'] = record['verification_id']
+        elif action == 'reconcile':
+            self._task_store.reconcile(state)
+        elif action == 'resolve':
+            if set(command) != {'action', 'operation_id', 'acknowledgement'}:
+                raise PersistenceError('只接受人工核对说明，不接受伪造状态/证据或授权')
+            self._task_store.resolve(state, command['operation_id'], command['acknowledgement'])
+        elif action != 'check':
+            raise PersistenceError('未知 task 控制操作')
+        self._check_task_acceptance()
+        self._task_checkpoint()
+        self._refresh_system()
+        return dict(acceptance=state.acceptance, operations=state.operations,
+                    result=state.result, result_details=state.result_details)
+
+    def new_task(self):
+        """Explicit control action; unfinished acceptance remains in its old sidecar."""
+        if self.task_state and any(op['state'] in ('unknown', 'prepared', 'running') for op in self.task_state.operations):
+            from .taskstate import PersistenceError
+            raise PersistenceError('存在未知副作用，不能切换任务绕过核对')
+        self._guard_task_switch()
+        self._task_checkpoint()
+        self.task_id = uuid.uuid4().hex
+        self.task_state = None
+        self.toolbox.execution.durable = None
+        self.toolbox.execution.control = None
+        self.toolbox.todos.restore([])
+        self._command_approvals = set()
+        self._baseline_done = False
+        self._baseline = ''
+        self._code_task = False
+        self._ensure_task_storage()
+
+    @events.running
     def send(self, user_message: str) -> str:
+        from .taskstate import TaskState, TaskStore, workspace_id
+        from . import session
+        if getattr(self, '_restore_error', False):
+            from .taskstate import PersistenceError
+            raise PersistenceError('恢复受阻，禁止继续；原件保留')
+        if self.backend is None:
+            raise RuntimeError("还没有可用的模型")
+        if self.session_id is None or self.session_id == session.LEGACY:
+            self.session_id = session.new_id()
+        self._check_task_acceptance()
+        if self.task_state is not None and self.task_state.result == 'completed':
+            self.new_task()
+        if self._task_store is None:
+            self._task_store = TaskStore(self.toolbox.root, self.session_id)
+        if self.task_state is None:
+            self.task_state = TaskState(self.session_id, self.task_id, workspace_id(self.toolbox.root))
+            for request in getattr(self, '_legacy_requests', []):
+                self.task_state.revise(request)
+                self.task_state.requests[-1]['source'] = 'unknown/legacy'
+                for goal in self.task_state.goals:
+                    if goal['request_id'] == self.task_state.requests[-1]['id']:
+                        goal['source'] = 'unknown/legacy'
+            self._legacy_requests = []
+        previous_state = self.task_state.run_state
+        self.task_state.revise(user_message)
+        provenance.append(self, 'user_request', user_message, self.task_state.requests[-1]['id'])
+        self._task_store.activate(self.task_state)
+        self.task_state.run_state = 'running'
+        self.toolbox.execution.durable = (self._task_store, self.task_state)
+        self._control().cancelled.clear()  # A new user turn resumes cancellation, never funds/deadline.
+        self._task_checkpoint()
+        events.admitted(self.session_id, self.task_id)
+        events.fact('task_resumed', previous_state=previous_state, state='running')
+        try:
+            self._refresh_system()
+            self._control().check()
+            result = self._send(user_message)
+            # An assistant completion is a conversation boundary, not task acceptance.
+            if self.task_state.run_state == 'running':
+                self.task_state.run_state = 'waiting_user'
+            return result
+        except RunStopped as exc:
+            if exc.reason == 'deadline_stopped':
+                return self._stop_time(self.time_budget)
+            if exc.reason == 'budget_stopped':
+                return self._stop_budget('父任务到了你设的上限，或用量未知；先核对费用')
+            self.task_state.run_state = 'interrupted'
+            raise
+        except KeyboardInterrupt:
+            self.cancel()
+            self.task_state.run_state = 'interrupted'
+            raise
+        except BaseException:
+            self.task_state.run_state = 'blocked'
+            raise
+        finally:
+            self._task_checkpoint()
+            session.save(self.toolbox.root, self, self.session_id)
+            if self.task_state.run_state in ('interrupted', 'budget_stopped', 'deadline_stopped', 'blocked'):
+                events.fact('task_stopped', state=self.task_state.run_state)
+            events.fact('run_end', state=self.task_state.run_state)
+
+    def _send(self, user_message: str) -> str:
         if self.backend is None:
             raise RuntimeError("还没有可用的模型 先用 /key add 添加一个，再用 /model 选中 ")
         self.task = user_message
@@ -1003,9 +1474,14 @@ class Feiyu:
             print(ui.notice("已读好并附上：" + "、".join(said)))
             print()
             note += attached
+        if note:
+            provenance.append(self, 'external_data', note)
         self.backend.add_user_message(user_message + note)
+        from . import session
+        session.save(self.toolbox.root, self, self.session_id)
         rounds = 0
-        deadline = time.monotonic() + self.time_budget if self.time_budget else 0.0
+        remaining = self.task_state.budget.get('deadline', 0) - time.time()
+        deadline = time.monotonic() + max(0, remaining) if self.task_state.budget.get('deadline') else 0.0
         self._time_warned = False
         nudged = False      # 清单没做完只提醒一次，提醒到底会转不出来
         retries = 0
@@ -1016,7 +1492,8 @@ class Feiyu:
             asked = time.monotonic()
             try:
                 # 中断/报错时也必须停掉 spinner 线程，否则它会继续往屏幕上糊帧
-                turn = self.backend.run_turn(on_text=stream.write,
+                self._refresh_volatile_context()
+                turn = self._model_call(self.backend, "run_turn", on_text=stream.write,
                                              on_tool=stream.progress,
                                              on_think=stream.thinking)
                 self._pending = 0       # 接口刚报过准确的数，估算作废
@@ -1047,7 +1524,7 @@ class Feiyu:
                     print(ui.warn("接口出错（%s），%.0f 秒后重试第 %d 次" % (
                         type(exc).__name__, RETRY_WAIT, retries)))
                     print()
-                    time.sleep(RETRY_WAIT)
+                    self._control().wait(RETRY_WAIT)
                     continue
                 # 吐过字就不能重发——模型会把刚说的话再说一遍
                 # 但已经说出口的话要留在历史里，角色也得接着交替
@@ -1076,6 +1553,7 @@ class Feiyu:
                     getattr(self.backend, "max_tokens", "?")))
                 print()
             if not turn.tool_calls:
+                self._control().check()
                 left = self.toolbox.todos.unfinished()
                 if left and not nudged:
                     # 五件事做完三件就宣布干完，是这类 agent 最常见的毛病
@@ -1085,6 +1563,9 @@ class Feiyu:
                     self.backend.add_user_message(todo_mod.nudge_text(left))
                     continue
                 self._fire("Stop", extra={"text": turn.text})
+                if self._code_task:
+                    print(ui.notice(self.verification_summary()))
+                    self._code_task = False
                 self._maybe_compact()
                 return turn.text
 
@@ -1102,9 +1583,12 @@ class Feiyu:
                     self._after_tools(changed, outputs)
                 self._note_jobs(outputs)
                 self._note_deadline(deadline, outputs)
+                for output in outputs:
+                    provenance.append(self, 'assistant_claim' if any(c.id == output.id and (c.name == 'task' or (c.name == 'web_fetch' and c.input.get('prompt'))) for c in turn.tool_calls) else 'external_data', output.content, output.id)
                 self.backend.add_tool_results(outputs)
                 self._pending += sum(len(o.content) for o in outputs) // CHARS_PER_TOKEN
                 self._fold(turn.tool_calls, outputs)
+                session.save(self.toolbox.root, self, self.session_id)
             rounds += 1
             # 预算和轮数在同一处收口 放开了轮数就必须有另一道闸，
             # 否则一道 SWE-bench 题能自己烧掉一整轮评测的钱
@@ -1149,26 +1633,65 @@ class Feiyu:
 
     def restore(self, data: dict) -> bool:
         """从存盘恢复 系统提示会按当前的身份/风格/项目约定重新拼，不用存盘里的那份 """
+        from .taskstate import PersistenceError, matches_workspace
+        if data.get('workspace_id') and not matches_workspace(data['workspace_id'], self.toolbox.root):
+            raise PersistenceError('会话工作区身份不匹配，保留原件')
+        self._guard_task_switch()
+        self.session_id = data.get('session_id') or self.session_id
+        task_ref = data.get('task_ref')
+        if task_ref or data.get('session_id'):
+            from .taskstate import TaskStore
+            if self._task_store is not None:
+                self._task_store.close()
+            self._task_store = None
+            self.toolbox.execution.durable = None
+            self.toolbox.execution.control = None
+            try:
+                self._task_store = TaskStore(self.toolbox.root, self.session_id)
+                self.task_state = self._task_store.recover(task_ref)
+                if self.task_state is not None:
+                    self.task_id = self.task_state.task_id
+                    from .jobs import restore_jobs
+                    restore_jobs(self.toolbox.jobs, self._task_store)
+                    self._task_store.reconcile(self.task_state)
+            except Exception:
+                self._restore_error = True
+                self.task_state = None
+                self.toolbox.execution.durable = None
+                self.toolbox.execution.control = None
+                if self._task_store is not None:
+                    self._task_store.close()
+                self._task_store = None
+                raise
+            if self.task_state is not None:
+                self.toolbox.todos.restore(self.task_state.todos)
+            if self.task_state is not None:
+                self.toolbox.execution.durable = (self._task_store, self.task_state)
+        if data.get('journal_only'):
+            self._task_checkpoint()
+            self._refresh_system()
+            return True
         name = data.get("model") or ""
         if not name or not self.use_model(name):
             return False
         self._pending = 0
         if data.get("style") in STYLES:
             self.style = data["style"]
-        if data.get("mode") in MODES:
+        if data.get("mode") in ("readonly", "plan"):
             self.mode = data["mode"]
         # 机器人要跟着一起回来 **在 use_model 之后**：start_bot 会去换模型，
         # 而存盘里那条模型才是这段对话当时真正在用的
         self.bot = data.get("bot") or ""
         if self.bot and bots_mod.get(self.bot) is None:
             self.bot = ""       # 那个机器人被删了，就当没套
-        self.toolbox.todos.restore(data.get("todos"))
+        self.toolbox.todos.restore(self.task_state.todos if self.task_state else data.get("todos"))
         # **读没读过外部内容要跟着历史回来** —— 藏在那份网页里的话还在历史里，
         # 切回这段对话、或者 --resume 之后闸要照旧落着
         self.toolbox.outside = str(data.get("outside") or "")
         self.lessons.reset()
         b = self.backend
-        b.messages = data["messages"]
+        native_history.restore_session(b, data["messages"])
+        self.source_refs = provenance.clean(data.get("source_refs", []))
         # 捞回来的历史里，那些 id 我们没登记过；Watcher 也是一张白纸，
         # 隔了一个会话的内容本来就该重读
         self._forget_history()
@@ -1178,6 +1701,25 @@ class Feiyu:
         b.tokens_hit = int(data.get("tokens_hit") or 0)
         b.cost = float(data.get("cost") or 0.0)
         b.priced = bool(data.get("priced", True))
+        self._external_unpriced = bool(data.get("unknown_cost", False))
+        self.session_id = data.get("session_id") or self.session_id
+        self.task_id = self.task_state.task_id if self.task_state else (data.get("task_id") or self.task_id)
+        self._code_task = bool(data.get("verification_pending", False))
+        self.verifications.restore(data.get("verifications"))
+        self.verifications.current(self.toolbox.root, self.toolbox.cwd, self._verification_config())
+        if not task_ref and self.task_state is None:
+            self._legacy_requests = []
+            for message in data['messages']:
+                if not isinstance(message, dict) or message.get('role') != 'user':
+                    continue
+                text = message.get('content')
+                if isinstance(text, str):
+                    self._legacy_requests.append(text)
+                elif isinstance(text, list):
+                    self._legacy_requests.extend(block['text'] for block in text
+                        if isinstance(block, dict) and block.get('type') == 'text' and isinstance(block.get('text'), str))
+        self._command_approvals = set()
+        self._task_checkpoint()
         self._refresh_system()
         return True
 
@@ -1195,18 +1737,78 @@ class Feiyu:
         # （thinking、纯图片），拿它的空当"没东西"会把真该压的那份放过去
         if not any(m.get("role") != "system" for m in self.backend.messages):
             return ""
+        try:
+            compaction.check_pairs(self.backend.messages)
+        except compaction.UnsafeCompaction:
+            return ""
+        control = self._control()
+        control.check()
+        original = native_history.export_session(self.backend)
+        before = compaction.protected(self)
+        # Capture before requesting a summary; neither model nor candidate owns facts.
+        initial_facts = compaction.facts(self)
         side = self._side_backend()
         try:
-            summary = (side.ask(SUMMARY_PROMPT + "\n\n"
+            summary = (self._model_call(side, "ask", SUMMARY_PROMPT + "\n\n"
                                 + self.backend.transcript()) or "").strip()
-        except Exception:
-            summary = ""
+        except (PersistenceError, RunStopped):
+            raise
+        except Exception as exc:
+            if getattr(exc, 'sdk_cleanup_error', None):
+                raise
+            return ""
         if not summary:
             return ""
-        self.backend.compact_to(summary)
-        self.backend.tokens_context = 0
+        control.check()
+        if (native_history.export_session(self.backend) != original or
+                compaction.protected(self) != before):
+            return ""
+        snapshot = compaction.facts(self)
+        old_ops = {op['id'] for op in initial_facts['task']['operations']}
+        new_ops = {op['id'] for op in snapshot['task']['operations']}
+        if not old_ops.issubset(new_ops):
+            return ""
+        try:
+            staged = compaction.candidate(self.backend, summary, snapshot)
+        except compaction.UnsafeCompaction:
+            return ""
+        staged.tokens_context = 0
+        control.check()
+        # Keep a durable original before candidate save: atomic_json may fail
+        # on directory fsync *after* replacing the destination.
+        import tempfile
+        session.save(self.toolbox.root, self, self.session_id)
+        path = session._path(self.toolbox.root, self.session_id)
+        fd, rollback = tempfile.mkstemp(prefix='.compact-original-', dir=Path(path).parent)
+        os.close(fd)
+        try:
+            os.unlink(rollback)
+            os.link(path, rollback)
+            view = copy.copy(self)
+            view.backend = staged
+            control.check()
+            try:
+                session.save(self.toolbox.root, view, self.session_id)
+            except BaseException as exc:
+                try:
+                    os.replace(rollback, path)
+                except OSError as recovery_error:
+                    # Preserve the original backup and primary critical failure.
+                    exc.compaction_rollback = rollback
+                    if hasattr(exc, 'add_note'):
+                        exc.add_note('Original history retained at %s; rollback failed: %s' %
+                                     (rollback, recovery_error))
+                    rollback = None
+                raise
+        finally:
+            if rollback:
+                try:
+                    os.unlink(rollback)
+                except OSError:
+                    pass  # Derived backup cleanup cannot undo accepted persistence.
+        # Successful candidate persistence is the acceptance ordering point.
+        self.backend.__dict__.update(staged.__dict__)
         self._pending = 0
-        # 历史整个换成了摘要，之前登记的那些 id 在历史里已经不存在
         self._forget_history()
         return summary
 
@@ -1255,9 +1857,14 @@ class Feiyu:
         prompt = "%s\n\n===== 任务 =====\n%s\n\n===== 交出的改动 =====\n%s" % (
             REVIEW_PROMPT, task or "（没有记录任务描述）", body)
         try:
-            verdict = (judge.ask(prompt, max_tokens=4000) or "").strip()
+            verdict = (self._model_call(judge, "ask", prompt, max_tokens=4000) or "").strip()
+        except PersistenceError:
+            raise
         except Exception as exc:
             return "评分没跑成：%s" % exc
+        finally:
+            self._account_external(dict(tokens=getattr(judge, 'tokens_total', 0),
+                cost=getattr(judge, 'cost', 0.0), priced=getattr(judge, 'priced', False)))
         self.trace.write("review", score=find_score(verdict), chars=len(body))
         return verdict
 
@@ -1274,7 +1881,7 @@ class Feiyu:
             stream = ui.Stream()
             stream.start()
             try:
-                turn = self.backend.run_turn(on_text=stream.write,
+                turn = self._model_call(self.backend, "run_turn", on_text=stream.write,
                                              on_think=stream.thinking)
             finally:
                 stream.finish()
@@ -1303,8 +1910,10 @@ class Feiyu:
         """
         if not self.budget:
             return ""
-        spent = self.cost
-        if spent is None or spent < self.budget:
+        spent = self.task_state.budget.get('cost') if self.task_state else self.cost
+        if spent is None:
+            return '父任务费用未知，预算无法核对'
+        if spent < self.budget:
             return ""
         return "这次任务已经花掉 %s，到了你设的上限 %s" % (
             pricing.yuan(spent), pricing.yuan(self.budget))
@@ -1315,8 +1924,10 @@ class Feiyu:
         **必须往历史补一条 assistant** —— 跟 `_stop_runaway` 同一个理由：
         不补的话角色不再交替，下一轮请求直接 400（0.12.0 那条记了三遍的坑）。
         """
-        text = note + " 我先停下 要接着做就把上限调高，或者 feiyu --resume 接上 "
+        text = note + " 我先停下；恢复不会补充任务额度，请核对任务账本 "
         self.backend.messages.append({"role": "assistant", "content": text})
+        if self.task_state is not None:
+            self.task_state.run_state = "budget_stopped"
         self.trace.write("budget_stop", cost=self.cost, budget=self.budget)
         print(ui.warn(text))
         print()
@@ -1325,8 +1936,10 @@ class Feiyu:
     def _stop_time(self, budget: float) -> str:
         """时间到了，收手 跟 `_stop_budget` 同一个形状，包括必须补的那条 assistant """
         text = ("这次任务已经跑满 %s，到了你设的时间上限 我先停下 "
-                "要接着做就把上限调高，或者 feiyu --resume 接上 " % clock(budget))
+                "恢复不会延长任务截止时间，请核对任务账本 " % clock(budget))
         self.backend.messages.append({"role": "assistant", "content": text})
+        if self.task_state is not None:
+            self.task_state.run_state = "deadline_stopped"
         self.trace.write("time_stop", budget=round(budget, 1))
         print(ui.warn(text))
         print()
@@ -1405,7 +2018,7 @@ class Feiyu:
         第二次：整段摘要 摘要收尾是 assistant，得再补一条 user 把话接上
         """
         if attempt == 1:
-            done = history.shrink(self.backend.messages,
+            done = history.shrink(native_history.read(self.backend),
                                   limit=SHRINK_LIMIT, keep=SHRINK_KEEP)
             self.trace.write("overflow", attempt=attempt, shrunk=done)
             if done:
@@ -1427,7 +2040,7 @@ class Feiyu:
         用户的话、模型的决定、最近几轮全都原样留着——比整段摘要保真得多 """
         if self.backend is None or self.context <= self.context_limit * TRIM_RATIO:
             return
-        done = history.trim(self.backend.messages, keep_last=TRIM_KEEP_LAST,
+        done = history.trim(native_history.read(self.backend), keep_last=TRIM_KEEP_LAST,
                             limit=TRIM_LIMIT, keep=TRIM_KEEP)
         if done:
             self.trace.write("trim", count=done)
@@ -1531,6 +2144,10 @@ class Feiyu:
             return ""
         return "这段对话读过外部内容（%s），沙箱没开、断不了网，这条命令能把东西送出去" % outside
 
+    def _record_tool_source(self, call, result):
+        kind = 'assistant_claim' if call.name == 'task' or (call.name == 'web_fetch' and call.input.get('prompt')) else 'external_data'
+        provenance.append(self, kind, result.content, call.id)
+
     def _note_outside(self, call, result) -> None:
         """外部内容进了上下文：记下是哪一份 之后能出网的 bash 要人点头（`_egress`）
 
@@ -1577,10 +2194,17 @@ class Feiyu:
         这种批次里，写那步依赖前面读的结果，挑着并行等于乱序执行
         """
         if len(calls) > 1 and all(
-                c.name in PARALLEL_SAFE and not c.error for c in calls):
+                self.toolbox.execution.parallel(c) for c in calls):
             self._run_parallel(calls, outputs)
             return None
         return self._run_serial(calls, outputs)
+
+    def _recheck_execution(self, call, prior_egress):
+        # Reuse this call's approval, but never bypass a changed hard boundary.
+        answer = self._gate(call, self._egress(call) == prior_egress)
+        if not answer[0]:
+            self.toolbox.execution.reject(call.name, answer[3], call_id=call.id)
+        return answer
 
     def _run_parallel(self, calls, outputs: list[ToolOutput]) -> None:
         """先按顺序过一遍闸（确认要读 stdin，只能在主线程），再一起跑
@@ -1589,19 +2213,19 @@ class Feiyu:
         输出会交叉成一团看不懂的东西
         """
         approved = []
+        egress_before = {}
         allow_all = False
         for call in calls:
             print(ui.tool_call(call.name, call.input, cid=call.id), flush=True)
-            blocked = self._pre_tool(call)
-            if not blocked:
-                # **「本轮都允许」在这一批里也得算数。** 不带 allow_all 的话，
-                # 四条 web_fetch 你在第一条上按了「都允许」，后三条照样问、
-                # 照样被拒 —— 用户拿截图来问过。
-                ok, always, _, reason = self._gate(call, allow_all)
-                allow_all = allow_all or always
-                blocked = "" if ok else reason
+            egress_before[call.id] = self._egress(call)
+            ok, always, _, reason = self.toolbox.execution.prepare(
+                call, self._gate, self._pre_tool, allow_all)
+            allow_all = allow_all or always
+            blocked = "" if ok else reason
             approved.append((call, blocked))
 
+        approved = [(call, blocked or self._recheck_execution(call, egress_before[call.id])[3])
+                    for call, blocked in approved]
         began = time.monotonic()
         # **用到时才 import。** 它会把 `logging` 一起拉进来，两个加起来 15ms，
         # 而一次运行里多数轮次根本没有可并行的那一批（实测 544 次工具调用里
@@ -1609,39 +2233,47 @@ class Feiyu:
         import concurrent.futures
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_PARALLEL) as pool:
-            futures = [
-                (call, None if blocked else pool.submit(self.toolbox.run, call.name, call.input))
-                for call, blocked in approved
-            ]
-            # 按调用顺序取结果：任务本身是并发跑的，这里只是让输出有个定序
-            # strict：两串本来就一一对应，长度对不上就是上面拼错了，早点炸出来
-            for (call, blocked), (_, future) in zip(approved, futures, strict=True):
-                if blocked:
+            try:
+                futures = [
+                    (call, None if blocked else events.submit(pool, self.toolbox.execution.dispatch, call, self.toolbox.run))
+                    for call, blocked in approved
+                ]
+                # 按调用顺序取结果：任务本身是并发跑的，这里只是让输出有个定序
+                # strict：两串本来就一一对应，长度对不上就是上面拼错了，早点炸出来
+                for (call, blocked), (_, future) in zip(approved, futures, strict=True):
+                    if blocked:
+                        target = ui.tool_target(call.name, call.input)
+                        print(ui.tool_result(
+                            "%s — 没有执行" % ui.clip(target, 40) if target else "没有执行",
+                            [], is_error=True, cid=call.id))
+                        print()
+                        outputs.append(ToolOutput(id=call.id, content=blocked, is_error=True))
+                        continue
+                    result = future.result()
+                    self._record_tool_source(call, result)
+                    self._note_outside(call, result)
+                    summary = result.summary or result.content.splitlines()[0][:80]
+                    # 并行时四条结果一起出来，不带上作用对象就分不清谁是谁
                     target = ui.tool_target(call.name, call.input)
-                    print(ui.tool_result(
-                        "%s — 没有执行" % ui.clip(target, 40) if target else "没有执行",
-                        [], is_error=True, cid=call.id))
+                    shown = "%s — %s" % (ui.clip(target, 40), summary) if target else summary
+                    print(ui.tool_result(shown, result.detail, is_error=result.is_error,
+                                         shows=result.shows, cid=call.id))
                     print()
-                    outputs.append(ToolOutput(id=call.id, content=blocked, is_error=True))
-                    continue
-                result = future.result()
-                self._note_outside(call, result)
-                summary = result.summary or result.content.splitlines()[0][:80]
-                # 并行时四条结果一起出来，不带上作用对象就分不清谁是谁
-                target = ui.tool_target(call.name, call.input)
-                shown = "%s — %s" % (ui.clip(target, 40), summary) if target else summary
-                print(ui.tool_result(shown, result.detail, is_error=result.is_error,
-                                     shows=result.shows, cid=call.id))
-                print()
-                self.trace.write("tool", name=call.name, args=call.input,
-                                 ok=not result.is_error, summary=summary, parallel=True)
-                # **图片也要带上。** read_file 在 PARALLEL_SAFE 里，一批里但凡有
-                # 两个只读调用就走这条路 —— 漏掉 image 的话模型收到的只有
-                # 「（下面是 a.png，1024×768）」这句话，图本身根本没发出去，
-                # 而串行那条路是给的：同一次调用，看不看得见图取决于它旁边有没有别的调用
-                outputs.append(
-                    ToolOutput(id=call.id, content=result.content + self._lesson(call, result),
-                               is_error=result.is_error, image=result.image))
+                    self.trace.write("tool", name=call.name, args=call.input,
+                                     ok=not result.is_error, summary=summary, parallel=True)
+                    # **图片也要带上。** read_file 在 PARALLEL_SAFE 里，一批里但凡有
+                    # 两个只读调用就走这条路 —— 漏掉 image 的话模型收到的只有
+                    # 「（下面是 a.png，1024×768）」这句话，图本身根本没发出去，
+                    # 而串行那条路是给的：同一次调用，看不看得见图取决于它旁边有没有别的调用
+                    outputs.append(
+                        ToolOutput(id=call.id, content=result.content + self._lesson(call, result),
+                                   is_error=result.is_error, image=result.image))
+            except KeyboardInterrupt:
+                self.cancel()
+                for _, future in locals().get('futures', []):
+                    if future is not None:
+                        future.cancel()
+                raise
         self.trace.write("parallel", count=len(calls),
                          ms=round((time.monotonic() - began) * 1000))
 
@@ -1650,19 +2282,9 @@ class Feiyu:
         changed = None
         for call in calls:
             print(ui.tool_call(call.name, call.input, cid=call.id), flush=True)
-            if call.error:
-                print(ui.tool_result("参数没解析出来", [], is_error=True, cid=call.id))
-                print()
-                self.trace.write("tool", name=call.name, ok=False, why="参数没解析出来")
-                outputs.append(ToolOutput(id=call.id, content=call.error, is_error=True))
-                continue
-            veto = self._pre_tool(call)
-            if veto:
-                print(ui.tool_result("钩子拦下", [], is_error=True, cid=call.id))
-                print()
-                outputs.append(ToolOutput(id=call.id, content=veto, is_error=True))
-                continue
-            ok, always, label, reason = self._gate(call, allow_all)
+            prior_egress = self._egress(call)
+            ok, always, label, reason = self.toolbox.execution.prepare(
+                call, self._gate, self._pre_tool, allow_all)
             allow_all = allow_all or always
             if not ok:
                 print(ui.tool_result(label, [], is_error=True, cid=call.id))
@@ -1674,8 +2296,14 @@ class Feiyu:
             if call.name in VERIFY_AFTER:
                 self._snapshot(call)
                 self._reproduce_first()
+            ok, _, label, reason = self._recheck_execution(call, prior_egress)
+            if not ok:
+                print(ui.tool_result(label, [], is_error=True, cid=call.id))
+                outputs.append(ToolOutput(id=call.id, content=reason, is_error=True))
+                continue
             began = time.monotonic()
-            result = self.toolbox.run(call.name, call.input)
+            result = self.toolbox.execution.dispatch(call, self.toolbox.run)
+            self._record_tool_source(call, result)
             self._note_outside(call, result)
             summary = result.summary or result.content.splitlines()[0][:80]
             # 确认前已经把 diff 画过一遍，结果里再画就是同一段出现两次
@@ -1781,7 +2409,7 @@ class Feiyu:
         old = {cid: note for batch, cid, note in self._aging if batch <= due}
         if old and self._should_fold():
             self._aging = [e for e in self._aging if e[0] > due]
-            done = history.age(self.backend.messages, old, keep=AGE_KEEP)
+            done = history.age(native_history.read(self.backend), old, keep=AGE_KEEP)
             if done:
                 self.trace.write("age", count=done)
 
@@ -1805,11 +2433,10 @@ class Feiyu:
             return
         ids = self._reads.pop(key, [])
         if ids:
-            history.expire(self.backend.messages, set(ids), note)
+            history.expire(native_history.read(self.backend), set(ids), note)
 
     def _pre_tool(self, call) -> str:
-        """PreToolUse 拦下就返回给模型看的说明 放在权限门**之前**：
-        反正要被拦，没必要先烦用户点一次确认 """
+        """参数与权限检查后运行 PreToolUse；hook 的命令另行授权，不递归触发 hooks。"""
         subject = permissions.subject(call.name, call.input)
         blocked = [r for r in self._fire("PreToolUse", tool=call.name, subject=subject)
                    if not r.ok]
@@ -1850,13 +2477,19 @@ class Feiyu:
         print()
         began = time.monotonic()
         try:
-            outcome = hooks_mod.run(hook, {"event": "PreWrite",
-                                           "workspace": str(self.toolbox.root)},
-                                    self.toolbox.root)
-        except Exception:
+            outcome = self._run_verification(hook, {"event": "PreWrite",
+                                           "workspace": str(self.toolbox.root)}, "baseline")
+        except Exception as exc:
+            from .taskstate import PersistenceError
+            if isinstance(exc, PersistenceError):
+                raise
             return
         ms = round((time.monotonic() - began) * 1000)
         self.trace.write("reproduce", ok=outcome.ok, ms=ms)
+        if outcome.ok and self.verifications.records[-1]["validity"] != "current":
+            self._baseline = "（动手前命令退出码为 0，但验证内容发生变化或范围未知，不能证明当前通过。）"
+            print(ui.notice(self.verification_summary()))
+            return
         if outcome.ok:
             # 全绿。**这条也要说**：它意味着"现在没有失败的测试"，
             # 那么这个任务多半是加功能而不是修 bug，别再去找不存在的红灯

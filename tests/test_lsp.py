@@ -173,29 +173,25 @@ class TestClose(unittest.TestCase):
 
     def test_收了尸也关了管道(self):
         import subprocess
-        client = object.__new__(lsp.Client)
-        client.proc = subprocess.Popen(["sleep", "30"], stdin=subprocess.PIPE,
-                                       stdout=subprocess.PIPE)
+        import sys
+        with patch.object(lsp.Client, '_initialize'):
+            client = lsp.Client([sys.executable, '-c', 'import time; time.sleep(30)'], Path('/tmp'))
         client.close()
         self.assertIsNotNone(client.proc.returncode)
         self.assertTrue(client.proc.stdin.closed)
         self.assertTrue(client.proc.stdout.closed)
 
     def test_死了的那个先关掉再重起(self):
-        import types
-        import unittest.mock
-        closed = []
-
-        class Dead:
-            proc = types.SimpleNamespace(poll=lambda: 1)
-
-            def close(self):
-                closed.append(1)
-
-        pool = lsp.Pool(Path("/tmp"))
-        pool.clients["pyright-langserver"] = Dead()
-        with unittest.mock.patch.object(lsp, "server_for",
-                                        return_value=["pyright-langserver", "--stdio"]), \
-             unittest.mock.patch.object(lsp, "Client", lambda argv, root: "新起的"):
-            self.assertEqual(pool.get(Path("/tmp/x.py")), "新起的")
-        self.assertEqual(closed, [1])
+        import sys
+        pool = lsp.Pool(Path('/tmp'))
+        argv = [sys.executable, '-c', 'import time; time.sleep(30)']
+        try:
+            with patch.object(lsp, 'server_for', return_value=argv), patch.object(lsp.Client, '_initialize'):
+                old = pool.get(Path('/tmp/x.py'))
+                old.close(failed=True)
+                new = pool.get(Path('/tmp/x.py'))
+                self.assertIsNot(old, new)
+                self.assertTrue(old.proc.stdin.closed)
+                self.assertIsNotNone(old.proc.returncode)
+        finally:
+            pool.close()

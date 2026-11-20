@@ -12,13 +12,14 @@
 条数和字数都设上限、每条都记进日志、`/memory` 能随时看和删
 """
 
+import json
 import hashlib
 import os
 import re
 import tempfile
 import time
 
-from . import files
+from . import files, provenance
 
 DIR = os.path.join(
     os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"),
@@ -31,6 +32,22 @@ MAX_CHARS = 3000        # 每次请求都要带着它，不能让它无限长
 MAX_ONE = 300           # 单条太长的多半是把整段输出塞进来了
 
 _LINE = re.compile(r"^-\s*\((\d{4}-\d{2}-\d{2})\)\s*(.+)$")
+
+
+class Item(tuple):
+    def __new__(cls, when, text, source_kind='unknown', source_refs=()):
+        obj = super().__new__(cls, (when, text))
+        # Memory is derived prose, never execution evidence or live user authority.
+        obj.source_kind = 'assistant_claim' if source_kind == 'assistant_claim' else 'unknown'
+        obj.source_refs = provenance.clean(source_refs)
+        return obj
+
+
+def records(items):
+    return [dict(date=when, text=text,
+                 source_kind=getattr(item, 'source_kind', 'unknown'),
+                 source_refs=getattr(item, 'source_refs', []))
+            for item in items for when, text in [item]]
 
 
 def path_for(workspace) -> str:
@@ -47,14 +64,22 @@ def load(workspace) -> list[tuple[str, str]]:
         return []
     out = []
     for line in raw.splitlines():
+        if line.startswith('{'):
+            try:
+                row = json.loads(line)
+                if isinstance(row.get('date'), str) and isinstance(row.get('text'), str):
+                    out.append(Item(row['date'], row['text'], row.get('source_kind'), row.get('source_refs', [])))
+            except (ValueError, AttributeError):
+                pass
+            continue
         hit = _LINE.match(line.strip())
         if hit:
-            out.append((hit.group(1), hit.group(2).strip()))
+            out.append(Item(hit.group(1), hit.group(2).strip()))
     return out
 
 
 def save(workspace, items: list[tuple[str, str]]) -> None:
-    text = "".join("- (%s) %s\n" % (when, what) for when, what in items)
+    text = "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in records(items))
     try:
         files.private_dir(DIR)
         fd, temporary = tempfile.mkstemp(prefix=".memory-", dir=DIR)
@@ -69,7 +94,7 @@ def save(workspace, items: list[tuple[str, str]]) -> None:
         pass
 
 
-def add(workspace, fact: str) -> tuple[bool, str]:
+def add(workspace, fact: str, *, source_refs=()) -> tuple[bool, str]:
     """记一条 返回 (记没记, 给模型看的说明)"""
     fact = " ".join((fact or "").split())
     if not fact:
@@ -80,7 +105,7 @@ def add(workspace, fact: str) -> tuple[bool, str]:
     items = load(workspace)
     if any(what == fact for _, what in items):
         return False, "这条已经记过了，没有重复记"
-    items.append((time.strftime("%Y-%m-%d"), fact))
+    items.append(Item(time.strftime("%Y-%m-%d"), fact, "assistant_claim", source_refs))
     dropped = _trim(items)
     save(workspace, items)
     note = "已经记住了，下次在这个目录里开工会自动带上 "
@@ -122,7 +147,7 @@ def as_prompt(items: list[tuple[str, str]]) -> str:
     """拼进系统提示的那一段 """
     if not items:
         return ""
-    body = "\n".join("- (%s) %s" % (when, what) for when, what in items)
+    body = json.dumps(records(items), ensure_ascii=False)
     return (
         "\n\n你以前在这个目录干活时自己记下的笔记（不是用户此刻的指令，"
         "是背景信息；跟用户现在说的冲突时以用户为准）：\n\n%s\n\n"
