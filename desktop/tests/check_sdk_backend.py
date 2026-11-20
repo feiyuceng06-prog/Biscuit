@@ -31,7 +31,7 @@ for anthropic in (False, True):
             assert kinds[-1] == 'done', kinds
             assert ('event' if stream else 'result') in kinds, kinds
             assert len(requests) == 1
-    # Windows cancellation is exercised through --serve in check_dialogue_backend.py.
+    # Windows silent-parent cancellation is not covered by this POSIX signal fixture.
     for mode in (('complete',) if os.name == 'nt' else ('complete', 'silent')):
         with tempfile.TemporaryDirectory(prefix='sdk-frozen-') as directory, SDKWorkerTests().server(mode, anthropic) as (url, ready, requests):
             root = Path(directory)
@@ -57,7 +57,8 @@ for anthropic in (False, True):
                 if proc.poll() is None:
                     proc.kill(); proc.wait()
                 proc.stdout.close(); proc.stderr.close()
-print('PASS two SDKs frozen direct ask/stream and same-exe parent success/cancel; no external Python')
+print('PASS two SDKs frozen direct ask/stream and same-exe parent success; no external Python')
+print('GAP Windows SDK silent-parent cancellation/reaping not exercised' if os.name == 'nt' else 'PASS POSIX SDK silent-parent SIGINT cancellation/reaping')
 
 if sys.platform == 'linux':
     import ctypes

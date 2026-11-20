@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkModelForm } from './model-form.mjs';
+import { checkLayout, retainLayout } from './layout.mjs';
 import { dialogueFixture } from './dialogue-fixture.mjs';
 const desktop = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const temporary = await fs.mkdtemp(path.join(os.tmpdir(), 'feiyu-desktop-test-'));
@@ -32,11 +33,13 @@ await fs.writeFile(path.join(config, 'state.json'), JSON.stringify({last:'offlin
 delete env.ELECTRON_RUN_AS_NODE;
 let application, page;
 try {
-  application = await electron.launch({
+  const launch = (resume = false) => electron.launch({
     ...(process.env.FEIYU_TEST_EXECUTABLE ? { executablePath: process.env.FEIYU_TEST_EXECUTABLE } : {}),
-    args: [...(process.env.FEIYU_TEST_EXECUTABLE ? [] : [desktop]), '-w', workspace], env, timeout: 30000,
+    args: [...(process.env.FEIYU_TEST_EXECUTABLE ? [] : [desktop]), '-w', workspace, ...(resume ? ['--resume'] : []), ...(process.env.FEIYU_TEST_SCALE ? ['--force-device-scale-factor=' + process.env.FEIYU_TEST_SCALE] : [])], env, timeout: 30000,
   });
+  application = await launch();
   page = await application.firstWindow();
+  page.setDefaultTimeout(10000);
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await expect(page.locator('#s-ver')).not.toHaveText('—', { timeout: 30000 });
@@ -61,6 +64,7 @@ try {
   await expect(page.locator('#startup')).toHaveCount(0, { timeout: 6500 });
   await expect(page.locator('#input')).toBeFocused();
   await expect(page.locator('.backend-error')).toHaveCount(0);
+  await checkLayout(application, page, 'empty');
   await page.locator('#input').fill('synthetic GUI 中文 😀 𠮷');
   await page.locator('#send').click();
   await expect(page.locator('body')).toContainText('GUI reply 1 中文 😀 𠮷', {timeout:30000});
@@ -68,18 +72,26 @@ try {
   await expect.poll(async () => (await fs.readdir(sessionsRoot, {recursive:true})).filter(p => p.endsWith('.task.json')).length).toBe(1);
   const journal = (await fs.readdir(sessionsRoot, {recursive:true})).find(p => p.endsWith('.task.json'));
   const saved = JSON.parse(await fs.readFile(path.join(sessionsRoot, journal), 'utf8')).payload;
-  await page.evaluate(() => send({op:'new'}));
-  await page.evaluate(sid => send({op:'open',id:sid}), saved.session_id);
+  await application.close();
+  application = await launch(true);
+  page = await application.firstWindow();
+  page.setDefaultTimeout(10000);
+  page.on('pageerror', error => errors.push(error.message));
+  await expect(page.locator('#startup')).toHaveCount(0, {timeout:15000});
+  await expect(page.locator('#s-ver')).not.toHaveText('—', {timeout:30000});
   await expect(page.locator('body')).toContainText('GUI reply 1 中文 😀 𠮷', {timeout:30000});
   await page.locator('#input').fill('synthetic resumed 中文 😀 𠮷');
   await page.locator('#send').click();
   await expect(page.locator('body')).toContainText('GUI reply 2 中文 😀 𠮷', {timeout:30000});
   expect(fixture.requests).toHaveLength(2);
+  await expect.poll(async () => JSON.parse(await fs.readFile(path.join(sessionsRoot, journal), 'utf8')).payload.budget.attempts).toBe(2);
+  expect(JSON.parse(await fs.readFile(path.join(sessionsRoot, journal), 'utf8')).payload.session_id).toBe(saved.session_id);
   expect(fixture.requests[1].messages.filter(m => m.role === 'user').length).toBeGreaterThanOrEqual(2);
-  console.log('PASS: actual GUI streamed synthetic conversation and durable session reopen');
+  console.log('PASS: actual GUI streamed synthetic conversation and durable session restore after actual application restart');
   await expect(page.getByRole('button', { name: '· README.md', exact: true })).toBeVisible();
   await page.getByRole('button', { name: '· README.md', exact: true }).click();
   await expect(page.locator('.file-preview')).toContainText('Electron + Python agent.');
+  await checkLayout(application, page, 'file');
   const isolation = await page.evaluate(() => ({ require: typeof window.require, process: typeof window.process }));
   expect(isolation).toEqual({ require: 'undefined', process: 'undefined' });
   const denied = await page.evaluate(async () => {
@@ -122,6 +134,7 @@ try {
   console.log('PASS: fullscreen intro, streamed caption, automatic exit, Escape, reduced motion, focus restoration');
   console.log('PASS: real backend, file preview, isolated renderer, path boundary, PTY, workspace switching, settings');
 } catch (error) {
+  try { await retainLayout(page, 'failure'); } catch {}
   try { console.error('Terminal display:', await page?.locator('.xterm-rows').innerText()); } catch {}
   try { console.error(await fs.readFile(path.join(temporary, 'state/feiyu/desktop.log'), 'utf8')); } catch {}
   throw error;

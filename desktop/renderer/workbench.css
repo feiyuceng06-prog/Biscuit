@@ -178,16 +178,13 @@ body[data-files="on"] { grid-template-columns: var(--side) minmax(340px, 1fr) mi
 
 .backend-error button:hover { background: var(--tint-hover); }
 
+/* Keep preview and composer in separate tracks at small Windows work areas / DPI.
+   A fixed preview covers the Send button when the default-open panel is narrow. */
 @media (max-width: 1100px) {
-  body[data-files="on"] { grid-template-columns: var(--side) minmax(0, 1fr); }
-  .files-panel {
-    position: fixed;
-    z-index: 50;
-    top: calc(var(--bar) + var(--space-2));
-    right: var(--space-2);
-    bottom: calc(var(--bar-s) + var(--space-2));
-    width: min(440px, 65vw);
-    margin: 0;
-    box-shadow: var(--shadow-pop);
+  body[data-files="on"] {
+    --side: 0px;
+    --gut-l: var(--gut);
+    grid-template-columns: 0 minmax(0, 1fr) minmax(240px, 36vw);
   }
+  body[data-files="on"] .side { visibility: hidden; }
 }
