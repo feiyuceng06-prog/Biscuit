@@ -27,12 +27,12 @@ printf '[Desktop Entry]\nName=Feiyu\nStartupWMClass=feiyu\n' > $r/feiyu.desktop
 FAKE_CURL = r'''#!/usr/bin/env bash
 url="${@: -1}"
 case "$url" in
-  https://api.github.com/*)
+  https://api.github.com/repos/feiyuceng06-prog/Biscuit/releases/latest)
     [ "${FAKE_API_FAIL:-}" = 1 ] && exit 22
     printf '{"assets":[{"name":"x.deb","browser_download_url":"https://github.com/o/r/releases/download/desktop-v9.5.0/x.deb"},'
     printf '{"browser_download_url":"https://github.com/o/r/releases/download/desktop-v9.5.0/%s-9.5.0.AppImage"}]}' "${FAKE_API_BRAND:-Feiyu}" ;;
-  */releases/latest)
-    printf 'https://github.com/feiyuceng06-prog/feiyu-agent/releases/tag/desktop-v9.6.0' ;;
+  https://github.com/feiyuceng06-prog/Biscuit/releases/latest)
+    printf 'https://github.com/feiyuceng06-prog/Biscuit/releases/tag/desktop-v9.6.0' ;;
   *.AppImage)
     if [[ "$*" == *'%{url_effective}'* ]]; then
       [[ $url == */"${FAKE_FALLBACK_BRAND:-Feiyu}"-* ]] || exit 22
@@ -160,7 +160,7 @@ class TestGet(unittest.TestCase):
         r = self.get(env=dict(self.env, FAKE_API_FAIL='1'))
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertEqual(self.log.read_text().split(), [
-            'https://github.com/feiyuceng06-prog/feiyu-agent/releases/download/desktop-v9.6.0/Feiyu-9.6.0.AppImage'])
+            'https://github.com/feiyuceng06-prog/Biscuit/releases/download/desktop-v9.6.0/Feiyu-9.6.0.AppImage'])
 
     def test_biscuit_api_and_fallback_assets(self):
         for fallback in (False, True):
