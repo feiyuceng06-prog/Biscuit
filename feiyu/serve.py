@@ -218,6 +218,11 @@ class Server:
                        tokens=agent.tokens,
                        cost=round(spent, 6) if spent is not None else None,
                        context=agent.context, context_limit=agent.context_limit)
+            backend = agent.backend
+            if hasattr(backend, "configured_thinking"):
+                current = (backend.effort, backend.thinking_on)
+                out["thinking"] = {"effort": backend.effort, "enabled": backend.thinking_on,
+                                   "overridden": current != backend.configured_thinking}
             got = agent.credits
             if got is not None:
                 # 只出算好的数和币种，**不出接口原文** —— 各家形状不一样，
@@ -913,6 +918,10 @@ class Server:
         elif op in ("prompt", "command"):
             text = str(msg.get("text") or "")[:MAX_TEXT]
             self.inbox.put((op, text))
+        elif op == "thinking_level":
+            level = msg.get("level")
+            if level in ("low", "medium", "high", "xhigh", "default") and isinstance(msg.get("model"), str):
+                self.inbox.put((op, json.dumps([msg["model"][:MAX_TEXT], level])))
         elif op == "status":
             self.push_status()
         elif op == "sessions":
@@ -1000,6 +1009,15 @@ class Server:
                     self.open_session(text)
                 elif op == "delete":
                     self.delete_session(text)
+                elif op == "thinking_level":
+                    model, level = json.loads(text)
+                    backend = self.agent.backend
+                    if self.agent.name == model and hasattr(backend, "configured_thinking"):
+                        if level == "default":
+                            backend.effort, backend.thinking_on = backend.configured_thinking
+                        else:
+                            backend.effort, backend.thinking_on = level, True
+                    self.push_status()
                 elif op == "cycle_mode":
                     self.proto.send("note", level="notice",
                                     text="已切到「%s」" % agent_mod.MODES[

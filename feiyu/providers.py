@@ -194,6 +194,7 @@ def build_backend(entry: dict, *, system: str, tools: list[dict]):
     # 关掉它在 xhigh/max 上直接 400
     if entry.get("thinking") is not None:
         backend.thinking_on = bool(entry["thinking"])
+    backend.configured_thinking = (backend.effort, backend.thinking_on)
     # 用户在 /key add 里填的价格优先于内置价格表
     backend.rates = _as_rates(entry.get("price"))
     return backend

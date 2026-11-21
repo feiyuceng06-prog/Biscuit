@@ -1,0 +1,431 @@
+:host {
+  --popup: var(--raised);
+  --muted-ink: var(--muted);
+  --tint: #204da7;
+  grid-area: effort;
+  min-width: 0;
+  color: var(--text);
+}
+:host-context([data-theme="dark"]) {
+  --popup: #303032;
+  --tint: #98bbff;
+}
+* {
+  box-sizing: border-box;
+}
+button,
+input {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+}
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--tint);
+  outline-offset: 2px;
+}
+button:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+.icon {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  height: 13px;
+}
+.title,
+.levels {
+  display: flex;
+  align-items: center;
+}
+.trigger {
+  white-space: nowrap;
+  height: var(--control-c);
+  max-width: 100%;
+}
+.restore {
+  display: block;
+  margin: 7px auto 0;
+  color: var(--muted-ink);
+  font-size: 12px;
+}
+[hidden] {
+  display: none;
+}
+.anchor {
+  position: relative;
+}
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: 30px;
+  background: var(--popup);
+  border: 1px solid var(--line);
+  padding: 6px 12px;
+  color: var(--muted-ink);
+  font-size: 13px;
+}
+.trigger b {
+  max-width: 8em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--tint);
+  font-size: 12px;
+  font-weight: 600;
+}
+.trigger .icon {
+  width: 13px;
+  transition: transform 0.15s;
+}
+.trigger[aria-expanded="true"] .icon {
+  transform: rotate(180deg);
+}
+.pop {
+  position: absolute;
+  bottom: calc(100% + 11px);
+  right: var(--offset, 0px);
+  z-index: 6;
+  width: min(318px, calc(100vw - 24px));
+  padding: 17px 16px 12px;
+  border-radius: 21px;
+  border: 1px solid var(--line);
+  background: var(--popup);
+  box-shadow: 0 9px 26px #0003;
+}
+.pop[hidden] {
+  display: none;
+}
+.title {
+  justify-content: center;
+  gap: 7px;
+  color: var(--tint);
+  font-size: 21px;
+  font-weight: 600;
+}
+.title span:first-child {
+  font-size: 16px;
+}
+.desc {
+  text-align: center;
+  margin: 1px 0 15px;
+  color: var(--muted-ink);
+  font-size: 12px;
+}
+.rail {
+  height: 24px;
+  position: relative;
+  border-radius: 999px;
+  background: var(--line);
+  margin: 0 1px;
+}
+.slider {
+  appearance: none;
+  -webkit-appearance: none;
+  position: absolute;
+  inset: -6px 0;
+  width: 100%;
+  height: 36px;
+  margin: 0;
+  background: transparent;
+  touch-action: pan-y;
+  cursor: grab;
+  border-radius: 20px;
+}
+.slider:active {
+  cursor: grabbing;
+}
+.slider::-webkit-slider-runnable-track {
+  background: transparent;
+  height: 24px;
+}
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 31px;
+  height: 31px;
+  border: 1px solid #0002;
+  margin-top: -3.5px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px #0004;
+}
+.slider::-moz-range-thumb {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid #0002;
+}
+.levels {
+  justify-content: space-between;
+  margin-top: 7px;
+}
+.level {
+  padding: 4px 2px;
+  color: var(--muted-ink);
+  font-size: 12px;
+}
+.level[aria-pressed="true"] {
+  color: var(--tint);
+  font-weight: 650;
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: inherit;
+
+  clip-path: inset(0 var(--cut, 0%) 0 0 round 15px);
+}
+
+.fill {
+  container-type: inline-size;
+  background:
+    radial-gradient(ellipse 55px 32px at calc(100% - var(--cut, 0%)) 50%, #85b7ffb3, transparent),
+    linear-gradient(100deg, #113986, #205be2 68%, #396fd7);
+}
+.meteor {
+  position: absolute;
+  left: -12px;
+  top: 5px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #f3fbff;
+  box-shadow: 0 0 5px #b4dcff;
+}
+.meteor.far {
+  top: 1px;
+  width: 2px;
+  height: 2px;
+  --tail: 20px;
+}
+.meteor::before {
+  content: "";
+  position: absolute;
+  right: 50%;
+  top: 50%;
+  width: var(--tail, 33px);
+  height: 2px;
+  transform-origin: right center;
+  transform: translateY(-50%) rotate(3deg) scaleX(var(--heading, 1));
+  background: linear-gradient(90deg, transparent, #a9d9ff70 60%, #eaf7ff);
+  clip-path: polygon(0 50%, 100% 0, 100% 100%);
+}
+.rail[data-reverse] {
+  --heading: -1;
+}
+
+.rail::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: var(--cut, 15.5px);
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #82b8ff80 15%, #4687ff40 44%, transparent 72%);
+  transform: translate(50%, -50%) scale(0.78);
+  pointer-events: none;
+  opacity: 0;
+}
+.slider {
+  z-index: 1;
+}
+.level {
+  position: relative;
+}
+.level::after {
+  content: "";
+  position: absolute;
+  inset: 2px -5px;
+  background: var(--tint);
+  border-radius: 10px;
+  opacity: 0;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pop {
+    transform-origin: 85% 100%;
+    animation: unfold 220ms cubic-bezier(0.2, 0.8, 0.25, 1) both;
+  }
+  .rail::after {
+    transition:
+      opacity 140ms,
+      transform 180ms;
+  }
+  .rail.dragging::after {
+    opacity: 1;
+    transform: translate(50%, -50%) scale(1);
+  }
+  .level.confirmed::after {
+    animation: confirm 380ms ease-out;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .trigger .icon {
+    transition: none;
+  }
+}
+@keyframes unfold {
+  from {
+    opacity: 0;
+    transform: translateY(9px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes confirm {
+  0% {
+    opacity: 0.24;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+}
+
+.slider::-webkit-slider-thumb {
+  opacity: 0;
+}
+.slider::-moz-range-thumb {
+  opacity: 0;
+}
+.handle {
+  position: absolute;
+  right: var(--cut, 15.5px);
+  top: 50%;
+  transform: translate(50%, -50%);
+  width: 39px;
+  height: 39px;
+  z-index: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 2px #10182788);
+}
+.stone {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: center / contain no-repeat url("meteorite.svg");
+}
+
+/* The shock front stays in the airflow while the rock turns underneath it. */
+.wind-window {
+  position: absolute;
+  inset: -17px -7px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.entry-wind {
+  position: absolute;
+  top: 50%;
+  right: calc(var(--cut, 15.5px) + 7px);
+  transform: translate(26px, -50%);
+  opacity: var(--heat, 0);
+  overflow: visible;
+}
+
+.entry-wind .sheath {
+  stroke-width: 8;
+  filter: blur(3px);
+  opacity: 0.82;
+}
+.entry-wind .front {
+  stroke-width: var(--rim-width, 1);
+}
+.gusts {
+  stroke-width: 1.6;
+  transform-origin: 134px 32px;
+  transform: scaleX(var(--wake-length, 1));
+}
+.gusts path {
+  stroke-dasharray: 26 14 5 11;
+}
+.gusts path:nth-child(2n) {
+  stroke-dasharray: 12 17 3 9;
+  opacity: 0.65;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .entry-wind {
+    transition: opacity 140ms ease-out;
+  }
+  .gusts path {
+    animation: entry-gust 300ms linear infinite;
+  }
+  .gusts path:nth-child(2n) {
+    animation: entry-wisp 235ms linear infinite;
+  }
+  .gusts path:nth-child(3) {
+    animation-delay: -270ms;
+  }
+  .gusts path:nth-child(4) {
+    animation-delay: -150ms;
+  }
+}
+@keyframes entry-gust {
+  to {
+    stroke-dashoffset: -56;
+  }
+}
+@keyframes entry-wisp {
+  to {
+    stroke-dashoffset: -41;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pro-impact .handle {
+    animation: pro-impact 320ms cubic-bezier(0.28, 0.55, 0.46, 1);
+  }
+  .pro-impact .fill {
+    animation: track-recoil 260ms ease-out;
+  }
+}
+/* Translate the housing independently of the spinning stone and native input. */
+@keyframes pro-impact {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  12% {
+    translate: 3px -1px;
+  }
+  29% {
+    translate: -2.4px 1px;
+  }
+  47% {
+    translate: 1.5px -0.6px;
+  }
+  68% {
+    translate: -0.8px 0.3px;
+  }
+  84% {
+    translate: 0.35px 0;
+  }
+}
+@keyframes track-recoil {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  22% {
+    translate: -1.4px 0.5px;
+  }
+  52% {
+    translate: 0.8px -0.3px;
+  }
+  78% {
+    translate: -0.35px 0;
+  }
+}

@@ -6,6 +6,8 @@ Describe a task in plain language. Biscuit helps you read code, edit files, and 
 
 Biscuit was previously named Feiyu. The commands and existing data locations stay the same.
 
+The chat composer offers four thinking levels. Drag the meteorite or use the arrow keys, then send your message. Pro requests `xhigh` on the current model. Available reasoning levels depend on your provider. Use the reset button to return to the model configuration.
+
 ## Install on Linux
 
 **Recommended: one command installs both the desktop app and CLI.** Requires Linux x86_64 and an internet connection.
@@ -29,8 +31,8 @@ To update, run the same installation command again.
 
 Visit the [download page](https://github.com/feiyuceng06-prog/Biscuit/releases/latest) and choose a format:
 
-- **deb**: for distributions using apt. In the download directory, run `sudo apt install ./feiyu-desktop_0.88.0_amd64.deb`.
-- **AppImage**: run `chmod +x Biscuit-0.88.0.AppImage`, then double-click the file. If FUSE is missing, use the one-command installer above.
+- **deb**: for distributions using apt. In the download directory, run `sudo apt install ./feiyu-desktop_0.89.0_amd64.deb`.
+- **AppImage**: run `chmod +x Biscuit-0.89.0.AppImage`, then double-click the file. If FUSE is missing, use the one-command installer above.
 
 Packages are unsigned. See the download page for tested systems and known limitations.
 
@@ -63,7 +65,7 @@ If venv is missing on Debian/Ubuntu, run `sudo apt install python3-venv` first. 
 
 ## Windows
 
-On the [download page](https://github.com/feiyuceng06-prog/Biscuit/releases/latest), download **Biscuit Setup 0.88.0.exe** and run it. Git Bash is included. Existing Feiyu settings and conversations are retained.
+On the [download page](https://github.com/feiyuceng06-prog/Biscuit/releases/latest), download **Biscuit Setup 0.89.0.exe** and run it. Git Bash is included. Existing Feiyu settings and conversations are retained.
 
 The installer is unsigned, so Windows may show a security warning. Check the source and published SHA256 before installing. See the release notes for Windows limitations.
 

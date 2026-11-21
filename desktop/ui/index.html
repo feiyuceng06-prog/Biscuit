@@ -160,6 +160,7 @@
               placeholder="我们要做什么？"></textarea>
     <button id="model" class="pick" type="button" title="切换模型"
             aria-haspopup="listbox" aria-expanded="false" aria-controls="models">—</button>
+    <div id="thinking-control"></div>
     <button id="send" class="go" type="button" title="发送" aria-label="发送"><svg class="icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V3.5M3.5 7.5 8 3l4.5 4.5"/></svg></button>
     <button id="stop" class="go go--stop" type="button" title="中断" aria-label="中断" hidden><svg class="icon" viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="2.5"/></svg></button>
   </div>
@@ -202,6 +203,34 @@ m1260 -700 c124 -143 82 -336 -105 -487 l-37 -30 43 66 c99 150 126 317 71
 
 <script src="vendor/xterm.js"></script>
 <script src="vendor/addon-fit.js"></script>
+<template id="thinking-template">
+<link rel="stylesheet" href="thinking.css">
+<div class="anchor">
+<button type="button" class="trigger" aria-expanded="false" disabled aria-controls="effort">思考强度 <b>—</b><svg class="icon" viewBox="0 0 16 16"><path d="m3 6 5 5 5-5"/></svg></button>
+<section hidden class="pop" id="effort" aria-label="调整思考强度"><div class="title"><span aria-hidden="true">✦</span><span id="name"></span></div><p class="desc" id="desc"></p>
+<div class="rail"><div class="fill" aria-hidden="true"><span class="meteor"></span><span class="meteor far"></span></div><span class="wind-window" aria-hidden="true"><svg class="entry-wind" viewBox="0 0 144 64" width="144" height="64" aria-hidden="true">
+  <defs>
+    <linearGradient id="wind-heat"><stop stop-color="#75acff" stop-opacity="0"/>
+      <stop offset=".36" stop-color="#a4d8ff" stop-opacity=".34"/>
+      <stop offset=".74" stop-color="#ff975c" stop-opacity=".85"/>
+      <stop offset=".94" stop-color="#ffca84"/><stop offset="1" stop-color="#fff7de"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#wind-heat)" stroke-linecap="round">
+    <path class="sheath" d="M21 8C61 11 87 6 111 12C128 14 136 19 138 31C138 43 130 49 111 52C78 57 67 51 37 57"/>
+    <path class="front" d="M72 9C111 9 136 13 138 31C139 48 116 55 83 55"/>
+    <g class="gusts">
+      <path d="M134 23C115 4 82 11 52 8S16 4 2 7"/>
+      <path d="M127 17C104 9 79 17 46 14S18 10 10 13"/>
+      <path d="M137 39C124 56 101 49 72 54S28 60 4 56"/>
+      <path d="M130 19Q107 10 81 12T25 10T-24 5" opacity=".66"/>
+      <path d="M132 44Q112 54 81 51T28 54T-20 59" opacity=".72"/>
+      <path d="M126 45C105 54 80 45 51 47S25 53 13 49"/>
+    </g>
+  </g></svg></span><span class="handle" aria-hidden="true"><span class="stone"></span></span><input class="slider" type="range" min="0" max="3" step="0.001" value="0" aria-label="思考强度" aria-describedby="desc"></div><div class="levels"></div><button class="restore" hidden type="button">恢复模型设置</button></section>
+</div>
+</template>
+<script src="thinking.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

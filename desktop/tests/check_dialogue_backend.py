@@ -52,6 +52,11 @@ for encoding in ('cp936', 'cp1252'):
                             break
                     if resume:
                         assert any(r.get('kind') == 'resumed' for r in received), received
+                    levels = ('low', 'high') if encoding == 'cp936' else ('medium', 'xhigh')
+                    level = levels[1 if resume else 0]
+                    for target, value in [('offline', level), ('previous-model', 'default')]:
+                        command = {'op': 'thinking_level', 'model': target, 'level': value}
+                        proc.stdin.write((json.dumps(command) + '\n').encode())
                     proc.stdin.write((json.dumps({'op':'prompt', 'text':TEXT}, ensure_ascii=False)+'\n').encode('utf-8'))
                     proc.stdin.flush()
                     while True:
@@ -61,6 +66,11 @@ for encoding in ('cp936', 'cp1252'):
                         if row.get('kind') == 'turn_end':
                             break
                     assert not [r for r in received if r.get('kind') == 'note' and r.get('level') == 'error'], received
+                    if anthropic:
+                        assert requests[-1]['output_config']['effort'] == level, requests[-1]
+                        assert requests[-1]['thinking'] == {'type': 'adaptive'}, requests[-1]
+                    else:
+                        assert requests[-1]['reasoning_effort'] == level, requests[-1]
                     assert 'answer' in json.dumps(received), received
                     assert TEXT in json.dumps(received, ensure_ascii=False), received
                     proc.stdin.close()
