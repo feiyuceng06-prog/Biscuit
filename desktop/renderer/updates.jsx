@@ -24,17 +24,19 @@ export function UpdateNotice() {
     const timer = setInterval(() => void check(true), 6 * 60 * 60 * 1000);
     return () => clearInterval(timer);
   }, []);
+  function open(url) {
+    invoke('open_url', { url }).catch(() => {
+      setManual(true);
+      setUpdate({ status: 'error', message: '无法打开浏览器，请稍后重试' });
+    });
+  }
   const available = update.status === 'available' && update.latest !== dismissed;
   return <section className="update-panel" aria-label="软件更新">
     {available && <>
       <p role="status">发现新版本 <strong>{update.latest}</strong></p>
       <div className="update-actions">
-        <button type="button" className="update-download" onClick={() => {
-          invoke('open_url', { url: update.url }).catch(() => {
-            setManual(true);
-            setUpdate({ status: 'error', message: '无法打开浏览器，请稍后重试' });
-          });
-        }}>查看更新</button>
+        <button type="button" className="update-download" onClick={() => open(update.downloadUrl)}>下载更新</button>
+        <button type="button" onClick={() => open(update.url)}>更新说明</button>
         <button type="button" onClick={() => {
           setDismissed(update.latest);
           try { localStorage.setItem('biscuit.update.dismissed', update.latest); } catch { /* Session only. */ }

@@ -43,7 +43,7 @@ export async function checkUpdateNotice(application, page) {
   await expect(panel).toContainText('发现新版本 99.0.0');
   for (const theme of ['light', 'dark']) {
     await page.evaluate(value => setTheme(value), theme);
-    await panel.getByRole('button', { name: '查看更新' }).click({ trial: true });
+    await panel.getByRole('button', { name: '下载更新' }).click({ trial: true });
     await page.screenshot({ path: `test-results/update-${theme}.png`, animations: 'disabled' });
   }
   await panel.getByRole('button', { name: '稍后' }).click();
@@ -53,8 +53,14 @@ export async function checkUpdateNotice(application, page) {
   await expect(panel).not.toContainText('发现新版本');
   await panel.getByRole('button', { name: '检查更新', exact: true }).click();
   await expect(panel).toContainText('发现新版本 99.0.0');
-  await panel.getByRole('button', { name: '查看更新' }).click();
-  expect(await application.evaluate(() => globalThis.__updateOpenedURL))
+  await panel.getByRole('button', { name: '下载更新' }).click();
+  const filename = process.platform === 'win32' ? 'Biscuit.Setup.99.0.0.exe'
+    : await application.evaluate(() => process.execPath === '/opt/Biscuit/feiyu-desktop' && !process.env.APPIMAGE)
+      ? 'feiyu-desktop_99.0.0_amd64.deb' : 'Biscuit-99.0.0.AppImage';
+  await expect.poll(() => application.evaluate(() => globalThis.__updateOpenedURL))
+    .toBe('https://github.com/feiyuceng06-prog/Biscuit/releases/download/desktop-v99.0.0/' + filename);
+  await panel.getByRole('button', { name: '更新说明' }).click();
+  await expect.poll(() => application.evaluate(() => globalThis.__updateOpenedURL))
     .toBe('https://github.com/feiyuceng06-prog/Biscuit/releases/tag/desktop-v99.0.0');
   console.log('PASS: automatic release notice, both themes, persisted dismissal, manual rediscovery, canonical release link');
 }

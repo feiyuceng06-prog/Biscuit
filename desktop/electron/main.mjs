@@ -14,6 +14,7 @@ import { createUpdateChecker } from './updates.mjs';
 app.setPath('userData', path.join(app.getPath('appData'), 'feiyu-desktop'));
 app.setName('Biscuit');
 const checkUpdates = createUpdateChecker({ current: app.getVersion(), platform: process.platform,
+  linuxDeb: process.platform === 'linux' && !process.env.APPIMAGE && process.execPath === '/opt/Biscuit/feiyu-desktop',
   arch: process.arch, request: (...args) => net.fetch(...args) });
 
 const here = path.dirname(fileURLToPath(import.meta.url));
