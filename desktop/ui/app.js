@@ -26,6 +26,7 @@ const inputEl = $("input");
 const paletteEl = $("palette");
 const modelsEl = $("models");
 const modelPill = $("model");
+const updateThinking = createThinkingControl($("thinking-control"), send);
 
 let socket = null;
 let busy = false;
@@ -613,6 +614,7 @@ function setDot(state, text) {
 /** 说一句要等人看见的话。秒表那一路不许冲掉它。 */
 function sayOnce(state, text) {
   setDot(state, text);
+  if (state === "off") updateThinking();
   noteHeld = true;
 }
 
@@ -801,6 +803,7 @@ function shortPath(raw, cap = 46) {
 function setStatus(s) {
   if (!s) return;
   busy = !!s.busy;
+  updateThinking(s);
   // 换模型那张清单底下那句「跑完才换」跟着 busy 走
   if (!modelsEl.hidden) drawModelsList();
   // **工作台不由 status 说了算。** 换台时旧进程可能还会再推一条 status 过来，
@@ -2799,6 +2802,7 @@ function drawDesks() {
 }
 
 function resetDeskView() {
+  updateThinking();
   closeSaying();
   stopWait();
   dropAsk();

@@ -6,6 +6,8 @@
 
 Biscuit 原名 Feiyu，命令和现有数据目录保持不变。
 
+聊天输入框里的「思考强度」有日常、标准、深入和 Pro 四档。拖动陨石或按方向键即可切换，从下一条消息生效。Pro 向当前模型请求 `xhigh`，具体支持的档位取决于模型接口。点「恢复模型设置」可切回原配置。
+
 ## Linux 安装
 
 **推荐：一条命令，装好桌面版和终端版。** 适用于 Linux x86_64，需要能联网。
@@ -29,8 +31,8 @@ feiyu          # 终端版
 
 到 [下载页面](https://github.com/feiyuceng06-prog/Biscuit/releases/latest) 选择一种格式：
 
-- **deb**：适用于使用 apt 的发行版。下载后在文件所在目录运行 `sudo apt install ./feiyu-desktop_0.88.0_amd64.deb`。
-- **AppImage**：下载后运行 `chmod +x Biscuit-0.88.0.AppImage`，再双击打开。若提示缺少 FUSE，建议使用上方一键安装方式。
+- **deb**：适用于使用 apt 的发行版。下载后在文件所在目录运行 `sudo apt install ./feiyu-desktop_0.89.0_amd64.deb`。
+- **AppImage**：下载后运行 `chmod +x Biscuit-0.89.0.AppImage`，再双击打开。若提示缺少 FUSE，建议使用上方一键安装方式。
 
 安装包未签名。各版本的系统验证范围和已知限制见下载页面。
 
@@ -63,7 +65,7 @@ cd Biscuit
 
 ## Windows
 
-到[下载页面](https://github.com/feiyuceng06-prog/Biscuit/releases/latest)下载 **Biscuit Setup 0.88.0.exe**，双击安装即可。安装包已包含 Git Bash，升级会保留原有 Feiyu 配置和对话。
+到[下载页面](https://github.com/feiyuceng06-prog/Biscuit/releases/latest)下载 **Biscuit Setup 0.89.0.exe**，双击安装即可。安装包已包含 Git Bash，升级会保留原有 Feiyu 配置和对话。
 
 安装包尚未签名，Windows 可能显示安全提示；安装前请核对下载来源和发布页的 SHA256。Windows 的已知限制见发布说明。
 

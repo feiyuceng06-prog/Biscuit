@@ -1,6 +1,7 @@
 """Durable boundaries, actual child processes and v2 measurement integration."""
 import copy
 import json
+import math
 import os
 from pathlib import Path
 import subprocess
@@ -149,9 +150,10 @@ class DurableTests(unittest.TestCase):
 
     def test_observation_timeout_and_post_call_facts(self):
         c = self.opened()
-        c.run['deadline'] = time.monotonic()+300
+        # Adding 120 to this tick rounds the absolute deadline up to 520.0.
+        clock = math.nextafter(400.0, 0.0)
+        c.run['deadline'] = clock + 300
         seen = []
-        clock = time.monotonic()
         def completed(*args, **kwargs):
             nonlocal clock
             seen.append(kwargs['timeout'])

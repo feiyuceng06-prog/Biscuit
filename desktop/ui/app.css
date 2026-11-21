@@ -1684,10 +1684,10 @@ body[data-glide] .block:not([data-leaving]) { animation-delay: var(--moderate-ou
 
 .composer__row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, max-content) auto auto;
   grid-template-areas:
-    "input input input input"
-    "attach . model send";
+    "input input input input input"
+    "attach . model effort send";
   align-items: center;
   gap: var(--space-1) 6px;
   max-width: var(--content);

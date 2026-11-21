@@ -335,10 +335,13 @@ class Controller:
         code = "import json,sys; print(json.dumps(dict(outcome=sys.argv[1],usage_lower_bound=json.loads(sys.argv[2]),supplier_invoice=None)))"
         auth.require_remote_contract(dict(plan=self.run['plan'], fee_authorization=self.run['approval']), self.run['plan'])
         remaining = min(self.run['deadline'], self._observation_deadline)-time.monotonic()
-        if remaining <= 0:
+        # Converting a rounded absolute deadline back to seconds can exceed the budget by one tick.
+        timeout = min(remaining, self.run['limits']['max_seconds'],
+                      self.run['bundle']['static']['config']['budget']['seconds'])
+        if timeout <= 0:
             raise Blocked('deadline exhausted before physical dispatch')
         result = subprocess.run([sys.executable, '-I', '-c', code, outcome, auth.canonical(usage)],
-            capture_output=True, text=True, timeout=remaining,
+            capture_output=True, text=True, timeout=timeout,
             env={'PATH': '/usr/bin:/bin', 'LANG': 'C.UTF-8'})
         if result.returncode:
             raise RuntimeError('fake child failed: '+result.stderr)
