@@ -40,6 +40,17 @@ test('release links are constructed locally, not accepted from remote metadata',
   assert.equal(result.url, 'https://github.com/feiyuceng06-prog/Biscuit/releases/tag/desktop-v0.88.0');
 });
 
+test('downloads the matching release asset for each installation format', () => {
+  for (const [platform, linuxDeb, filename] of [
+    ['linux', true, 'feiyu-desktop_0.88.0_amd64.deb'],
+    ['linux', false, 'Biscuit-0.88.0.AppImage'],
+    ['win32', false, 'Biscuit.Setup.0.88.0.exe'],
+  ]) {
+    const result = releaseStatus('0.87.2', releaseFixture(), platform, 'x64', linuxDeb);
+    assert.equal(result.downloadUrl, 'https://github.com/feiyuceng06-prog/Biscuit/releases/download/desktop-v0.88.0/' + filename);
+  }
+});
+
 test('checks deduplicate requests, cache automatic results, and allow manual refresh', async () => {
   let clock = 0, calls = 0;
   const check = createUpdateChecker({ current: '0.87.2', platform: 'linux', arch: 'x64', now: () => clock,

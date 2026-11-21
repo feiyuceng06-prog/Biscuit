@@ -7,7 +7,7 @@ function version(value) {
   return parts.every(Number.isSafeInteger) ? parts : null;
 }
 
-export function releaseStatus(current, release, platform, arch) {
+export function releaseStatus(current, release, platform, arch, linuxDeb = false) {
   const installed = version(current);
   const latest = typeof release?.tag_name === 'string' ? release.tag_name.replace(/^desktop-v/, '') : null;
   const available = version(latest);
@@ -23,10 +23,12 @@ export function releaseStatus(current, release, platform, arch) {
     asset.browser_download_url === `${releases}/download/desktop-v${latest}/${name}`))) {
     return { status: 'unavailable', current, latest };
   }
-  return { status: 'available', current, latest, url };
+  const filename = platform === 'linux' && linuxDeb ? names[1] : names[0];
+  return { status: 'available', current, latest, url,
+    downloadUrl: `${releases}/download/desktop-v${latest}/${filename}` };
 }
 
-export function createUpdateChecker({ current, platform, arch, request = fetch, now = Date.now }) {
+export function createUpdateChecker({ current, platform, arch, linuxDeb = false, request = fetch, now = Date.now }) {
   let result;
   let checked = -Infinity;
   let pending;
@@ -41,7 +43,7 @@ export function createUpdateChecker({ current, platform, arch, request = fetch, 
           signal: AbortSignal.timeout(10000), redirect: 'error', credentials: 'omit',
         });
         if (!response.ok) throw new Error('Release check failed');
-        result = releaseStatus(current, await response.json(), platform, arch);
+        result = releaseStatus(current, await response.json(), platform, arch, linuxDeb);
       } catch {
         result = { status: 'error', current, message: '暂时无法检查更新，请稍后重试' };
       } finally { checked = now(); pending = null; }
