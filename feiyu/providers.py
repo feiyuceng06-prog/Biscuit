@@ -951,7 +951,7 @@ def models_url(kind: str, base_url: str) -> str:
 
 
 def list_models(kind: str, base_url: str, key: str) -> list[dict]:
-    """[{"id": …, "context": …?}, …]。出错抛 ValueError，措辞是给人看的，**不带 key** """
+    """读取模型 ID 和接口明确声明的容量、图像输入能力。出错抛 ValueError，措辞是给人看的，**不带 key** """
     url = models_url(kind, base_url)
     parts = urllib.parse.urlparse(url)
     if parts.scheme not in ("http", "https") or not parts.netloc:
@@ -990,9 +990,26 @@ def list_models(kind: str, base_url: str, key: str) -> list[dict]:
             continue
         seen.add(mid)
         one = {"id": mid}
-        ctx = item.get("context_length") if isinstance(item, dict) else None
-        if isinstance(ctx, int) and not isinstance(ctx, bool) and ctx > 0:
-            one["context"] = ctx
+        if isinstance(item, dict):
+            top = item.get("top_provider")
+            top = top if isinstance(top, dict) else {}
+            context = item.get("context_length")
+            output = top.get("max_completion_tokens")
+            if kind == "anthropic":
+                context = item.get("max_input_tokens") or context
+                output = item.get("max_tokens")
+                caps = item.get("capabilities")
+                image = caps.get("image_input") if isinstance(caps, dict) else None
+                if isinstance(image, dict) and isinstance(image.get("supported"), bool):
+                    one["vision"] = image["supported"]
+            else:
+                arch = item.get("architecture")
+                modes = arch.get("input_modalities") if isinstance(arch, dict) else None
+                if isinstance(modes, list) and modes and all(isinstance(m, str) and m for m in modes):
+                    one["vision"] = "image" in modes
+            for field, value in (("context", context), ("max_tokens", output)):
+                if type(value) is int and 0 < value <= 2**53 - 1:
+                    one[field] = value
         out.append(one)
     if not out:
         raise ValueError("接口没回模型清单 —— 直接填模型 id 也行")
