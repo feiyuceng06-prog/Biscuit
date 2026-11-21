@@ -218,7 +218,7 @@ class Server:
                        tokens=agent.tokens,
                        cost=round(spent, 6) if spent is not None else None,
                        context=agent.context, context_limit=agent.context_limit)
-            backend = agent.backend
+            backend = getattr(agent, "backend", None)
             if hasattr(backend, "configured_thinking"):
                 current = (backend.effort, backend.thinking_on)
                 out["thinking"] = {"effort": backend.effort, "enabled": backend.thinking_on,
