@@ -33,6 +33,19 @@ export async function checkModelForm(page) {
       check(current.base_url === 'https://api.deepseek.com' && current.key === 'test-only-deepseek-key', 'explicit request uses current endpoint/key');
       response(current.ticket);
       check(!form.modelForm.picks.hidden, 'current response displays models');
+      gotModelList({ticket:current.ticket, ok:true, rows:[
+        {id:'vision-model', context:384000, max_tokens:16000, vision:true}, {id:'id-only'}]});
+      form.modelForm.picks.querySelector('button').click();
+      const vision = form.querySelector('input[type=checkbox]');
+      check(got.limit.value === '384000' && got.max_tokens.value === '16000' && vision.checked,
+        'catalog selection fills both limits and image support');
+      type(got.max_tokens, '4096');
+      type(got.model, 'id-only');
+      check(got.limit.value === '' && got.max_tokens.value === '4096' && !vision.checked,
+        'ID-only model drops inferred fields and retains manual override');
+      type(got.model, 'vision-model');
+      check(got.limit.value === '384000' && got.max_tokens.value === '4096' && vision.checked,
+        'typing an exact catalog ID applies its capabilities');
       type(got.base_url, 'https://other.example/v1');
       response(current.ticket);
       check(got.key.value === '' && form.modelForm.picks.hidden && !form.modelForm.picks.textContent, 'URL change clears key and rejects old response');
@@ -61,6 +74,6 @@ export async function checkModelForm(page) {
       drawShelf();
     }
   });
-  assert.equal(passed.length, 12);
-  console.log(`PASS: ${passed.length} model form credential/race checks`);
+  assert.equal(passed.length, 15);
+  console.log(`PASS: ${passed.length} model form model setup checks`);
 }

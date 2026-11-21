@@ -2214,8 +2214,8 @@ const KEY_FIELDS = [
   ["base_url", "接口地址", "多数接口填到 /v1 就行，留空走官方地址", "text"],
   ["model", "模型 id", "贴上 key 之后点「列出模型」挑一个，也可以直接填", "text"],
   ["key", "API key", "留空 = 不动原来那条", "password"],
-  ["max_tokens", "单轮输出上限", "不填按 8192；写长文件容易撞", "number"],
-  ["limit", "上下文上限", "不填按 128k，撞过一次它会自己学", "number"],
+  ["max_tokens", "单轮输出上限", "可自动识别，也可填 token 数或留空", "number"],
+  ["limit", "上下文上限", "可自动识别，也可填 token 数或留空", "number"],
 ];
 
 /* 加模型时摆在最上面的几家接口。**只有地址，没有模型 id 和价格**：地址多年不变，
@@ -2341,7 +2341,7 @@ function modelForm() {
       field.className = "field-with";
       field.append(input, list);
       line.append(field, picks, hint);
-      input.oninput = () => drawPicks(picks, got);
+      input.oninput = () => refreshPicks();
     } else {
       line.append(input);
     }
@@ -2363,6 +2363,7 @@ function modelForm() {
     got.key.value = "";
     got.key.placeholder = "接口已更改，请重新填写这一家的 key";
     invalidate();
+    applyCapabilities();
     if (box.markPresets) box.markPresets();
   };
   const askModels = () => {
@@ -2376,9 +2377,9 @@ function modelForm() {
   };
   list.onclick = askModels;
   // 只在明确点击「列出模型」时发请求，避免失焦先于厂商按钮 click 导致 key 发往旧地址。
-  got.key.addEventListener("input", invalidate);
+  got.key.addEventListener("input", () => { invalidate(); applyCapabilities(); });
   got.base_url.addEventListener("input", endpointChanged);
-  box.modelForm = { got, picks, hint, accepts: ticket =>
+  box.modelForm = { got, picks, hint, refreshPicks, accepts: ticket =>
     !!request && request.ticket === ticket && request.context === context() };
 
   const kind = document.createElement("label");
@@ -2397,9 +2398,45 @@ function modelForm() {
   seesBox.checked = !!row.vision;
   const seesWhy = document.createElement("span");
   seesWhy.className = "form__hint";
-  seesWhy.textContent = "没标的模型收到图会直接 400，所以不猜，按你填的来";
+  seesWhy.textContent = "接口提供图像输入能力时自动填写，也可手动调整";
   sees.append(seesBox, seesWhy);
   box.append(sees);
+
+  const fields = { context: got.limit, max_tokens: got.max_tokens, vision: seesBox };
+  const saved = new Map();
+  const manual = new Set();
+  for (const [key, field] of Object.entries(fields)) {
+    if (editing && (key === "vision" || field.value !== "")) {
+      saved.set(key, key === "vision" ? field.checked : field.value);
+    }
+    field.addEventListener("input", () => {
+      saved.delete(key);
+      if (key === "vision" || field.value !== "") manual.add(key);
+      else manual.delete(key);
+    });
+  }
+  function applyCapabilities(model) {
+    const sameModel = got.model.value.trim() === row.model &&
+      got.base_url.value.trim() === row.base_url && pickKind.value === row.kind;
+    for (const [key, field] of Object.entries(fields)) {
+      if (manual.has(key)) continue;
+      const value = sameModel && saved.has(key) ? saved.get(key) : model?.[key];
+      if (key === "vision") field.checked = value === true;
+      else field.value = value ?? "";
+    }
+  }
+  function refreshPicks() {
+    const model = modelRows.find(r => r.id === got.model.value.trim());
+    applyCapabilities(model);
+    if (model) {
+      const reported = Object.keys(fields).filter(k => model[k] != null)
+        .map(k => ({context: "上下文", max_tokens: "输出上限", vision: "图像输入"})[k]);
+      hint.textContent = reported.length ? "接口已报告：" + reported.join("、") : "接口只返回了模型 ID，可留空使用默认上限";
+    } else if (modelRows.length) {
+      hint.textContent = `已读取 ${modelRows.length} 个模型，点选以填写接口提供的能力`;
+    }
+    drawPicks(picks, got, refreshPicks);
+  }
 
   const price = document.createElement("label");
   price.className = "form__row";
@@ -2466,7 +2503,7 @@ function modelForm() {
 /* 拉回来的模型清单，按模型 id 那一格里打的字筛。几百个（OpenRouter）的时候只摆前一百个 */
 const PICKS_SHOWN = 100;
 
-function drawPicks(picks, got) {
+function drawPicks(picks, got, refreshPicks) {
   const want = got.model.value.trim().toLowerCase();
   const keep = modelRows.filter((r) => !want || r.id.toLowerCase().includes(want));
   picks.textContent = "";
@@ -2481,8 +2518,7 @@ function drawPicks(picks, got) {
     b.onclick = () => {
       got.model.value = r.id;
       if (!got.name.readOnly && !got.name.value.trim()) got.name.value = r.id.split("/").pop();
-      if (r.context && !got.limit.value.trim()) got.limit.value = r.context;
-      drawPicks(picks, got);
+      refreshPicks();
     };
     li.append(b);
     picks.append(li);
@@ -2500,7 +2536,7 @@ function gotModelList(ev) {
   if (ev.ticket !== modelAsk) return;           // 早先那次问的，字段已经改过了
   const form = $("shelf-pane").querySelector(".form");
   if (!form || !form.modelForm || !form.modelForm.accepts(ev.ticket)) return;
-  const { got, picks, hint } = form.modelForm;
+  const { picks, hint } = form.modelForm;
   if (!ev.ok) {
     modelRows = [];
     picks.hidden = true;
@@ -2511,7 +2547,7 @@ function gotModelList(ev) {
   modelRows = rowsOf(ev.rows).filter((r) => typeof r.id === "string");
   hint.removeAttribute("data-level");
   hint.textContent = `拉到 ${ev.total || modelRows.length} 个模型，点一个填进去`;
-  drawPicks(picks, got);
+  form.modelForm.refreshPicks();
 }
 
 function oneLine(value, hint, onSave) {

@@ -38,11 +38,14 @@ class _Api(http.server.BaseHTTPRequestHandler):
         self.seen.append((self.path, {k.lower(): v for k, v in self.headers.items()}))
         port = self.server.server_address[1]
         if self.path == "/v1/models":
-            self._json(200, {"data": [{"id": "甲/a"}, {"id": "乙/b", "context_length": 8192},
+            self._json(200, {"data": [{"id": "甲/a"}, {"id": "乙/b", "context_length": 8192,
+                                       "top_provider": {"max_completion_tokens": 2048},
+                                       "architecture": {"input_modalities": ["text", "image"]}},
                                       {"id": "甲/a"}, {"id": ""}, {"name": "没有 id"},
-                                      {"id": "丙", "context_length": True}]})
+                                      {"id": "丙", "context_length": True, "top_provider": [], "architecture": None}]})
         elif self.path == "/anth/v1/models?limit=1000":
-            self._json(200, {"data": [{"id": "claude-x", "type": "model"}]})
+            self._json(200, {"data": [{"id": "claude-x", "max_input_tokens": 200000, "max_tokens": 16000,
+                                       "capabilities": {"image_input": {"supported": False}}}]})
         elif self.path == "/bad/v1/models":
             self._json(401, {"error": "invalid key"})
         elif self.path == "/nope/v1/models":
@@ -85,7 +88,7 @@ class Base(unittest.TestCase):
 class TestListModels(Base):
     def test_openai_兼容的头和清单(self):
         got = providers.list_models("openai", self.base + "/v1/", "sk-a1")
-        self.assertEqual(got, [{"id": "甲/a"}, {"id": "乙/b", "context": 8192}, {"id": "丙"}])
+        self.assertEqual(got, [{"id": "甲/a"}, {"id": "乙/b", "context": 8192, "max_tokens": 2048, "vision": True}, {"id": "丙"}])
         path, head = _Api.seen[-1]
         self.assertEqual(path, "/v1/models")
         self.assertEqual(head["authorization"], "Bearer sk-a1")
@@ -97,7 +100,7 @@ class TestListModels(Base):
 
     def test_anthropic_的头和地址(self):
         got = providers.list_models("anthropic", self.base + "/anth", "sk-b2")
-        self.assertEqual(got, [{"id": "claude-x"}])
+        self.assertEqual(got, [{"id": "claude-x", "context": 200000, "max_tokens": 16000, "vision": False}])
         head = _Api.seen[-1][1]
         self.assertEqual(head["x-api-key"], "sk-b2")
         self.assertEqual(head["anthropic-version"], "2023-06-01")
