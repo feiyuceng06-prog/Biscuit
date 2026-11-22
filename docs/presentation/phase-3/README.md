@@ -47,3 +47,5 @@ python evals/presentation/director-audit.py /tmp/biscuit-planner --planner
 实图仍有值得人工取舍的地方。产品的前两页复用同一张阅览室图片，符合输入中的素材限制，但没有具体展示书签交互。商业封面的报告称句号在缩略图中疑似裁切，完整 PNG 可清楚读到句号。几个纯文字封面在短标题之后留白较多。以上证据支持判断信息层级与表达方式的变化，目前没有读者盲评数据足以推出整体审美偏好。[产品图文页](evidence/launch/phase3/review/slide-2.png) · [商业封面](evidence/operations/phase3/review/slide-1.png)
 
 本次在 Linux 执行真实导出、界面和渲染测试。PowerPoint、Keynote、macOS Electron 的重新排版、编辑与放映仍待验证。极长的横条类别名会额外导出为独立的可编辑文本框，在 PowerPoint 改名时需同步修改对应文本框。
+
+验收期间发现，最初的分析新版图表正确显示了 0，但内嵌工作表的数据单元格为空。已修复导出和回归断言，并用同一输入生成替代样例。以上表格保留原始对照。[修复后的分析 PPTX 与逐单元格核对](repairs/editable-zero/README.md)

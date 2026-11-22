@@ -48,7 +48,9 @@ export async function powerPoint(raw) {
       if (o.type === 'chart')
         page.addChart(
           o.encoding === 'line' ? ppt.ChartType.line : ppt.ChartType.bar,
-          [{ name: '数值', labels: o.items.map((r) => r.label), values: o.items.map((r) => r.value) }],
+          // PptxGenJS 4 writes a falsy numeric zero as an empty worksheet cell.
+          // Its XML writer emits the literal '0' as a number in both the workbook and chart cache.
+          [{ name: '数值', labels: o.items.map((r) => r.label), values: o.items.map((r) => r.value === 0 ? '0' : r.value) }],
           {
             ...box,
             barDir: o.encoding === 'bars' ? 'bar' : 'col',

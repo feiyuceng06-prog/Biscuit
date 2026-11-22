@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "deckId": "analysis",
+  "pptxSha256": "b423547db1d6f5978700815676e7ef6b41120ef51ecfa5fb62b83fb051eef2e9",
+  "status": "needs_review",
+  "critic": {
+    "status": "unavailable",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [],
+    "errorType": "RuntimeError"
+  },
+  "pages": [
+    {
+      "slideId": "analysis-1",
+      "png": "slide-1.png",
+      "sha256": "2fa1bf78839c5e797b701614c66b62df8662b52f8a48a83038b259a0931f0059"
+    },
+    {
+      "slideId": "analysis-2",
+      "png": "slide-2.png",
+      "sha256": "bcc8b9bd307a091ca1aea52f869e8076ec75b0423665cb992023bd7c10258aca"
+    },
+    {
+      "slideId": "analysis-3",
+      "png": "slide-3.png",
+      "sha256": "a427907dc3791b1b72b3cb8d768df12f42b23b8a63b8561ec9fb7218b1ac52c2"
+    },
+    {
+      "slideId": "analysis-4",
+      "png": "slide-4.png",
+      "sha256": "9ced0c57b3dd760a7b1f644346274ebd0811a605c457e5133ea1d4cc6db727d9"
+    }
+  ],
+  "issues": [],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "13f1a601ad95647066b579ff444021138b314837697fd608bf35593bab766afa",
+  "fonts": [
+    "BAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     90  0",
+    "CAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     80  0",
+    "DAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes    110  0",
+    "EAAAAA+InterVariable                 TrueType          WinAnsi          yes yes yes    125  0",
+    "FAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     85  0",
+    "GAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes    100  0",
+    "HAAAAA+SourceHanSansCN-Regular       Type 1            Builtin          yes yes yes    115  0",
+    "IAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes    105  0",
+    "JAAAAA+InterVariable                 TrueType          WinAnsi          yes yes yes    120  0",
+    "KAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     95  0"
+  ],
+  "contactSheet": "contact.png",
+  "durationMs": 1833
+}

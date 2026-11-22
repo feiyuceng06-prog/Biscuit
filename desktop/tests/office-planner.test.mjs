@@ -163,10 +163,11 @@ test('PPTX has editable line, bar and column charts with original numbers, categ
     const notes = await pptx.file('ppt/notesSlides/notesSlide' + (i + 1) + '.xml').async('string');
     assert.match(graph, encodings[i]);
     assert.ok(slideXml.includes(page.unit) && notes.includes(page.notes));
-    for (const item of page.items) {
+    for (const [row, item] of page.items.entries()) {
       assert.ok(graph.includes('<c:v>' + item.label + '</c:v>'));
       assert.ok(graph.includes('<c:v>' + item.value + '</c:v>'));
-      assert.ok(workbook.includes('<v>' + item.value + '</v>'));
+      assert.ok(workbook.includes('<c r="B' + (row + 2) + '"><v>' + item.value + '</v></c>'),
+        'Expected the editable value in worksheet row ' + (row + 2));
     }
   }
   const wrapped = objects(deck, deck.design, 1);
