@@ -1,0 +1,20 @@
+{
+  "name": "reading",
+  "model": "deepseek-flash",
+  "reopen": true,
+  "started": "2026-11-22T11:24:58.900Z",
+  "events": [
+    {
+      "action": "保存源文件",
+      "ms": 4767,
+      "status": "已保存到 /home/Feiyu/Biscuit/docs/presentation/photography-pilot/checks/reading-7-critic/source.deck.json"
+    },
+    {
+      "action": "导出 PPTX",
+      "ms": 57680,
+      "status": "需复核 · /home/Feiyu/Biscuit/docs/presentation/photography-pilot/checks/reading-7-critic/deck.pptx · 修复尝试 0 次 · 报告 /home/Feiyu/Biscuit/docs/presentation/photography-pilot/checks/reading-7-critic/deck.pptx.review-K5YhBe/report.json"
+    }
+  ],
+  "manualPageEdits": 0,
+  "totalMs": 57680
+}

@@ -176,6 +176,16 @@ ipcMain.handle('feiyu:command', async (event, command, args = {}) => {
       if (result.canceled || !result.filePath) return null;
       const destination = result.filePath;
       if (!destination.toLowerCase().endsWith(pptx ? '.pptx' : '.json')) throw Error('请选择匹配的文件扩展名');
+      if (pptx && deck.design?.version === 2 && deck.design.direction === 'photography') {
+        const { deliverPhotography } = await import('./office/photo-delivery.mjs');
+        let backend, backendError;
+        try {
+          backend = resolveBackend({ packaged: app.isPackaged, resources: process.resourcesPath, root });
+        } catch (error) {
+          backendError = error.message;
+        }
+        return deliverPhotography(destination, deck, { backend, backendError });
+      }
       const data = pptx ? await (await import('./office/pptx.mjs')).powerPoint(deck) : JSON.stringify(deck, null, 2);
       const temp = path.join(path.dirname(destination), '.' + randomUUID() + '.tmp');
       try {

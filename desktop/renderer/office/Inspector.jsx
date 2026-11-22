@@ -25,7 +25,7 @@ async function loadImage(file) {
   }
 }
 
-async function loadPhoto(file) {
+export async function loadPhoto(file) {
   if (!imageTypes.includes(file.type) || file.size > 30_000_000)
     throw Error('请选择 30 MB 以内的 PNG 或 JPEG 照片');
   const image = await createImageBitmap(file, { imageOrientation: 'from-image' });

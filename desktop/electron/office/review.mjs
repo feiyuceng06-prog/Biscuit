@@ -5,10 +5,13 @@ import { createHash } from 'node:crypto';
 import os from 'node:os';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { composition, readDeck } from './deck.mjs';
+import { exportPages, readDeck } from './deck.mjs';
 
-export function reviewManifest(raw) {
+export const reviewObjectId = (o, i) => o.field || (o.photoId ? 'photo:' + o.photoId : o.type + '-' + (i + 1));
+
+export function reviewManifest(raw, pages) {
   const deck = readDeck(raw);
+  pages ??= exportPages(deck);
   return {
     deckId: deck.id, brief: deck.brief,
     ...(deck.design && { design: {
@@ -18,27 +21,35 @@ export function reviewManifest(raw) {
     } }),
     slides: deck.slides.map((slide, i) => ({
       slideId: slide.id, layout: slide.layout,
-      objects: composition(slide, i + 1, deck.slides.length, deck.theme, deck.design).map(({data, ...o}, j) => ({
-        ...o, id: o.field || (o.photoId ? 'photo:' + o.photoId : o.type + '-' + (j + 1)),
+      objects: pages[i].map(({data, ...o}, j) => ({
+        ...o, id: reviewObjectId(o, j),
       })),
     })),
   };
 }
 
 export async function reviewExport(destination, bytes, deck, backend) {
+  const output = await fs.mkdtemp(destination + '.review-');
+  const report = await inspectExport(output, bytes, deck, { backend });
+  return { destination, status: report.status, critic: report.critic.status, report: path.join(output, 'report.json') };
+}
+
+export async function inspectExport(output, bytes, deck, { backend, pages, deterministicOnly = false, backendError }) {
   const work = await fs.mkdtemp(path.join(os.tmpdir(), 'biscuit-ppt-'));
   try {
-    const output = await fs.mkdtemp(destination + '.review-');
     await fs.writeFile(path.join(work, 'deck.pptx'), bytes);
-    await fs.writeFile(path.join(work, 'manifest.json'), JSON.stringify(reviewManifest(deck)));
+    await fs.writeFile(path.join(work, 'manifest.json'), JSON.stringify(reviewManifest(deck, pages)));
     const reportPath = path.join(output, 'report.json');
     const pptxSha256 = createHash('sha256').update(bytes).digest('hex');
-    let processFailure;
-    try {
-      await promisify(execFile)(backend.command, [...backend.args, '--presentation-review', work, output],
-        { windowsHide: true, timeout: 600000, env: { ...process.env, PYTHONUTF8: '1' } });
-    } catch (error) {
-      processFailure = 'Review process failed: ' + (error.code || error.signal || 'unknown');
+    let processFailure = backendError;
+    if (backend) {
+      try {
+        await promisify(execFile)(backend.command, [...backend.args, '--presentation-review', work, output],
+          { windowsHide: true, timeout: deterministicOnly ? 120000 : 600000,
+            env: { ...process.env, PYTHONUTF8: '1', ...(deterministicOnly && { BISCUIT_PRESENTATION_CRITIC: '' }) } });
+      } catch (error) {
+        processFailure = 'Review process failed: ' + (error.code || error.signal || 'unknown');
+      }
     }
     let report;
     try {
@@ -58,7 +69,7 @@ export async function reviewExport(destination, bytes, deck, backend) {
         error: processFailure || 'Review process did not produce a valid report.' };
       await fs.writeFile(reportPath, JSON.stringify(report, null, 2));
     }
-    return { destination, status: report.status, critic: report.critic.status, report: reportPath };
+    return report;
   } finally {
     await fs.rm(work, { recursive: true, force: true });
   }

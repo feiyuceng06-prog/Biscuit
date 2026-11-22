@@ -1,0 +1,264 @@
+{
+  "pair-1": {
+    "seconds": 31.373,
+    "manualPageEdits": 0,
+    "generationRetries": 0,
+    "failure": "locator.selectOption: Timeout 25000ms exceeded."
+  },
+  "pair-2": {
+    "seconds": 26.471,
+    "manualPageEdits": 0,
+    "generationRetries": 0,
+    "status": "checked",
+    "issues": [],
+    "repairAttempts": 0,
+    "pptxSHA": "24d24779ad6797e64a982c850c5417a023f53e67c007fb194924d3fe191db69d",
+    "pages": [
+      {
+        "png": "runs/pair-2/deck.pptx.review-EpOpHT/slide-1.png",
+        "sha256": "4bd08d7b51a8b6c1577865c12ba5667415d7abef1bb4a11bc7eb98eac6296038",
+        "photoIDs": [
+          "260348.jpg",
+          "260734.jpg"
+        ],
+        "missingURLs": []
+      }
+    ]
+  },
+  "pair-3": {
+    "seconds": 22.955,
+    "manualPageEdits": 0,
+    "generationRetries": 0,
+    "status": "checked",
+    "issues": [],
+    "repairAttempts": 0,
+    "pptxSHA": "ff1825d7b49f890f2f8e9b562a5c34d8636891bb30a6c9f246860b8c2f03dafe",
+    "pages": [
+      {
+        "png": "runs/pair-3/deck.pptx.review-vDhmyq/initial/review/slide-1.png",
+        "sha256": "41ef7f98922803588b25ff3fc8ef8164c9fd95836f6fb2727427392e4b2c5a82",
+        "photoIDs": [
+          "260348.jpg",
+          "260734.jpg"
+        ],
+        "missingURLs": []
+      }
+    ]
+  },
+  "reading-1": {
+    "seconds": 31.392,
+    "manualPageEdits": 0,
+    "generationRetries": 0,
+    "failure": "locator.selectOption: Timeout 25000ms exceeded."
+  },
+  "reading-2": {
+    "seconds": 31.399,
+    "manualPageEdits": 0,
+    "generationRetries": 0,
+    "failure": "locator.selectOption: Timeout 25000ms exceeded."
+  },
+  "reading-3": {
+    "seconds": 50.497,
+    "manualPageEdits": 0,
+    "generationRetries": 0,
+    "failure": "locator.waitFor: Target page, context or browser has been closed"
+  },
+  "reading-4": {
+    "seconds": 26.93,
+    "manualPageEdits": 0,
+    "generationRetries": 0,
+    "failure": "locator.waitFor: Target page, context or browser has been closed"
+  },
+  "reading-5": {
+    "seconds": 52.836,
+    "manualPageEdits": 0,
+    "generationRetries": 0,
+    "status": "checked",
+    "issues": [],
+    "repairAttempts": 0,
+    "pptxSHA": "d419c126acabb13ef4108d2e8093b9f63e7c02eec4029fefdf48f15c60586f0f",
+    "pages": [
+      {
+        "png": "runs/reading-5/deck.pptx.review-GqS4mv/initial/review/slide-1.png",
+        "sha256": "4d8c0b9c2d51b63630effaf74fb4946062924b67fe7b195bb61be60e06c883ca",
+        "photoIDs": [
+          "260348.jpg",
+          "260089.jpg",
+          "260349.jpg"
+        ],
+        "missingURLs": []
+      },
+      {
+        "png": "runs/reading-5/deck.pptx.review-GqS4mv/initial/review/slide-2.png",
+        "sha256": "8dc3251e99b0877607ca0b226f0b9fa6d4ef07bfa1ffd5c9cb14689cefdd1646",
+        "photoIDs": [],
+        "missingURLs": []
+      },
+      {
+        "png": "runs/reading-5/deck.pptx.review-GqS4mv/initial/review/slide-3.png",
+        "sha256": "26e085aae98a4b4763366f058830feaa6db652006c5211069b6cd30525911b01",
+        "photoIDs": [
+          "260090.jpg",
+          "260350.jpg"
+        ],
+        "missingURLs": []
+      }
+    ]
+  },
+  "reading-6": {
+    "seconds": 57.99,
+    "manualPageEdits": 0,
+    "generationRetries": 1,
+    "status": "checked",
+    "issues": [],
+    "repairAttempts": 0,
+    "pptxSHA": "bd5ae212428de0672f7f32236b5470a21ac01c6401c5e5963fa83f215b2f8466",
+    "pages": [
+      {
+        "png": "runs/reading-6/deck.pptx.review-pay9Ua/initial/review/slide-1.png",
+        "sha256": "caaa876b1552bdf475be5f3505f81ac25b0b02abc8cfa32f4c36f86804021f8d",
+        "photoIDs": [
+          "260348.jpg",
+          "260089.jpg",
+          "260349.jpg"
+        ],
+        "missingURLs": []
+      },
+      {
+        "png": "runs/reading-6/deck.pptx.review-pay9Ua/initial/review/slide-2.png",
+        "sha256": "35567c88de75235ec6cb11a33707b1131cba01e51e2826e93976c7d8db0b739f",
+        "photoIDs": [],
+        "missingURLs": []
+      },
+      {
+        "png": "runs/reading-6/deck.pptx.review-pay9Ua/initial/review/slide-3.png",
+        "sha256": "ad9009ddfd630f23fb097ae65bdfe4f39f21feed7c93bfe5d9b14833e8655de4",
+        "photoIDs": [
+          "260090.jpg",
+          "260350.jpg"
+        ],
+        "missingURLs": []
+      }
+    ]
+  },
+  "reading-7": {
+    "seconds": 45.633,
+    "manualPageEdits": 0,
+    "generationRetries": 0,
+    "status": "checked",
+    "issues": [],
+    "repairAttempts": 0,
+    "pptxSHA": "f7d683132e98657fafced8458ecc299b18c68ecb2f12b7d24f4108b626a93d86",
+    "pages": [
+      {
+        "png": "runs/reading-7/deck.pptx.review-V7tCeU/initial/review/slide-1.png",
+        "sha256": "1740128757bdb2e0a883d5acd636487236768d462ea9861c825bc0e164858e0e",
+        "photoIDs": [
+          "260348.jpg",
+          "260089.jpg"
+        ],
+        "missingURLs": []
+      },
+      {
+        "png": "runs/reading-7/deck.pptx.review-V7tCeU/initial/review/slide-2.png",
+        "sha256": "a5fc7cd38df0304d2be537f00e234397b2b90ef5e38f68e56ab711756eac82b2",
+        "photoIDs": [
+          "260349.jpg",
+          "260090.jpg"
+        ],
+        "missingURLs": []
+      },
+      {
+        "png": "runs/reading-7/deck.pptx.review-V7tCeU/initial/review/slide-3.png",
+        "sha256": "17f19a556f5ceedc5d6820a75f3622534d65f198ac4590b34d6f602962c9c318",
+        "photoIDs": [
+          "260350.jpg"
+        ],
+        "missingURLs": []
+      }
+    ]
+  },
+  "reading-8": {
+    "seconds": 59.636,
+    "manualPageEdits": 0,
+    "generationRetries": 1,
+    "status": "checked",
+    "issues": [],
+    "repairAttempts": 0,
+    "pptxSHA": "1d7c0db81ee85762ece1dd4bb61a01dddd43de3e600146017c065e359a7713d4",
+    "pages": [
+      {
+        "png": "runs/reading-8/deck.pptx.review-M7SOdP/initial/review/slide-1.png",
+        "sha256": "50ee2b17aa31be6fb58a920973e6059363045a0000abba2dea0ec2f35192d78a",
+        "photoIDs": [
+          "260348.jpg",
+          "260089.jpg"
+        ],
+        "missingURLs": []
+      },
+      {
+        "png": "runs/reading-8/deck.pptx.review-M7SOdP/initial/review/slide-2.png",
+        "sha256": "2f155f0ed9405436ae95782aa96a371a18a7eb20533ebdeb985dd58fab916c50",
+        "photoIDs": [
+          "260349.jpg",
+          "260090.jpg"
+        ],
+        "missingURLs": []
+      },
+      {
+        "png": "runs/reading-8/deck.pptx.review-M7SOdP/initial/review/slide-3.png",
+        "sha256": "1799176807c3ff1dc1e5a071e7e39575f5f376a24cacc60a42efe253c5703c3b",
+        "photoIDs": [
+          "260350.jpg"
+        ],
+        "missingURLs": []
+      }
+    ]
+  },
+  "river-1": {
+    "seconds": 31.435,
+    "manualPageEdits": 0,
+    "generationRetries": 0,
+    "failure": "locator.selectOption: Timeout 25000ms exceeded."
+  },
+  "river-2": {
+    "seconds": 19.38,
+    "manualPageEdits": 0,
+    "generationRetries": 0,
+    "status": "checked",
+    "issues": [],
+    "repairAttempts": 0,
+    "pptxSHA": "3f2db4b4d25fbec5ccc846e801273a51dc4a64b65e988b05c3240927ab3d452c",
+    "pages": [
+      {
+        "png": "runs/river-2/deck.pptx.review-B9yTpN/slide-1.png",
+        "sha256": "4fbc53f16eb0fee01ac6adf3f217359e5390f454d1f9902b47b75d1e99f824a7",
+        "photoIDs": [
+          "260971.jpg"
+        ],
+        "missingURLs": [
+          260971
+        ]
+      }
+    ]
+  },
+  "river-3": {
+    "seconds": 21.523,
+    "manualPageEdits": 0,
+    "generationRetries": 0,
+    "status": "checked",
+    "issues": [],
+    "repairAttempts": 0,
+    "pptxSHA": "bc304c095bcf1d8e559eb541def242fa8f954f68f1111e533d2dc52f3be6d4ab",
+    "pages": [
+      {
+        "png": "runs/river-3/deck.pptx.review-pGUKo3/initial/review/slide-1.png",
+        "sha256": "76f07eb68abda50f2b70d60567347b1ab54633c8d4c1a86b061686a69f4c45d9",
+        "photoIDs": [
+          "260971.jpg"
+        ],
+        "missingURLs": []
+      }
+    ]
+  }
+}

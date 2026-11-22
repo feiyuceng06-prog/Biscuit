@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "deckId": "4afdd4d4-3d46-447e-9b11-2f6ffbdb6267",
+  "status": "preview_unavailable",
+  "pptxSha256": "29403b5fb5e159b104a06de7de1927fd4d536c5815da3c87f69006d9e75c0102",
+  "pages": [],
+  "issues": [],
+  "critic": {
+    "status": "unavailable"
+  },
+  "error": "Review worker unavailable"
+}

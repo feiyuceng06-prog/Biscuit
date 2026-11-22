@@ -1,19 +1,20 @@
 import pptxgen from 'pptxgenjs';
-import { readDeck, composition } from './deck.mjs';
+import { photoCredits } from './photos.mjs';
+import { readDeck, exportPages } from './deck.mjs';
 
 // PptxGenJS interprets numeric values of 100 or more as EMUs.
 const imageCoord = (inches) => inches >= 100 ? Math.round(inches * 914400) : inches;
 const pictureName = (value) => value.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '');
 
-export async function powerPoint(raw) {
+export async function powerPoint(raw, pages) {
   const deck = readDeck(raw);
   const ppt = new pptxgen();
   ppt.layout = 'LAYOUT_WIDE';
   ppt.author = 'Biscuit';
   ppt.title = deck.title;
-  for (const [index, slide] of deck.slides.entries()) {
+  for (const [index, objects] of (pages ?? exportPages(deck)).entries()) {
     const page = ppt.addSlide();
-    for (const o of composition(slide, index + 1, deck.slides.length, deck.theme, deck.design)) {
+    for (const o of objects) {
       const box = { x: o.x / 72, y: o.y / 72, w: o.w / 72, h: o.h / 72 };
       if (o.type === 'rect')
         page.addShape(ppt.ShapeType.rect, {
@@ -47,7 +48,7 @@ export async function powerPoint(raw) {
             : 0,
           valign: 'top',
           breakLine: false,
-          fit: 'shrink',
+          fit: o.fit ?? 'shrink',
           paraSpaceAfter: 0,
         });
       if (o.type === 'chart')
@@ -112,7 +113,10 @@ export async function powerPoint(raw) {
         page.addImage(options);
       }
     }
-    if (slide.notes) page.addNotes(slide.notes);
+    const slide = deck.slides[index];
+    const credits = photoCredits(deck.source, slide.photos).filter(line => !slide.notes.includes(line));
+    const notes = [slide.notes, ...credits].filter(Boolean).join('\n');
+    if (notes) page.addNotes(notes);
   }
   return ppt.write({ outputType: 'nodebuffer' });
 }

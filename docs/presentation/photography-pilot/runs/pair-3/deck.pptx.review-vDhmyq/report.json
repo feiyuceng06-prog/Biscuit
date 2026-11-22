@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "deckId": "4c8b00d7-5c6c-4555-866f-f4a4fb4301e2",
+  "pptxSha256": "ff1825d7b49f890f2f8e9b562a5c34d8636891bb30a6c9f246860b8c2f03dafe",
+  "status": "checked",
+  "critic": {
+    "status": "not_requested"
+  },
+  "pages": [
+    {
+      "slideId": "11a528e1-5408-4a1d-811d-65f94b3a5dcf",
+      "png": "initial/review/slide-1.png",
+      "sha256": "41ef7f98922803588b25ff3fc8ef8164c9fd95836f6fb2727427392e4b2c5a82"
+    }
+  ],
+  "issues": [],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "33e246308706d5f073d721dd95f1d9e01f34eb9cf9e2197869691dbeef284575",
+  "contactSheet": "initial/review/contact.png",
+  "fonts": [
+    "BAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     37  0",
+    "CAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     32  0",
+    "DAAAAA+LiberationSerif-Italic        TrueType          WinAnsi          yes yes yes     22  0",
+    "EAAAAA+NotoSerifCJKkr-Regular        Type 1            Builtin          yes yes yes     27  0"
+  ],
+  "durationMs": 1823,
+  "destination": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/pair-3/deck.pptx",
+  "requestedDestination": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/pair-3/deck.pptx",
+  "reviewStatus": "checked",
+  "report": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/pair-3/deck.pptx.review-vDhmyq/report.json",
+  "initialPptx": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/pair-3/deck.pptx.review-vDhmyq/initial/deck.pptx",
+  "initialReport": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/pair-3/deck.pptx.review-vDhmyq/initial/review/report.json",
+  "finalPptx": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/pair-3/deck.pptx.review-vDhmyq/final.pptx",
+  "finalReport": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/pair-3/deck.pptx.review-vDhmyq/initial/review/report.json",
+  "repairAttempts": 0,
+  "failureReason": null,
+  "rounds": [
+    {
+      "stage": "initial",
+      "changes": [],
+      "durationMs": 1813,
+      "pptx": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/pair-3/deck.pptx.review-vDhmyq/initial/deck.pptx",
+      "report": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/pair-3/deck.pptx.review-vDhmyq/initial/review/report.json",
+      "reviewStatus": "checked",
+      "accepted": true,
+      "reason": null
+    }
+  ],
+  "skipped": [],
+  "unresolvedIssues": []
+}

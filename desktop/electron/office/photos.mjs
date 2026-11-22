@@ -3,9 +3,9 @@ export const maxPictureData = 3_000_000;
 export const maxDeckPictureData = 12_000_000;
 export const maxPhotoCaption = 160;
 
-export function pictureDataSize(slides) {
+export function pictureDataSize(slides, pending = []) {
   return slides.reduce((size, slide) => size + slide.image.length
-    + (slide.photos ?? []).reduce((sum, photo) => sum + photo.data.length, 0), 0);
+    + (slide.photos ?? []).reduce((sum, photo) => sum + photo.data.length, 0), pending.reduce((sum, photo) => sum + photo.data.length, 0));
 }
 
 export function pictureRatio(data, checkType = false) {
@@ -66,6 +66,7 @@ export const hasPhotos = deck => deck.slides.some(slide => slide.photos?.length)
 const photoRoles = {
   cover: /封面|\b(?:cover|title slide)\b/i,
   image: /作品页|图像页|\b(?:gallery|image|work|portfolio) (?:slide|page)s?\b/i,
+  comparison: /对比页|比较页|\bcomparison (?:slide|page)s?\b/i,
   conclusion: /说明页|\b(?:essay|explanation|notes?) (?:slide|page)s?\b/i,
 };
 export const photographyIntent = value =>
@@ -177,4 +178,58 @@ export function galleryFrames(photos, { x, y, w, h }, strip = false) {
     return { x: x + (columns - inRow) * (width + gap) / 2 + (i % columns) * (width + gap),
       y: top, w: width, h: height, captionY: top + height + captionGap, captionHeight };
   });
+}
+
+// Reserve explicit page counts before distributing the remaining pictures in import order.
+export function distributePhotos(slides, photos, brief) {
+  if (!photos.length) return slides;
+  const requested = photoCounts(brief);
+  const counts = slides.map(s => ['cover', 'image', 'conclusion', 'comparison'].includes(s.layout)
+    ? requested[s.layout] : 0);
+  for (const role of Object.keys(requested)) {
+    if (requested[role] && !slides.some(s => s.layout === role))
+      throw Error('大纲缺少指定的摄影页面，请重新生成大纲或调整制作要求');
+  }
+  const remaining = photos.length - counts.reduce((sum, n) => sum + (n ?? 0), 0);
+  const free = counts.flatMap((count, i) => count === undefined ? [i] : []);
+  if (remaining < 0 || (remaining && !free.length))
+    throw Error('照片总数与各页要求不一致，请调整照片或制作要求');
+  for (const i of free) counts[i] = 0;
+  // Give each open page a picture before filling a second row.
+  for (let n = 0; n < remaining; n++) counts[free[n % free.length]]++;
+  if (counts.some(n => n > maxPhotos)) throw Error('单页照片超过 12 张，请增加页数或调整制作要求');
+  let offset = 0;
+  return slides.map((slide, i) => {
+    const page = photos.slice(offset, offset + counts[i]);
+    offset += page.length;
+    return page.length ? { ...slide, photos: page } : slide;
+  });
+}
+
+// Optional structured source lines: filename (or its stem) | original catalogue entry.
+export function photoCredits(source, photos = []) {
+  const names = new Set(photos.flatMap(({ name }) => name ? [name, name.replace(/\.[^.]+$/, '')] : []));
+  return source.split(/\r?\n/).filter(line => {
+    const bar = line.indexOf('|');
+    return bar > 0 && names.has(line.slice(0, bar).trim()) && line.slice(bar + 1).trim();
+  });
+}
+
+// A catalogue comparison can be written from the original records without guessing what the photos show.
+export function catalogueComparison(deck, slide) {
+  if (!deck.photoInput || slide.layout !== 'comparison' || slide.photos?.length !== 2
+    || !/横幅|竖幅|横竖|画幅|landscape|portrait orientation|aspect ratios?/i.test(deck.brief + deck.source)) return;
+  const records = slide.photos.map(photo => {
+    const lines = photoCredits(deck.source, [photo]);
+    if (lines.length !== 1) return;
+    const fields = lines[0].split('|').map(field => field.trim());
+    if (fields.length !== 5 || !fields[1] || !fields[2] || fields[2].length > 220
+      || !fields[3] || !/^https?:\/\/\S+$/.test(fields[4])) return;
+    const ratio = pictureRatio(photo.data);
+    if (!ratio) return;
+    const chinese = /[\u3400-\u9fff]/u.test(deck.brief + deck.photoInput.title);
+    const labels = chinese ? ['横幅', '竖幅', '方幅'] : ['Landscape', 'Portrait', 'Square'];
+    return { label: labels[ratio === 1 ? 2 : ratio > 1 ? 0 : 1], text: fields[2], value: 0 };
+  });
+  if (records.every(Boolean)) return { items: records, notes: '' };
 }

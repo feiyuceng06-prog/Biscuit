@@ -16,8 +16,9 @@ import { draft } from './drafts.mjs';
 import { libraryExample } from './library-example.mjs';
 import readingRoom from './reading-room.jpg';
 import { planDesign } from '../../electron/office/director.mjs';
-import { hasPhotos, maxDeckPictureData, maxPhotos, photographyIntent, pictureDataSize } from '../../electron/office/photos.mjs';
+import { catalogueComparison, hasPhotos, maxDeckPictureData, maxPhotos, photoCredits, photographyIntent, pictureDataSize } from '../../electron/office/photos.mjs';
 import { DesignBrief } from './DesignBrief.jsx';
+import { loadPhoto } from './Inspector.jsx';
 import { Studio } from './Studio.jsx';
 
 import './office.css';
@@ -113,7 +114,7 @@ export function Office({ workspace }) {
       ),
     };
     if (
-      ('image' in patch || 'photos' in patch) && pictureDataSize(next.slides) > maxDeckPictureData
+      ('image' in patch || 'photos' in patch) && pictureDataSize(next.slides, next.pendingPhotos) > maxDeckPictureData
     ) {
       setError('文稿图片总量已达上限，请移除图片后再导入');
       return;
@@ -131,6 +132,20 @@ export function Office({ workspace }) {
     }
     setError('');
     editSlide(slideId, { photos: ordered });
+  }
+  function importPool(files) {
+    if (!files.length) return;
+    const snapshot = current.current;
+    void run('正在读取待排版照片', async (signal) => {
+      const pool = [...(snapshot.pendingPhotos ?? [])];
+      if (pool.length + files.length > maxPhotos) throw Error('一次排版最多支持 12 张照片');
+      for (const file of files) pool.push(await loadPhoto(file));
+      signal.throwIfAborted();
+      if (current.current !== snapshot) throw Error('材料已改变，请重新导入照片');
+      if (pictureDataSize(snapshot.slides, pool) > maxDeckPictureData)
+        throw Error('文稿图片总量已达上限');
+      commit({ ...snapshot, pendingPhotos: pool, photoInput: snapshot.photoInput ?? { title: '', copy: '' } });
+    });
   }
   function enter(next) {
     setStage(next);
@@ -161,7 +176,7 @@ export function Office({ workspace }) {
       history.current = [];
       commit(next, false);
       select(next.slides[0].id);
-      enter('edit');
+      enter(next.pendingPhotos?.length ? 'source' : 'edit');
     } catch (e) {
       setError(e.message);
     }
@@ -187,7 +202,13 @@ export function Office({ workspace }) {
         deck: current.current,
       });
       if (typeof destination === 'string') setMessage('已保存到 ' + destination);
-      else if (destination) {
+      else if (destination?.initialReport) {
+        const { status, repairAttempts, report } = destination;
+        const label = status === 'draft' ? '导出仅保留为草稿' : status === 'export_failed' ? '导出失败'
+          : status === 'checked' ? '基础检查通过' : '需复核';
+        setMessage(label + (destination.destination ? ' · ' + destination.destination : '') +
+          ' · 修复尝试 ' + repairAttempts + ' 次 · 报告 ' + report);
+      } else if (destination) {
         const label = { checked: '基础检查通过', needs_review: '需复核', blocked: '发现阻断问题',
           preview_unavailable: '无法完成预览检查' }[destination.status];
         setMessage('已保存到 ' + destination.destination + ' · ' + label +
@@ -227,7 +248,10 @@ export function Office({ workspace }) {
     void run('正在生成大纲', async (signal) => {
       const result = await requestPage(
         { action: 'outline', source: original.source, brief: original.brief, count,
-          direction: original.design?.direction },
+          photoBrief: original.photoInput && JSON.stringify({ title: original.photoInput.title,
+            finalCopy: original.photoInput.copy, files: (original.pendingPhotos ?? []).map(p => mediaText(p.name, 80)) }),
+          direction: original.design?.preferences?.direction && original.design.preferences.direction !== 'auto'
+            ? original.design.direction : original.photoInput ? 'photography' : original.design?.direction },
         signal,
       );
       signal.throwIfAborted();
@@ -258,12 +282,14 @@ export function Office({ workspace }) {
         const media = active.photos?.length || requestedPhotos !== undefined
           ? JSON.stringify({
               requestedPhotos,
+              sourceRows: photoCredits(now.source, active.photos).join('\n').slice(0, 1300),
               photos: (active.photos ?? []).map(({ name, caption }) => ({
                 name: mediaText(name, 40), caption: mediaText(caption, 60),
               })),
             })
           : undefined;
-        const response = await requestPage(
+        const catalogue = all && catalogueComparison(now, active);
+        const response = catalogue || await requestPage(
           {
             action: 'slide',
             source: now.source,
@@ -382,7 +408,7 @@ export function Office({ workspace }) {
                 <section className="office-recent" aria-label="本工作区草稿">
                   <h2>本工作区草稿</h2>
                   {deck ? (
-                    <button onClick={() => enter('edit')}>
+                    <button onClick={() => enter(deck.pendingPhotos?.length ? 'source' : 'edit')}>
                       <FileText size={18} /><strong>{deck.title}</strong><small>{deck.slides.length} 页</small><ArrowRight size={16} />
                     </button>
                   ) : <p>{ready ? '暂无草稿。新建后可在这里继续编辑。' : '正在读取草稿…'}</p>}
@@ -448,16 +474,31 @@ export function Office({ workspace }) {
                     </select>
                   </label>
                 </div>
+                <details className="office-photo-intake">
+                  <summary>摄影素材与指定原文</summary>
+                  <label>待排版照片
+                    <input type="file" multiple accept="image/png,image/jpeg" onChange={e => {
+                      importPool(Array.from(e.target.files)); e.target.value = '';
+                    }} />
+                  </label>
+                  {!!deck.pendingPhotos?.length && <p>待排版 {deck.pendingPhotos.length} 张
+                    <button type="button" onClick={() => commit({ ...deck, pendingPhotos: [] })}>清空待排版照片</button></p>}
+                  <small>要保留逐图出处，请在参考材料中每行填写「文件名 | 出处」。</small>
+                  <label>首页标题（原样保留）<input maxLength={120} value={deck.photoInput?.title ?? ''}
+                    onChange={e => commit({ ...deck, photoInput: { copy: '', ...deck.photoInput, title: e.target.value } })} /></label>
+                  <label>末页正文（原样保留）<textarea maxLength={220} value={deck.photoInput?.copy ?? ''}
+                    onChange={e => commit({ ...deck, photoInput: { title: '', ...deck.photoInput, copy: e.target.value } })} /></label>
+                </details>
                 <DesignBrief key={deck.id} deck={deck} commit={commit} onError={setError} disabled={!!busy} />
                 <div className="office-actions office-submit">
                   <button
                     className="office-primary"
-                    disabled={!deck.brief.trim() && !deck.source.trim()}
+                    disabled={!deck.brief.trim() && !deck.source.trim() && !deck.photoInput?.title.trim()}
                     onClick={outline}
                   >
                     生成大纲
                   </button>
-                  <button onClick={() => enter('edit')}>手动编辑</button>
+                  <button disabled={!!deck.pendingPhotos?.length} title={deck.pendingPhotos?.length ? '先生成大纲以分配待排版照片' : undefined} onClick={() => enter('edit')}>手动编辑</button>
                 </div>
               </fieldset>
             </main>

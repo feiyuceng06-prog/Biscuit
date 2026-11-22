@@ -1,6 +1,6 @@
 import { planDesign, restoreDesign, textUnits } from './director.mjs';
 import { barPlot, chartDomain, eastAsian, hasChartValue, resolveSlideLayout, textHeight } from './planner.mjs';
-import { hasPhotos, maxDeckPictureData, maxPictureData, pictureDataSize, pictureObject, pictureRatio, validPhotos } from './photos.mjs';
+import { distributePhotos, hasPhotos, maxDeckPictureData, maxPictureData, pictureDataSize, pictureObject, pictureRatio, validPhotos } from './photos.mjs';
 
 // The canvas and PowerPoint share a 960 × 540 point coordinate system.
 export const layouts = Object.freeze({
@@ -46,7 +46,14 @@ export function outlineDeck(draft, result, count) {
       throw Error('大纲格式不完整');
     return newSlide(clean(row.title, 120), row.layout);
   });
-  return { ...draft, title: clean(result.title, 120) || slides[0].title, slides };
+  const { pendingPhotos, ...next } = draft;
+  if (draft.photoInput?.title) slides[0].title = draft.photoInput.title;
+  if (draft.photoInput?.copy && !['cover', 'image', 'conclusion'].includes(slides.at(-1).layout))
+    throw Error('末页原文需要摄影展示或说明版式，请调整大纲后再试');
+  const pictures = pendingPhotos?.length ? pendingPhotos
+    : draft.photoInput ? draft.slides.flatMap(s => s.photos ?? []) : [];
+  return { ...next, title: draft.photoInput?.title || clean(result.title, 120) || slides[0].title,
+    slides: distributePhotos(slides, pictures, draft.brief) };
 }
 export function generatedBody(slide, result) {
   if (!Array.isArray(result?.items) || !result.items.length) throw Error('模型没有返回页面正文');
@@ -70,6 +77,10 @@ export function applyBody(deck, original, body) {
   const current = deck.slides.find((s) => s.id === original.id);
   if (!current || current.revision !== original.revision || current.layout !== original.layout)
     return deck;
+  if (deck.photoInput?.copy && current.id === deck.slides.at(-1).id
+    && ['cover', 'image', 'conclusion'].includes(current.layout)) {
+    body = { ...body, items: [{ ...body.items[0], label: '', text: deck.photoInput.copy }] };
+  }
   // The generation contract requires an explicit finite number for every chart
   // row, including a zero whose category label was left empty.
   const replacement = deck.design?.version === 2 && current.layout === 'chart'
@@ -143,7 +154,10 @@ export function readDeck(raw) {
       id(row.id);
     }
   }
-  if (pictureDataSize(raw.slides) > maxDeckPictureData) fail();
+  if (raw.photoInput !== undefined && (!raw.photoInput || !string(raw.photoInput.title, 120)
+    || !string(raw.photoInput.copy, 220))) fail();
+  if (raw.pendingPhotos !== undefined && !validPhotos(raw.pendingPhotos)) fail();
+  if (pictureDataSize(raw.slides, raw.pendingPhotos) > maxDeckPictureData) fail();
   if (raw.design !== undefined) return { ...raw, design: restoreDesign(raw, raw.design) };
   if (hasPhotos(raw)) return { ...raw, design: planDesign(raw, {}, { visualPlanner: true }) };
   return raw;
@@ -181,6 +195,10 @@ export const themes = {
     mutedBar: '778B80',
   },
 };
+
+export function exportPages(deck) {
+  return deck.slides.map((slide, i) => composition(slide, i + 1, deck.slides.length, deck.theme, deck.design));
+}
 
 export function composition(slide, page, total, theme = 'paper', design) {
   if (design?.version === 2) {
@@ -648,7 +666,8 @@ function plannedComposition(slide, page, total, tokens, plan) {
     const cjk = eastAsian.test(value);
     size = plannedSize(value, size, region, cjk);
     objects.push({ type: 'text', x, y, w, h, value, field, size, color, bold, align, ...(italic && { italic }),
-      ...(cjk && { wrapPadding: size }), lineHeight: type.lineHeight, ...fontFor(font, value) });
+      ...(cjk && { wrapPadding: size }), ...(field?.startsWith('caption-') && { fit: 'none' }),
+      lineHeight: type.lineHeight, ...fontFor(font, value) });
   }
 
   for (const { type: kind, color, ...region } of marks) {

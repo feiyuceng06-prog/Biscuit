@@ -1,0 +1,30 @@
+{
+  "name": "pair",
+  "model": "deepseek-flash",
+  "reopen": false,
+  "started": "2026-11-22T11:17:51.604Z",
+  "events": [
+    {
+      "action": "outline",
+      "ms": 4431,
+      "attempt": 1
+    },
+    {
+      "action": "body",
+      "ms": 9801,
+      "attempt": 1
+    },
+    {
+      "action": "保存源文件",
+      "ms": 24058,
+      "status": "已保存到 /home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/pair-2/source.deck.json"
+    },
+    {
+      "action": "导出 PPTX",
+      "ms": 26471,
+      "status": "已保存到 /home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/pair-2/deck.pptx · 基础检查通过 · 模型视觉审查未完成 · 报告 /home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/pair-2/deck.pptx.review-EpOpHT/report.json"
+    }
+  ],
+  "manualPageEdits": 0,
+  "totalMs": 26471
+}

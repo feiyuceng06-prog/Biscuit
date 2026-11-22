@@ -221,6 +221,10 @@ def inspect_page(slide, words, native, archive, relationships, image):
                 )
             # An unwrapped word may start inside the frame with its centre well outside it.
             rendered = matching_words(local, stored, bounds) or matching_words(words, stored, bounds)
+            if not rendered:
+                # Poppler may emit aligned CJK words column-first within one text box.
+                rows = sorted(local, key=lambda word: (round(word[1][1], 1), word[1][0]))
+                rendered = matching_words(rows, stored, bounds)
             content = "".join(v for v, _ in (rendered or local))
             bad_glyph = "\ufffd" in content
             if stored and not rendered and not bad_glyph:
