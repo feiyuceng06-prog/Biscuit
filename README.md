@@ -31,8 +31,8 @@ To update, run the same installation command again.
 
 Visit the [download page](https://github.com/feiyuceng06-prog/Biscuit/releases/latest) and choose a format:
 
-- **deb**: for distributions using apt. In the download directory, run `sudo apt install ./feiyu-desktop_0.94.0_amd64.deb`.
-- **AppImage**: run `chmod +x Biscuit-0.94.0.AppImage`, then double-click the file. If FUSE is missing, use the one-command installer above.
+- **deb**: for distributions using apt. In the download directory, run `sudo apt install ./feiyu-desktop_0.94.1_amd64.deb`.
+- **AppImage**: run `chmod +x Biscuit-0.94.1.AppImage`, then double-click the file. If FUSE is missing, use the one-command installer above.
 
 Packages are unsigned. See the download page for tested systems and known limitations.
 
@@ -65,7 +65,7 @@ If venv is missing on Debian/Ubuntu, run `sudo apt install python3-venv` first. 
 
 ## Windows
 
-On the [download page](https://github.com/feiyuceng06-prog/Biscuit/releases/latest), download **Biscuit Setup 0.94.0.exe** and run it. Git Bash is included. Existing Feiyu settings and conversations are retained.
+On the [download page](https://github.com/feiyuceng06-prog/Biscuit/releases/latest), download **Biscuit Setup 0.94.1.exe** and run it. Git Bash is included. Existing Feiyu settings and conversations are retained.
 
 The installer is unsigned, so Windows may show a security warning. Check the source and published SHA256 before installing. See the release notes for Windows limitations.
 
