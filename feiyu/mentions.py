@@ -23,6 +23,7 @@ import os
 from pathlib import Path
 
 from . import files, images
+from .presentation_content import PresentationError
 from .tools import read_document
 
 # 一个文件最多贴多少行 比 read_file 的 READ_CAP 小得多：`@` 是随手打的，
@@ -218,15 +219,17 @@ def _one(shown: str, target: Path, budget: int, watcher) -> tuple[str, str]:
         # `_read_image` 里，重写一遍迟早会跟它漂开 路径已经确认了，让它自己去读
         return "（这是图片，路径没问题 要看内容就用 read_file 读它 ）", "图片"
     try:
-        extracted = read_document(target)
+        extracted = read_document(target, watcher=watcher)
         if extracted is not None:
             text = extracted.strip()[:budget]
             kind = target.suffix.lower().lstrip(".")
-            if watcher is not None:
+            if watcher is not None and kind != "pptx":
                 watcher.record(target)
             return ("（从 %s 里抽出的文本，排版和图片没有保留）\n\n%s" % (
                 kind, text or "（没抽到文字）"), kind)
         raw = target.read_bytes()
+    except PresentationError as exc:
+        return f"（{exc}）", "读不了"
     except OSError as exc:
         return "（读不了：%s: %s）" % (type(exc).__name__, exc), "读不了"
     if b"\0" in raw[:8192]:

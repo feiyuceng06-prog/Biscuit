@@ -96,6 +96,10 @@ class Watcher:
     def seen(self, path: Path) -> bool:
         return path in self._seen
 
+    def record_fingerprint(self, path: Path, stamp: tuple[int, int], digest: str) -> None:
+        """Record the version already read and hashed by a document worker."""
+        self._seen[path] = (*stamp, digest)
+
     def stale(self, path: Path) -> bool:
         """看过、而且现在的内容跟看过的那份不一样 """
         known = self._seen.get(path)

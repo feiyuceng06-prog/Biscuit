@@ -125,6 +125,10 @@ def main() -> int:
         help="跑完再开一个只看产出的模型给改动打分 ",
     )
     parser.add_argument(
+        "--presentation-content", metavar="PATH", type=Path,
+        help="检查 PPTX 并提取内容，输出一个 JSON 对象",
+    )
+    parser.add_argument(
         "--serve",
         action="store_true",
         help="挂在 stdio 上说 JSON，给桌面端用 别手动跑，跑 feiyu-desktop ",
@@ -140,6 +144,19 @@ def main() -> int:
         help="直接跑一个任务，跑完就退出 ",
     )
     args = parser.parse_args()
+    if args.presentation_content is not None:
+        from .presentation_content import PresentationError, inspect_content
+        try:
+            content = inspect_content(args.presentation_content)
+        except PresentationError as exc:
+            configure_serve_stdio()
+            print(str(exc), file=sys.stderr)
+            return 1
+        result = {"text": content.text}
+        if content.truncated:
+            result["truncated"] = True
+        print(json.dumps(result, ensure_ascii=True))
+        return 0
     if args.serve:
         configure_serve_stdio()  # Also covers argparse flag abbreviations.
 
