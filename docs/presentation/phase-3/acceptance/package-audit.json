@@ -1,0 +1,301 @@
+{
+  "architecture": {
+    "pptx": "111624b961d6790cb98bc7c57af5e6caf037fa31b39e8fbd66d2f01eda798a73",
+    "pdf": "e48f88c4f6327fe68b49de9e8053cda31b2b9c0ed36e6c9b01ec38df45bc1475",
+    "manifest": "9caf260fa25d0b301294d40ae490658e195ecc6e8be7ae05dc5c0592b8435965",
+    "initialError": "JSONDecodeError",
+    "model": "deepseek-flash",
+    "pages": [
+      {
+        "slide": "architecture-1",
+        "sha256": "9909e7180af0a66b4a8b85dc3977a51ab731ea99c4a26c1e89da6bc7fef6dcb6",
+        "review": "initial"
+      },
+      {
+        "slide": "architecture-2",
+        "sha256": "8fd3a755126bf99dca2b93a70ac99cb6f8be08fed55eb09b593d8a3a79977d32",
+        "review": "retry"
+      },
+      {
+        "slide": "architecture-3",
+        "sha256": "c45dab7bf3473b82b3f6e0833d45118fd8a6a98180254c09ae8c0f6139da2a7c",
+        "review": "retry"
+      },
+      {
+        "slide": "architecture-4",
+        "sha256": "a4ab08dba66576189cece04d860e05d49b82c050dcf634348a8322f02900deb4",
+        "review": "retry"
+      }
+    ]
+  },
+  "labels": {
+    "original": {
+      "pptx": "8929f129a297ee1af2647e21209cf99fb0d4e647596f17986975136795e48126",
+      "png": "32f8b35741d1f3d3e902e5538d56abb2d9b6872baa700008ac4ea9b0f0eb8c80",
+      "rows": [
+        {
+          "row": 2,
+          "category": "Main reading room and weekend information desk for visitors",
+          "cache": -13.0,
+          "worksheet": "-13",
+          "independentLabelBoundsY": [
+            234.19,
+            264.45
+          ],
+          "renderedValueCenterY": 248.59
+        },
+        {
+          "row": 3,
+          "category": "Self-service book returns and reserved volume collection",
+          "cache": 0.0,
+          "worksheet": "",
+          "independentLabelBoundsY": [
+            325.06,
+            355.32
+          ],
+          "renderedValueCenterY": 339.46
+        },
+        {
+          "row": 4,
+          "category": "Interlibrary volume transfers and accessibility assistance",
+          "cache": 6.125,
+          "worksheet": "6.125",
+          "independentLabelBoundsY": [
+            415.93,
+            446.19
+          ],
+          "renderedValueCenterY": 430.3
+        }
+      ]
+    },
+    "fixed": {
+      "pptx": "68b07f9e34c2f2ee0e192c5a151a429214c41f828a8901e0cb42647517c23253",
+      "png": "32f8b35741d1f3d3e902e5538d56abb2d9b6872baa700008ac4ea9b0f0eb8c80",
+      "rows": [
+        {
+          "row": 2,
+          "category": "Main reading room and weekend information desk for visitors",
+          "cache": -13.0,
+          "worksheet": "-13",
+          "independentLabelBoundsY": [
+            234.19,
+            264.45
+          ],
+          "renderedValueCenterY": 248.59
+        },
+        {
+          "row": 3,
+          "category": "Self-service book returns and reserved volume collection",
+          "cache": 0.0,
+          "worksheet": "0",
+          "independentLabelBoundsY": [
+            325.06,
+            355.32
+          ],
+          "renderedValueCenterY": 339.46
+        },
+        {
+          "row": 4,
+          "category": "Interlibrary volume transfers and accessibility assistance",
+          "cache": 6.125,
+          "worksheet": "6.125",
+          "independentLabelBoundsY": [
+            415.93,
+            446.19
+          ],
+          "renderedValueCenterY": 430.3
+        }
+      ]
+    }
+  },
+  "samples": {
+    "portrait": {
+      "pptx": "0db4036a7dba87b85d442f84e24e0a0e7506a88a8d527aac186265f45d08ee17",
+      "pdf": "efca24904783567ffe303b576de071574a0ba21a68dc1675450b339e1ef344d3",
+      "slides": [
+        {
+          "page": 1,
+          "variant": "photo-cover",
+          "imageObjects": [
+            {
+              "objectID": 282044,
+              "xywhPt": [
+                94.0,
+                221.5,
+                86.0,
+                157.0
+              ],
+              "nativeCrop": {
+                "l": "12048",
+                "r": "12048",
+                "t": "0",
+                "b": "0"
+              }
+            },
+            {
+              "objectID": 282043,
+              "xywhPt": [
+                187.0,
+                193.0,
+                168.0,
+                214.0
+              ],
+              "nativeCrop": {
+                "l": "2755",
+                "r": "2755",
+                "t": "0",
+                "b": "0"
+              }
+            },
+            {
+              "objectID": 267426,
+              "xywhPt": [
+                362.0,
+                163.0,
+                236.0,
+                274.0
+              ],
+              "nativeCrop": {
+                "l": "0",
+                "r": "0",
+                "t": "5930",
+                "b": "5930"
+              }
+            },
+            {
+              "objectID": 269434,
+              "xywhPt": [
+                605.0,
+                193.0,
+                168.0,
+                214.0
+              ],
+              "nativeCrop": {
+                "l": "1290",
+                "r": "1290",
+                "t": "0",
+                "b": "0"
+              }
+            },
+            {
+              "objectID": 266257,
+              "xywhPt": [
+                780.0,
+                221.5,
+                86.0,
+                157.0
+              ],
+              "nativeCrop": {
+                "l": "14276",
+                "r": "14276",
+                "t": "0",
+                "b": "0"
+              }
+            }
+          ],
+          "nativeTitlePt": 60.0,
+          "renderedTitleFont": "LiberationSerif-Italic",
+          "png": "b8f27d339818ca6a0bccca3b22b82fe2988eb32f361df70a5f318b90947b3ad5"
+        }
+      ]
+    },
+    "sea": {
+      "pptx": "6ec19aa0390925803b674677f8dbb7750e402acc555ec0d5cb3c960f54f66ee9",
+      "pdf": "d4bd29423d3d5b14e0af2e8c0bc8dd116750bd800e0fb8c520d3a726eae3ac7d",
+      "slides": [
+        {
+          "page": 1,
+          "variant": "photo-cover",
+          "imageObjects": [
+            {
+              "objectID": 301885,
+              "xywhPt": [
+                187.0,
+                202.90511811023623,
+                168.0,
+                206.18976377952757
+              ],
+              "nativeCrop": {
+                "l": "19310",
+                "r": "19310",
+                "t": "0",
+                "b": "0"
+              }
+            },
+            {
+              "objectID": 283124,
+              "xywhPt": [
+                362.0,
+                174.0,
+                236.0,
+                264.0
+              ],
+              "nativeCrop": {
+                "l": "15434",
+                "r": "15434",
+                "t": "0",
+                "b": "0"
+              }
+            },
+            {
+              "objectID": 267425,
+              "xywhPt": [
+                605.0,
+                202.90511811023623,
+                168.0,
+                206.18976377952757
+              ],
+              "nativeCrop": {
+                "l": "18088",
+                "r": "18088",
+                "t": "0",
+                "b": "0"
+              }
+            }
+          ],
+          "nativeTitlePt": 58.0,
+          "renderedTitleFont": "LiberationSerif-Italic",
+          "png": "4cbda8ef4e98818fde96a1ed2dcfdfda504c095668c745720abf65ae99796eb6"
+        },
+        {
+          "page": 2,
+          "variant": "photo-work",
+          "imageObjects": [
+            {
+              "objectID": 261941,
+              "xywhPt": [
+                288.4188976377953,
+                42.0,
+                383.16220472440943,
+                311.0
+              ],
+              "nativeCrop": {}
+            }
+          ],
+          "nativeTitlePt": 38.0,
+          "renderedTitleFont": "LiberationSerif-Italic",
+          "png": "c964d9a8d4a91300ad37eb0f31119df3477c6a7cf21cfea0f3a27a575b44e8c6"
+        },
+        {
+          "page": 3,
+          "variant": "photo-essay",
+          "imageObjects": [
+            {
+              "objectID": 306320,
+              "xywhPt": [
+                60.0,
+                93.62503937007874,
+                445.0,
+                333.75
+              ],
+              "nativeCrop": {}
+            }
+          ],
+          "nativeTitlePt": 44.0,
+          "renderedTitleFont": "LiberationSerif-Italic",
+          "png": "09d4d44eac8012d63e1235648658e5f892e561106e5f7ab57950a8aac09e388e"
+        }
+      ]
+    }
+  }
+}

@@ -125,6 +125,21 @@ def inspect_page(slide, words, native, archive, relationships, image):
             layers.append((bounds, fill.get("val") if fill is not None else None))
         elif kind == "image":
             layers.append((bounds, None))
+            visible_w = visible_h = 1
+            if expected.get("photoId"):
+                source_rect = shape.find(".//{*}srcRect")
+                crop = [int(source_rect.get(axis, "0")) / 100000 if source_rect is not None else 0
+                        for axis in ("l", "t", "r", "b")]
+                visible_w, visible_h = 1 - crop[0] - crop[2], 1 - crop[1] - crop[3]
+                target = expected.get("crop", {"x": 0, "y": 0, "w": 1, "h": 1})
+                intended = [target["x"], target["y"], 1 - target["x"] - target["w"],
+                            1 - target["y"] - target["h"]]
+                if any(abs(a - b) > 0.00002 for a, b in zip(crop, intended)):
+                    add("image-crop", f"PPTX crop {crop} differs from {intended}.",
+                        "Re-export to apply the planned photo crop.")
+                if any(abs(a - expected[key]) > 0.05 for a, key in zip((x, y, w, h), ("x", "y", "w", "h"))):
+                    add("image-position", f"PPTX photo box {bounds} differs from the planned box.",
+                        "Re-export to apply the planned photo position.")
             blip = shape.find(".//{*}blip")
             rid = (
                 next((v for k, v in blip.attrib.items() if k.endswith("}embed")), None)
@@ -139,10 +154,11 @@ def inspect_page(slide, words, native, archive, relationships, image):
                     )
                 ) as asset:
                     asset.verify()
-                    if asset.width < w / 2 or asset.height < h / 2:
+                    pixel_w, pixel_h = asset.width * visible_w, asset.height * visible_h
+                    if pixel_w < w / 2 or pixel_h < h / 2:
                         add(
                             "low-resolution",
-                            f"{asset.width} × {asset.height} px in {w:g} × {h:g} pt.",
+                            f"{pixel_w:g} × {pixel_h:g} visible px in {w:g} × {h:g} pt.",
                             "Supply a larger source image.",
                             "major",
                         )

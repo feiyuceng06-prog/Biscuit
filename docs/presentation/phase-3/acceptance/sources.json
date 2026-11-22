@@ -1,0 +1,162 @@
+[
+  {
+    "objectID": 282044,
+    "objectURL": "https://www.metmuseum.org/art/collection/search/282044",
+    "artistDisplayName": "Julia Margaret Cameron",
+    "title": "Sappho",
+    "objectDate": "1865",
+    "medium": "Albumen silver print from glass negative",
+    "creditLine": "The Rubel Collection, Purchase, Jennifer and Joseph Duke and Anonymous Gifts, 1997",
+    "isPublicDomain": true,
+    "download": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/282044/main-image",
+    "dimensions": [
+      866,
+      1200
+    ],
+    "sha256": "62dc5e46c39681ee757fe6b83cd048f6bb58053d5824f7f9705a403fee1a3095"
+  },
+  {
+    "objectID": 282043,
+    "objectURL": "https://www.metmuseum.org/art/collection/search/282043",
+    "artistDisplayName": "Julia Margaret Cameron",
+    "title": "Zoe, Maid of Athens",
+    "objectDate": "1866",
+    "medium": "Albumen silver print from glass negative",
+    "creditLine": "The Rubel Collection, Purchase, Lila Acheson Wallace, Ann Tenenbaum and Thomas H. Lee, and Muriel Kallis Newman Gifts, 1997",
+    "isPublicDomain": true,
+    "download": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/282043/main-image",
+    "dimensions": [
+      997,
+      1200
+    ],
+    "sha256": "c56bcf46c2de4a041593cf1a88a27e9902d2af3d1f375ec586cf30cbb9cb6273"
+  },
+  {
+    "objectID": 267426,
+    "objectURL": "https://www.metmuseum.org/art/collection/search/267426",
+    "artistDisplayName": "Julia Margaret Cameron",
+    "title": "Julia Jackson",
+    "objectDate": "1867",
+    "medium": "Albumen silver print from glass negative",
+    "creditLine": "Purchase, Joseph Pulitzer Bequest, 1996",
+    "isPublicDomain": true,
+    "download": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/267426/main-image",
+    "dimensions": [
+      911,
+      1200
+    ],
+    "sha256": "0ab73645faf890f546cf64da7f640a21e755969b7898a28ac890a2c4aa0b6d08"
+  },
+  {
+    "objectID": 269434,
+    "objectURL": "https://www.metmuseum.org/art/collection/search/269434",
+    "artistDisplayName": "Julia Margaret Cameron",
+    "title": "Thomas Carlyle",
+    "objectDate": "1867",
+    "medium": "Carbon print",
+    "creditLine": "Alfred Stieglitz Collection, 1949",
+    "isPublicDomain": true,
+    "download": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/269434/main-image",
+    "dimensions": [
+      967,
+      1200
+    ],
+    "sha256": "adbc8b5421829decab43c8cc06d7b07fd7b1454b37117a50f434c84c85e5ab75"
+  },
+  {
+    "objectID": 266257,
+    "objectURL": "https://www.metmuseum.org/art/collection/search/266257",
+    "artistDisplayName": "Julia Margaret Cameron",
+    "title": "Circe",
+    "objectDate": "1865",
+    "medium": "Albumen silver print from glass negative",
+    "creditLine": "Bequest of James David Nelson, in memory of Samuel J. Wagstaff Jr., 1988",
+    "isPublicDomain": true,
+    "download": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/266257/main-image",
+    "dimensions": [
+      920,
+      1200
+    ],
+    "sha256": "206062624ced2e2992dbeb3ff2d1ff03d3309823e57586e7900e2cc195204130"
+  },
+  {
+    "objectID": 301885,
+    "objectURL": "https://www.metmuseum.org/art/collection/search/301885",
+    "artistDisplayName": "Gustave Le Gray",
+    "title": "Étude de nuages",
+    "objectDate": "1856–57",
+    "medium": "Albumen silver print from glass negatives",
+    "creditLine": "Bequest of Maurice B. Sendak, 2012",
+    "isPublicDomain": true,
+    "download": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/301885/main-image",
+    "dimensions": [
+      1200,
+      904
+    ],
+    "sha256": "a3c39df8cc798a4e6114d87bf5fb107b762b2a4b0b1695b8eaaa6f1242fb897e"
+  },
+  {
+    "objectID": 283124,
+    "objectURL": "https://www.metmuseum.org/art/collection/search/283124",
+    "artistDisplayName": "Gustave Le Gray",
+    "title": "Mediterranean Sea - Sète",
+    "objectDate": "1857",
+    "medium": "Albumen silver print from two glass negatives",
+    "creditLine": "Gilman Collection, Purchase, Robert Rosenkranz Gift, 2005",
+    "isPublicDomain": true,
+    "download": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/283124/main-image",
+    "dimensions": [
+      1200,
+      928
+    ],
+    "sha256": "d9cff43c492606b8d7a168262b5b60d36819e055decf261162935cb3645edc01"
+  },
+  {
+    "objectID": 267425,
+    "objectURL": "https://www.metmuseum.org/art/collection/search/267425",
+    "artistDisplayName": "Gustave Le Gray",
+    "title": "Mediterranean with Mount Agde",
+    "objectDate": "1857",
+    "medium": "Albumen silver print from two glass negatives",
+    "creditLine": "Purchase, Joseph Pulitzer Bequest, 1996",
+    "isPublicDomain": true,
+    "download": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/267425/main-image",
+    "dimensions": [
+      1200,
+      940
+    ],
+    "sha256": "778ddeacce570bbbeec0687429814f75286d2ac8c1007c5288d94ed0dd8ddb7c"
+  },
+  {
+    "objectID": 261941,
+    "objectURL": "https://www.metmuseum.org/art/collection/search/261941",
+    "artistDisplayName": "Gustave Le Gray",
+    "title": "[The Great Wave, Sète]",
+    "objectDate": "1857",
+    "medium": "Albumen silver print from glass negative",
+    "creditLine": "Gift of John Goldsmith Phillips, 1976",
+    "isPublicDomain": true,
+    "download": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/261941/main-image",
+    "dimensions": [
+      1200,
+      974
+    ],
+    "sha256": "9803c729238ff15f165c9ffffe0a7152edaaf3d821fd9db6083368ee6b3613bd"
+  },
+  {
+    "objectID": 306320,
+    "objectURL": "https://www.metmuseum.org/art/collection/search/306320",
+    "artistDisplayName": "Gustave Le Gray",
+    "title": "The French and English Fleets, Cherbourg",
+    "objectDate": "August 1858",
+    "medium": "Albumen silver print from glass negative",
+    "creditLine": "Bequest of Maurice B. Sendak, 2012",
+    "isPublicDomain": true,
+    "download": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/306320/main-image",
+    "dimensions": [
+      1200,
+      900
+    ],
+    "sha256": "24494ab1ffee91c3211230949a31b4c79bbcb1a77da38cef0173760ca14b79cc"
+  }
+]

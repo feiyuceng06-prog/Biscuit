@@ -232,6 +232,28 @@
   color: var(--muted);
   font-size: 12px;
 }
+.office-photos legend span {
+  margin-inline-start: 6px;
+  font-variant-numeric: tabular-nums;
+}
+.office-photo {
+  border-top: 1px solid var(--line);
+  padding: 8px 0;
+}
+.office-photo summary {
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.office-photo summary img {
+  width: 44px;
+  height: 34px;
+  margin-inline: 5px 8px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+.office-photo[open] summary {
+  margin-bottom: 12px;
+}
 .office-inspector hr {
   border: 0;
   border-top: 1px solid var(--line);

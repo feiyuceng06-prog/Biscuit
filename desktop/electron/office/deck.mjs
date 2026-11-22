@@ -1,5 +1,6 @@
-import { restoreDesign, textUnits } from './director.mjs';
+import { planDesign, restoreDesign, textUnits } from './director.mjs';
 import { barPlot, chartDomain, eastAsian, hasChartValue, resolveSlideLayout, textHeight } from './planner.mjs';
+import { hasPhotos, maxDeckPictureData, maxPictureData, pictureDataSize, pictureObject, pictureRatio, validPhotos } from './photos.mjs';
 
 // The canvas and PowerPoint share a 960 × 540 point coordinate system.
 export const layouts = Object.freeze({
@@ -115,7 +116,6 @@ export function readDeck(raw) {
   )
     fail();
   id(raw.id);
-  let imageBytes = 0;
   for (const s of raw.slides) {
     if (
       !s ||
@@ -130,12 +130,12 @@ export function readDeck(raw) {
       !Array.isArray(s.items) ||
       s.items.length < 1 ||
       s.items.length > 4 ||
-      !string(s.image, 3_000_000) ||
-      (s.image && !/^data:image\/(png|jpeg);base64,[A-Za-z0-9+/]+=*$/.test(s.image))
+      !string(s.image, maxPictureData) ||
+      (s.image && !/^data:image\/(png|jpeg);base64,[A-Za-z0-9+/]+=*$/.test(s.image)) ||
+      (s.photos !== undefined && !validPhotos(s.photos))
     )
       fail();
     id(s.id);
-    imageBytes += s.image.length;
     for (const row of s.items) {
       if (!row || !string(row.label, 60) || !string(row.text, 220) || !Number.isFinite(row.value)
         || ![undefined, 'text', 'chart-data'].includes(row.valueKind))
@@ -143,8 +143,10 @@ export function readDeck(raw) {
       id(row.id);
     }
   }
-  if (imageBytes > 12_000_000) fail();
-  return raw.design === undefined ? raw : { ...raw, design: restoreDesign(raw, raw.design) };
+  if (pictureDataSize(raw.slides) > maxDeckPictureData) fail();
+  if (raw.design !== undefined) return { ...raw, design: restoreDesign(raw, raw.design) };
+  if (hasPhotos(raw)) return { ...raw, design: planDesign(raw, {}, { visualPlanner: true }) };
+  return raw;
 }
 
 export const themes = {
@@ -184,6 +186,11 @@ export function composition(slide, page, total, theme = 'paper', design) {
   if (design?.version === 2) {
     const plan = design.slidePlans?.find((p) => p.slideId === slide.id && p.sourceLayout === slide.layout);
     if (plan) return plannedComposition(slide, page, total, design.tokens, plan);
+  }
+  // Layout selector previews can ask for a different layout before it is committed.
+  if (slide.photos?.length || design?.direction === 'photography') {
+    const preview = planDesign({ title: '', brief: '', slides: [slide] }, design?.preferences, { visualPlanner: true });
+    return plannedComposition(slide, page, total, preview.tokens, preview.slidePlans[0]);
   }
   if (design) return designedComposition(slide, page, total, design);
 
@@ -380,31 +387,6 @@ function fontFor(font, value) {
   const faces = eastAsian.test(value) ? [font.cjk, font.latin] : [font.latin, font.cjk];
   const family = [...faces, ...font.fallback].map((face) => face.includes(' ') ? '"' + face + '"' : face);
   return { fontFace: faces[0], fontFamily: family.join(', ') };
-}
-
-// Studio uploads are normalized to 1077 × 810. Imported decks can carry other
-// aspect ratios, so read their image headers before placing a native picture.
-function pictureRatio(data) {
-  try {
-    const header = atob(data.slice(data.indexOf(',') + 1, data.indexOf(',') + 1 + 131072));
-    const view = new DataView(Uint8Array.from(header, c => c.charCodeAt(0)).buffer);
-    if (view.getUint32(0) === 0x89504e47 && view.getUint32(12) === 0x49484452)
-      return view.getUint32(16) / view.getUint32(20);
-    if (view.getUint16(0) === 0xffd8) {
-      let pos = 2;
-      while (pos + 9 < view.byteLength && view.getUint8(pos) === 0xff) {
-        const marker = view.getUint8(++pos);
-        if (marker === 0xff) continue;
-        pos++;
-        const length = view.getUint16(pos);
-        if (length < 2 || marker === 0xda) break;
-        if (marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker))
-          return view.getUint16(pos + 5) / view.getUint16(pos + 3);
-        pos += length;
-      }
-    }
-  } catch { /* Short or incomplete header; use the Studio import dimensions. */ }
-  return 1077 / 810;
 }
 
 function designedComposition(slide, page, total, design) {
@@ -650,7 +632,7 @@ function designedComposition(slide, page, total, design) {
 
 
 function plannedComposition(slide, page, total, tokens, plan) {
-  const { text, marks, picture, chart, palette } = resolveSlideLayout(slide, tokens, plan);
+  const { text, marks, picture, gallery, chart, palette } = resolveSlideLayout(slide, tokens, plan);
   const { typography: type, fonts, spacing, graphics } = tokens;
   const { ink, soft, accent, mutedBar, rule } = palette;
   const markColors = { ...palette,
@@ -661,11 +643,11 @@ function plannedComposition(slide, page, total, tokens, plan) {
     while (size > 8 && textHeight(value, size, w, leading, cjk ? 1 : 0) > h) size--;
     return size;
   }
-  function addText(region, value, size, color, field, font, bold = false, align = 'left') {
+  function addText(region, value, size, color, field, font, bold = false, align = 'left', italic = false) {
     const { x, y, w, h } = region;
     const cjk = eastAsian.test(value);
     size = plannedSize(value, size, region, cjk);
-    objects.push({ type: 'text', x, y, w, h, value, field, size, color, bold, align,
+    objects.push({ type: 'text', x, y, w, h, value, field, size, color, bold, align, ...(italic && { italic }),
       ...(cjk && { wrapPadding: size }), lineHeight: type.lineHeight, ...fontFor(font, value) });
   }
 
@@ -673,20 +655,19 @@ function plannedComposition(slide, page, total, tokens, plan) {
     if (kind === 'text-arrow') addText(region, '›', 17, markColors[color], null, fonts.body, true);
     else objects.push({ type: kind, color: markColors[color], ...region });
   }
-  if (picture) {
-    const intrinsic = pictureRatio(slide.image);
-    const ratio = Number.isFinite(intrinsic) && intrinsic > 0 ? intrinsic : 1077 / 810;
-    const w = Math.min(picture.w, picture.h * ratio);
-    const h = w / ratio;
-    objects.push({ type: 'image', x: picture.x + (picture.w - w) / 2,
-      y: picture.y + (picture.h - h) / 2, w, h, data: slide.image });
+  if (picture) objects.push(pictureObject(picture, slide.image));
+  for (const { photo, slotId, ...region } of gallery ?? []) {
+    objects.push({ ...pictureObject(region, photo.data, photo.fit, photo.focus),
+      ...(photo.legacy ? {} : { photoId: photo.id, name: photo.name, alt: photo.caption || photo.name || 'Photo' }),
+      slotId });
   }
   for (const region of text) {
     const { value, size, field, role, align } = region;
     const color = role === 'title' ? ink : ['label', 'value'].includes(role) ? accent : soft;
-    const font = role === 'title' ? fonts.title : role === 'value' ? fonts.data : fonts.body;
+    const coverCredit = plan.variant === 'photo-cover' && ['subtitle', 'opening-credit'].includes(region.slotId);
+    const font = role === 'title' || coverCredit ? fonts.title : role === 'value' ? fonts.data : fonts.body;
     const bold = role === 'title' ? type.boldTitle : ['label', 'value'].includes(role);
-    addText(region, value, size, color, field, font, bold, align);
+    addText(region, value, size, color, field, font, bold, align, (role === 'title' || coverCredit) && type.italicTitle);
   }
   if (chart?.items.length) {
     const { items, focus, encoding } = chart;
@@ -720,8 +701,9 @@ function plannedComposition(slide, page, total, tokens, plan) {
       });
     }
   }
-  addText({ x: 856 - spacing.margin, y: spacing.footer, w: 104, h: 21 },
-    String(page).padStart(2, '0') + ' / ' + String(total).padStart(2, '0'),
-    type.caption, soft, null, fonts.data, false, 'right');
+  if (plan.variant !== 'photo-cover')
+    addText({ x: 856 - spacing.margin, y: spacing.footer, w: 104, h: 21 },
+      String(page).padStart(2, '0') + ' / ' + String(total).padStart(2, '0'),
+      type.caption, soft, null, fonts.data, false, 'right');
   return objects;
 }

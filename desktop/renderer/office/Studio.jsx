@@ -21,6 +21,7 @@ import {
   X,
 } from 'lucide-react';
 import { themes, layouts } from '../../electron/office/deck.mjs';
+import { hasPhotos } from '../../electron/office/photos.mjs';
 import { DesignBrief } from './DesignBrief.jsx';
 import { Canvas } from './Canvas.jsx';
 import { Inspector } from './Inspector.jsx';
@@ -39,6 +40,7 @@ export function Studio({
   select,
   commit,
   edit,
+  appendPhotos,
   onError,
   move,
   busy,
@@ -86,6 +88,8 @@ export function Studio({
   }, [playing, panel, pages]);
   function write(field, row, value) {
     if (field === 'title' || field === 'unit') edit({ [field]: value });
+    else if (field === 'caption')
+      edit({ photos: slide.photos.map((photo, i) => i === Number(row) ? { ...photo, caption: value } : photo) });
     else
       edit({
         items: slide.items.map((item, i) => (i === Number(row) ? { ...item, [field]: value } : item)),
@@ -305,12 +309,13 @@ export function Studio({
               </div>
             )}
             {panel === 'content' && (
-              <Inspector key={slide.id} slide={slide} planned={deck.design?.version === 2} edit={edit} error={onError} />
+              <Inspector key={slide.id} slide={slide} planned={deck.design?.version === 2} edit={edit}
+                appendPhotos={appendPhotos} error={onError} />
             )}
             {panel === 'design' && (
               <>
                 <DesignBrief key={deck.id} deck={deck} slideId={slide.id} commit={commit} onError={onError} disabled={!!busy} />
-                <h4>整份文稿风格</h4>
+                {!hasPhotos(deck) && <><h4>整份文稿风格</h4>
                 <div className="studio-themes">
                   {Object.entries(themes).map(([key, t]) => (
                     <button
@@ -324,7 +329,7 @@ export function Studio({
                       {t.name}
                     </button>
                   ))}
-                </div>
+                </div></>}
                 <h4>本页版式</h4>
                 <div className="studio-layouts">
                   {Object.entries(layouts).map(([key, name]) => (

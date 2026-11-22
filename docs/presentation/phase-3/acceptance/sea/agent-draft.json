@@ -1,0 +1,53 @@
+{
+  "id": "6ca7bc77-ad1b-487c-b8f7-d85ecc4ac11a",
+  "source": "1. cover · The Shape of the Horizon\nDisplay label: Marine studies / The Met Collection\nDisplay text: Gustave Le Gray\nGustave Le Gray | Étude de nuages | 1856–57 | https://www.metmuseum.org/art/collection/search/301885\nGustave Le Gray | Mediterranean Sea - Sète | 1857 | https://www.metmuseum.org/art/collection/search/283124\nGustave Le Gray | Mediterranean with Mount Agde | 1857 | https://www.metmuseum.org/art/collection/search/267425\n\n2. image · A wave breaks below a bank of clouds\nDisplay label: Sète\nDisplay text: White surf crosses the dark foreground.\nGustave Le Gray | [The Great Wave, Sète] | 1857 | https://www.metmuseum.org/art/collection/search/261941\n\n3. conclusion · What a low horizon leaves room for\nDisplay label: The sky\nDisplay text: A low band of ships leaves most of the frame to the sky.\nGustave Le Gray | The French and English Fleets, Cherbourg | August 1858 | https://www.metmuseum.org/art/collection/search/306320",
+  "brief": "English photography portfolio. For outline output use precisely the required number of slides with the literal English layout keys shown before each source title (cover, image, conclusion). Use {title,slides:[{title,layout}]} for the outline. Copy the page titles and display text from the catalogue selection. Put catalogue credit and the source URL in notes. Warm white paper, dark italic serif type. Cover: three photographs. Work slide: one photograph. Essay slide: one photograph.",
+  "modelAlias": "deepseek-flash",
+  "slides": [
+    {
+      "id": "eadafaa1-279d-4ce8-bb15-505b0a11a138",
+      "title": "The Shape of the Horizon",
+      "layout": "cover",
+      "items": [
+        {
+          "id": "caee2e17-8fe3-4379-9e2f-11c7fa790416",
+          "label": "Marine studies",
+          "text": "Gustave Le Gray, sea and sky photographs, 1856–58.",
+          "value": 0
+        }
+      ],
+      "notes": "Cover uses three photographs. Catalogue credit: Marine studies / The Met Collection. Sources: Gustave Le Gray, Étude de nuages, 1856–57, https://www.metmuseum.org/art/collection/search/301885; Mediterranean Sea - Sète, 1857, https://www.metmuseum.org/art/collection/search/283124; Mediterranean with Mount Agde, 1857, https://www.metmuseum.org/art/collection/search/267425.",
+      "generated": true
+    },
+    {
+      "id": "fcb45ddf-e42c-4d27-8569-692ece1ec178",
+      "title": "A wave breaks below a bank of clouds",
+      "layout": "image",
+      "items": [
+        {
+          "id": "de2496a1-7f2b-4359-b501-a8185e8f813e",
+          "label": "Sète",
+          "text": "White surf crosses the dark foreground.",
+          "value": 0
+        }
+      ],
+      "notes": "Gustave Le Gray, [The Great Wave, Sète], 1857. The Met Collection. https://www.metmuseum.org/art/collection/search/261941",
+      "generated": true
+    },
+    {
+      "id": "43c9d93c-cdf9-404b-aac5-44494bb02f22",
+      "title": "What a low horizon leaves room for",
+      "layout": "conclusion",
+      "items": [
+        {
+          "id": "124b5e81-22a0-48f9-94a9-292df5b3bcb4",
+          "label": "The sky",
+          "text": "A low band of ships leaves most of the frame to the sky",
+          "value": 0
+        }
+      ],
+      "notes": "Gustave Le Gray | The French and English Fleets, Cherbourg | August 1858 | https://www.metmuseum.org/art/collection/search/306320. Display label: The sky; display text: A low band of ships leaves most of the frame to the sky.",
+      "generated": true
+    }
+  ]
+}

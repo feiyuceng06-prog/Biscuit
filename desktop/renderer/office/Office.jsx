@@ -16,12 +16,14 @@ import { draft } from './drafts.mjs';
 import { libraryExample } from './library-example.mjs';
 import readingRoom from './reading-room.jpg';
 import { planDesign } from '../../electron/office/director.mjs';
+import { hasPhotos, maxDeckPictureData, maxPhotos, photographyIntent, pictureDataSize } from '../../electron/office/photos.mjs';
 import { DesignBrief } from './DesignBrief.jsx';
 import { Studio } from './Studio.jsx';
 
 import './office.css';
 
 const sample = libraryExample(readingRoom);
+const mediaText = (value, limit) => value?.replace(/[\u0000-\u001f]/g, ' ').slice(0, limit);
 
 export function Office({ workspace }) {
   const [deck, setDeck] = useState(null),
@@ -75,6 +77,8 @@ export function Office({ workspace }) {
     if (next === previous) return;
     if (next.design && next.design === previous?.design) {
       next = { ...next, design: planDesign(next, next.design.preferences, { visualPlanner: next.design.version === 2 }) };
+    } else if (!next.design && (hasPhotos(next) || (next.brief !== previous?.brief && photographyIntent(next.brief)))) {
+      next = { ...next, design: planDesign(next, {}, { visualPlanner: true }) };
     }
     if (record && previous) history.current = [...history.current.slice(-29), previous];
     current.current = next;
@@ -109,13 +113,24 @@ export function Office({ workspace }) {
       ),
     };
     if (
-      'image' in patch &&
-      next.slides.reduce((size, page) => size + page.image.length, 0) > 12_000_000
+      ('image' in patch || 'photos' in patch) && pictureDataSize(next.slides) > maxDeckPictureData
     ) {
-      setError('配图总量已达上限，请先移除一张配图');
+      setError('文稿图片总量已达上限，请移除图片后再导入');
       return;
     }
     commit(next);
+  }
+  function appendPhotos(deckId, slideId, photos) {
+    const active = current.current;
+    const page = active?.id === deckId && active.slides.find(s => s.id === slideId);
+    if (!page) return;
+    const ordered = [...(page.photos ?? []), ...photos];
+    if (ordered.length > maxPhotos) {
+      setError('每页最多可导入 ' + maxPhotos + ' 张照片');
+      return;
+    }
+    setError('');
+    editSlide(slideId, { photos: ordered });
   }
   function enter(next) {
     setStage(next);
@@ -205,13 +220,14 @@ export function Office({ workspace }) {
   function outline() {
     const original = current.current;
     if (
-      (original.slides.length > 1 || original.slides.some((s) => s.generated)) &&
+      (original.slides.length > 1 || original.slides.some((s) => s.generated || s.image || s.photos?.length)) &&
       !window.confirm('重新生成大纲会替换当前页面，可在完成后撤销。继续吗？')
     )
       return;
     void run('正在生成大纲', async (signal) => {
       const result = await requestPage(
-        { action: 'outline', source: original.source, brief: original.brief, count },
+        { action: 'outline', source: original.source, brief: original.brief, count,
+          direction: original.design?.direction },
         signal,
       );
       signal.throwIfAborted();
@@ -237,6 +253,16 @@ export function Office({ workspace }) {
         }
         setWorkingPage(active.id);
         setBusy(all ? '正在生成正文 ' + (i + 1) + ' / ' + targets.length : '正在重写本页正文');
+        const requestedPhotos = now.design?.slidePlans?.find(plan => plan.slideId === active.id)
+          ?.assetStrategy.photoCount?.requested;
+        const media = active.photos?.length || requestedPhotos !== undefined
+          ? JSON.stringify({
+              requestedPhotos,
+              photos: (active.photos ?? []).map(({ name, caption }) => ({
+                name: mediaText(name, 40), caption: mediaText(caption, 60),
+              })),
+            })
+          : undefined;
         const response = await requestPage(
           {
             action: 'slide',
@@ -244,8 +270,10 @@ export function Office({ workspace }) {
             brief: now.brief,
             title: active.title,
             layout: active.layout,
+            direction: now.design?.direction,
             outline: now.slides.map((s) => s.title).join('\n'),
             current: JSON.stringify({ items: active.items, unit: active.unit }),
+            media,
             change: all ? '' : change,
           },
           signal,
@@ -441,6 +469,7 @@ export function Office({ workspace }) {
               select={select}
               commit={commit}
               edit={(patch) => editSlide(slide.id, patch)}
+              appendPhotos={(photos) => appendPhotos(deck.id, slide.id, photos)}
               onError={setError}
               move={move}
               workingPage={workingPage}

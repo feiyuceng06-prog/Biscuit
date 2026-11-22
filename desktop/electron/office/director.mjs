@@ -1,6 +1,7 @@
 import { directions } from './directions.mjs';
 import { selectReference } from './references.mjs';
 import { planSlides, textUnits } from './planner.mjs';
+import { hasPhotos, photoCounts, photographyIntent } from './photos.mjs';
 
 export { textUnits };
 
@@ -73,8 +74,10 @@ function topicTags(text) {
   return Object.entries(topicPatterns).filter(([, pattern]) => pattern.test(text)).map(([topic]) => topic);
 }
 
-function chooseDirection(deck, preferences, densities) {
+function chooseDirection(deck, preferences, densities, visualPlanner) {
   if (preferences.direction !== 'auto') return [preferences.direction, '采用指定的设计方向。'];
+  if (hasPhotos(deck) || (visualPlanner && photographyIntent(`${deck.title} ${deck.brief}`)))
+    return ['photography', '摄影素材或制作要求适合按摄影集组织。'];
 
   const scores = { minimal: 2, corporate: 0, editorial: 0, technology: 0 };
   const addTopics = (text, weight) => {
@@ -121,7 +124,7 @@ function slideRole(slide, index, total) {
   if (slide.layout === 'conclusion' && (index === total - 1
     || /\b(?:summary|conclusions?|takeaways?|next steps)\b|总结|结论|下一步/i.test(slide.title))) return 'conclusion';
   if (index <= 1 || /\b(?:context|background|overview)\b|背景|概览/i.test(slide.title)) return 'context';
-  return slide.layout === 'image' && slide.image ? 'evidence' : 'thesis';
+  return slide.layout === 'image' && (slide.image || slide.photos?.length) ? 'evidence' : 'thesis';
 }
 
 function designTokens(direction, preferences) {
@@ -130,8 +133,8 @@ function designTokens(direction, preferences) {
   const stage = stagePattern.test(setting);
   const paletteMode = reference?.palette ?? (style.preferDark && !printPattern.test(setting) ? 'dark' : 'light');
   return {
-    palette: { ...(paletteMode === 'dark' ? style.dark : style.light) },
-    ...(paletteMode === 'mixed' && { openingPalette: { ...style.dark } }),
+    palette: { ...(paletteMode === 'dark' && style.dark ? style.dark : style.light) },
+    ...(paletteMode === 'mixed' && style.dark && { openingPalette: { ...style.dark } }),
     fonts: Object.fromEntries(Object.entries(style.fonts).map(([role, font]) => [
       role, { ...font, fallback: [...font.fallback] },
     ])),
@@ -154,14 +157,17 @@ function designTokens(direction, preferences) {
 export function planDesign(deck, preferences = {}, { visualPlanner = false } = {}) {
   preferences = readPreferences(preferences);
   const densities = deck.slides.map(slideDensity);
-  const [direction, reason] = chooseDirection(deck, preferences, densities);
+  const [direction, reason] = chooseDirection(deck, preferences, densities, visualPlanner);
   const tokens = designTokens(direction, preferences);
+  const photoPlanning = direction === 'photography' || hasPhotos(deck);
+  const counts = photoPlanning ? photoCounts(deck.brief) : {};
+  visualPlanner ||= photoPlanning;
   const selected = new Map();
   const deckTopics = topicTags(`${deck.title} ${deck.brief} ${preferences.audience} ${preferences.setting}`);
   const rhythm = deck.slides.map((slide, index) => {
     const role = slideRole(slide, index, deck.slides.length);
     const emphasis = slide.layout === 'chart' ? 'data'
-      : slide.image && ['cover', 'image'].includes(slide.layout) ? 'image' : 'text';
+      : slide.photos?.length || (slide.image && ['cover', 'image'].includes(slide.layout)) ? 'image' : 'text';
     // Keep enough capacity for the source content even when the reference was sparse.
     const density = preferences.reference && densityRank[tokens.density] > densityRank[densities[index]]
       ? tokens.density : densities[index];
@@ -181,14 +187,14 @@ export function planDesign(deck, preferences = {}, { visualPlanner = false } = {
   const referenceReason = reference ? '参考文稿提供明暗、标题对齐和密度偏好，页面布局仍以当前内容为准。' : '';
   return {
     version: visualPlanner === true ? 2 : 1,
-    ...(visualPlanner === true && { slidePlans: planSlides(deck, rhythm, tokens) }),
+    ...(visualPlanner === true && { slidePlans: planSlides(deck, rhythm, tokens, counts) }),
     direction,
     rationale: reason + thesis + referenceReason,
     rhythm,
     tokens,
     preferences,
     visualThesis: thesis,
-    imageryPolicy: 'existing-slide-images',
+    imageryPolicy: photoPlanning ? 'existing-slide-images-and-photos' : 'existing-slide-images',
     constraints: { aspectRatio: '16:9', preserveContent: true, nativeCharts: true },
     negativeRules: ['no-reference-content-or-assets', 'no-meaning-by-color-alone'],
     references: [...selected.values()].map((entry) => ({

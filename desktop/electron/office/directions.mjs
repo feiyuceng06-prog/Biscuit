@@ -13,6 +13,16 @@ const palette = (bg, ink, soft, tint, rule, accent, mutedBar) =>
   ({ bg, ink, soft, tint, rule, accent, mutedBar });
 
 export const directions = {
+  photography: {
+    thesis: '以暖白纸色、斜体衬线标题和独立照片组织摄影集。',
+    alignment: 'left',
+    fonts: { title: { ...serif, latin: 'Liberation Serif', fallback: ['Georgia', ...serif.fallback] }, body: sans, data: sans },
+    typography: { ...type(60, 49, 21, 20, 1.2, false), italicTitle: true, caption: 11 },
+    spacing: spacing(60, 42, 22, 28, 12),
+    graphics: { motif: 'rule', rule: 1, marker: 'circle', cover: 'plain', imageSide: 'left', imageShare: 0.54,
+      chartSide: 'left', panelFill: false, photoAlbum: true },
+    light: palette('F7F3F2', '282423', '524947', 'ECE4E1', 'B8ADAA', '76544A', '997F79'),
+  },
   editorial: {
     thesis: '用衬线大标题、细分隔线和有节制的图像建立叙事层次。',
     alignment: 'left',

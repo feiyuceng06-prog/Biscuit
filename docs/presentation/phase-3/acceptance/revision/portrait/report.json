@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "deckId": "b2b53125-fcc0-4383-a18a-697b85424d41",
+  "pptxSha256": "ebc5622eb0eb82b10fa6106a4b9d604d9d67c8e602ef0256d1cc33780e406495",
+  "status": "needs_review",
+  "critic": {
+    "status": "unavailable",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [],
+    "errorType": "JSONDecodeError"
+  },
+  "pages": [
+    {
+      "slideId": "c396f9fc-4e5e-4f81-9d6a-1c0ce21a1e25",
+      "png": "slide-1.png",
+      "sha256": "0fe00e1678566984fc09cb2d3e94a0c63c5984daea4361228f3c62990e6bb973"
+    }
+  ],
+  "issues": [],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "a7c605cf98f4d60f0712fb9ed073ac8ca8453f03d86757f6c2e72f9978e81d12",
+  "contactSheet": "contact.png",
+  "fonts": [
+    "BAAAAA+LiberationSerif-Italic        TrueType          WinAnsi          yes yes yes     34  0",
+    "CAAAAA+Arial                         TrueType          WinAnsi          yes yes yes     44  0",
+    "DAAAAA+Arial                         TrueType          WinAnsi          yes yes yes     39  0"
+  ],
+  "durationMs": 47535
+}

@@ -1,8 +1,11 @@
-import React from 'react';
-import { layouts, maxItems, blankItem, hasChartValue } from '../../electron/office/deck.mjs';
+import React, { useState } from 'react';
+import { layouts, maxItems, blankItem, hasChartValue, uid } from '../../electron/office/deck.mjs';
+import { maxPhotos, maxPhotoCaption, maxPictureData } from '../../electron/office/photos.mjs';
+
+const imageTypes = ['image/png', 'image/jpeg'];
 
 async function loadImage(file) {
-  if (!['image/png', 'image/jpeg'].includes(file.type) || file.size > 12_000_000)
+  if (!imageTypes.includes(file.type) || file.size > 12_000_000)
     throw Error('请选择 12 MB 以内的 PNG 或 JPEG');
   const image = await createImageBitmap(file);
   try {
@@ -21,7 +24,103 @@ async function loadImage(file) {
     image.close();
   }
 }
-export function Inspector({ slide, edit, error, planned = false }) {
+
+async function loadPhoto(file) {
+  if (!imageTypes.includes(file.type) || file.size > 30_000_000)
+    throw Error('请选择 30 MB 以内的 PNG 或 JPEG 照片');
+  const image = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  try {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    let longestEdge = Math.min(1800, Math.max(image.width, image.height));
+    while (true) {
+      const scale = longestEdge / Math.max(image.width, image.height);
+      canvas.width = Math.max(1, Math.round(image.width * scale));
+      canvas.height = Math.max(1, Math.round(image.height * scale));
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+      const data = canvas.toDataURL(file.type, 0.88);
+      if (data === 'data:,') throw Error('无法处理照片，请选择尺寸更小的文件');
+      if (data.length <= maxPictureData) return { id: uid(), name: file.name.slice(0, 255), data };
+      longestEdge = Math.floor(longestEdge * 0.75);
+    }
+  } finally {
+    image.close();
+  }
+}
+
+function PhotoInspector({ photos, edit, appendPhotos, error }) {
+  const [importing, setImporting] = useState(false);
+  async function importFiles(event) {
+    const files = Array.from(event.target.files);
+    event.target.value = '';
+    if (!files.length) return;
+    if (photos.length + files.length > maxPhotos) {
+      error('每页最多可导入 ' + maxPhotos + ' 张照片');
+      return;
+    }
+    setImporting(true);
+    try {
+      const imported = [];
+      for (const file of files) imported.push(await loadPhoto(file));
+      appendPhotos(imported);
+    } catch (e) {
+      error(e.name === 'InvalidStateError' ? '无法读取照片，请选择有效的 PNG 或 JPEG' : e.message);
+    } finally {
+      setImporting(false);
+    }
+  }
+  function update(index, patch) {
+    edit({ photos: photos.map((photo, i) => i === index ? { ...photo, ...patch } : photo) });
+  }
+  function move(index, delta) {
+    const ordered = [...photos];
+    const [photo] = ordered.splice(index, 1);
+    ordered.splice(index + delta, 0, photo);
+    edit({ photos: ordered });
+  }
+  return (
+    <fieldset className="office-photos">
+      <legend>本页照片 <span>{photos.length} / {maxPhotos}</span></legend>
+      <label>导入照片
+        <input type="file" multiple accept={imageTypes.join(',')} onChange={importFiles}
+          disabled={importing || photos.length >= maxPhotos} />
+      </label>
+      {importing && <small role="status">正在导入照片…</small>}
+      {photos.map((photo, index) => {
+        const name = photo.name || '照片 ' + (index + 1);
+        const focus = photo.focus ?? { x: 0.5, y: 0.5 };
+        return (
+          <details className="office-photo" key={photo.id}>
+            <summary><img src={photo.data} alt="" /><span>{name}</span></summary>
+            <label>图注
+              <input maxLength={maxPhotoCaption} value={photo.caption ?? ''}
+                onChange={e => update(index, { caption: e.target.value })} />
+            </label>
+            <label>填充方式
+              <select value={photo.fit ?? 'contain'} onChange={e => update(index, { fit: e.target.value })}>
+                <option value="contain">显示完整照片</option>
+                <option value="cover">裁切以填满相框</option>
+              </select>
+            </label>
+            {photo.fit === 'cover' && Object.entries({ x: '水平焦点', y: '垂直焦点' }).map(([axis, label]) => (
+              <label key={axis}>{label}
+                <input type="range" min="0" max="100" step="1" value={Math.round(focus[axis] * 100)}
+                  onChange={e => update(index, { focus: { ...focus, [axis]: e.target.valueAsNumber / 100 } })} />
+              </label>
+            ))}
+            <div className="office-actions">
+              <button type="button" aria-label={'前移 ' + name} disabled={!index} onClick={() => move(index, -1)}>前移</button>
+              <button type="button" aria-label={'后移 ' + name} disabled={index === photos.length - 1} onClick={() => move(index, 1)}>后移</button>
+              <button type="button" aria-label={'移除 ' + name} onClick={() => edit({ photos: photos.filter((_, i) => i !== index) })}>移除</button>
+            </div>
+          </details>
+        );
+      })}
+    </fieldset>
+  );
+}
+
+export function Inspector({ slide, edit, appendPhotos, error, planned = false }) {
   const updateItem = (id, patch) =>
     edit({ items: slide.items.map((item) => (item.id === id ? { ...item, ...patch } : item)) });
   const imageInput = async (e) => {
@@ -60,6 +159,7 @@ export function Inspector({ slide, edit, error, planned = false }) {
           ))}
         </select>
       </label>
+      <PhotoInspector photos={slide.photos ?? []} edit={edit} appendPhotos={appendPhotos} error={error} />
       {supportsImage && (
         <label>
           配图

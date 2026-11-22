@@ -19,7 +19,7 @@ export function reviewManifest(raw) {
     slides: deck.slides.map((slide, i) => ({
       slideId: slide.id, layout: slide.layout,
       objects: composition(slide, i + 1, deck.slides.length, deck.theme, deck.design).map(({data, ...o}, j) => ({
-        ...o, id: o.field || o.type + '-' + (j + 1),
+        ...o, id: o.field || (o.photoId ? 'photo:' + o.photoId : o.type + '-' + (j + 1)),
       })),
     })),
   };
