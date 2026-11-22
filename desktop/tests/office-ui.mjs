@@ -6,9 +6,29 @@ export async function checkOffice(application, page, workspace, output, fixture)
   await page.getByRole('button', { name: '办公', exact: true }).click();
   const office = page.locator('dialog.office');
   await expect(office.getByRole('button', { name: '新建演示文稿' })).toBeEnabled();
-  await office.screenshot({ animations: 'disabled', path: path.join(output, 'office-library-light.png') });
-  await page.evaluate(() => setTheme('dark'));
-  await office.screenshot({ animations: 'disabled', path: path.join(output, 'office-library-dark.png') });
+  for (const theme of ['light', 'dark']) {
+    await page.evaluate(theme => setTheme(theme), theme);
+    const paletteMatches = await office.evaluate(dialog => {
+      const app = getComputedStyle(document.documentElement);
+      const local = getComputedStyle(dialog);
+      return ['--accent', '--bg', '--raised', '--muted', '--alert', '--selected']
+        .every(token => local.getPropertyValue(token) === app.getPropertyValue(token));
+    });
+    expect(paletteMatches).toBe(true);
+    const create = office.getByRole('button', { name: '新建演示文稿' });
+    await expect.poll(() => create.evaluate(button =>
+      getComputedStyle(button).backgroundColor ===
+      getComputedStyle(document.getElementById('send'), '::before').backgroundColor
+    )).toBe(true);
+    await office.screenshot({ animations: 'disabled', path: path.join(output, 'office-library-' + theme + '.png') });
+  }
+  await page.evaluate(() => setTheme('system'));
+  for (const colorScheme of ['dark', 'light']) {
+    await page.emulateMedia({ colorScheme });
+    await expect(page.locator('html')).toHaveAttribute('data-theme', colorScheme);
+    await expect(office).toHaveCSS('color-scheme', colorScheme);
+  }
+  await page.emulateMedia({ colorScheme: null });
   await page.evaluate(() => setTheme('light'));
   await page.getByRole('button', { name: '打开示例文稿' }).click();
   await expect(page.locator('.office-thumb')).toHaveCount(5);
