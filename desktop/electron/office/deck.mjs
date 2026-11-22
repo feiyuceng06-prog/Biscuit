@@ -80,6 +80,7 @@ export function readDeck(raw) {
   };
   if (
     raw?.version !== 1 ||
+    (raw.theme !== undefined && (typeof raw.theme !== 'string' || !Object.hasOwn(themes, raw.theme))) ||
     !string(raw.title, 120) ||
     !string(raw.source, 30000) ||
     !string(raw.brief, 1500) ||
@@ -119,13 +120,37 @@ export function readDeck(raw) {
   return raw;
 }
 
-const ink = '172F37',
-  teal = '007E75',
-  grey = '476269',
-  pale = 'E0EEE9',
-  white = 'FFFFFF';
-export function composition(slide, page, total) {
-  const cover = slide.layout === 'cover';
+export const themes = {
+  paper: {
+    name: '白纸',
+    bg: 'FFFFFF',
+    ink: '202122',
+    soft: '57595A',
+    tint: 'F0F0ED',
+    rule: 'D5D6D1',
+    accent: '344EAE',
+  },
+  sand: {
+    name: '陶土',
+    bg: 'FBF6ED',
+    ink: '362B26',
+    soft: '655549',
+    tint: 'F1E2D0',
+    rule: 'D7BC9F',
+    accent: 'A64930',
+  },
+  midnight: {
+    name: '午夜',
+    bg: '1C2028',
+    ink: 'F4F2EB',
+    soft: 'B5BBCA',
+    tint: '2A303D',
+    rule: '545D70',
+    accent: 'AEBBF5',
+  },
+};
+export function composition(slide, page, total, theme = 'paper') {
+  const { bg, ink, soft, tint, rule, accent } = themes[theme] || themes.paper;
   const objects = [];
   const rect = (x, y, w, h, color) => objects.push({ type: 'rect', x, y, w, h, color });
   function text(x, y, w, h, value, size, color = ink, bold = false, field = null) {
@@ -145,55 +170,85 @@ export function composition(slide, page, total) {
     objects.push({ type: 'text', x, y, w, h, value, size, color, bold, field });
   }
   const items = slide.items.slice(0, maxItems(slide.layout));
-  rect(0, 0, 960, 540, cover ? ink : 'F9FBF8');
-  rect(52, 46, 44, 5, cover ? '7ED6BC' : teal);
-  text(
-    52,
-    cover ? 128 : 76,
-    855,
-    cover ? 150 : 95,
-    slide.title,
-    cover ? 55 : 40,
-    cover ? white : ink,
-    true,
-    'title',
-  );
-  if (cover) {
-    text(55, 296, 806, 46, items[0]?.label, 24, 'C2DFD8', true, 'label-0');
-    text(55, 348, 806, 95, items[0]?.text, 23, 'C2DFD8', false, 'text-0');
-  } else if (slide.layout === 'chart') {
-    objects.push({ type: 'chart', x: 60, y: 178, w: 833, h: 283, items });
-  } else if (slide.layout === 'comparison') {
-    items.forEach((row, i) => {
-      const x = 52 + i * 442;
-      rect(x, 185, 414, 245, i ? pale : ink);
-      text(x + 24, 210, 365, 65, row.label, 29, i ? ink : white, true, 'label-' + i);
-      text(x + 24, 287, 365, 125, row.text, 22, i ? grey : 'D3EAE1', false, 'text-' + i);
-    });
-  } else if (slide.layout === 'timeline') {
-    const step = 845 / items.length;
-    rect(59, 232, Math.max(10, (items.length - 1) * step), 3, teal);
-    items.forEach((row, i) => {
-      const x = 55 + i * step;
-      rect(x, 225, 16, 16, teal);
-      text(x, 260, step - 16, 70, row.label, 24, ink, true, 'label-' + i);
-      text(x, 336, step - 16, 110, row.text, 18, grey, false, 'text-' + i);
+  rect(0, 0, 960, 540, bg);
+  const ellipse = (x, y, w, h, color, outline = false) =>
+    objects.push({ type: 'ellipse', x, y, w, h, color, outline });
+  const title = (x, y, w, h, size) => text(x, y, w, h, slide.title, size, ink, true, 'title');
+  const body = (row, i, x, y, w, h, size) => text(x, y, w, h, row.text, size, soft, false, 'text-' + i);
+  const label = (row, i, x, y, w, h, size) => text(x, y, w, h, row.label, size, ink, true, 'label-' + i);
+  if (slide.layout === 'cover' && theme === 'paper') {
+    text(116, 110, 728, 48, items[0].label, 18, soft, false, 'label-0');
+    title(70, 179, 820, 131, 61);
+    body(items[0], 0, 108, 323, 744, 115, 24);
+    for (const object of objects) if (object.type === 'text') object.align = 'center';
+  } else if (slide.layout === 'cover') {
+    rect(615, 0, 345, 540, tint);
+    if(theme==='midnight') {
+      ellipse(645,115,277,277,rule,true);
+      ellipse(676,146,215,215,rule,true);
+      ellipse(710,180,147,147,accent,true);
+      ellipse(872,135,14,14,accent);
+      ellipse(765,236,37,37,accent);
+    } else {
+      for (let i = 0; i < 10; i++)
+        ellipse(640 + i * 13, 76 + i * 8, 282 - i * 13, 365 - i * 16, accent, true);
+    }
+    text(55, 66, 505, 60, items[0]?.label, 18, accent, true, 'label-0');
+    title(52, 153, 523, 175, 58);
+    body(items[0], 0, 55, 350, 515, 105, 24);
+  } else if (slide.layout === 'conclusion') {
+    title(52, 57, 355, 346, 46);
+    const step = 382 / items.length;
+    items.forEach((r, i) => {
+      const y = 65 + i * step;
+      rect(445, y, 457, 1, rule);
+      label(r, i, 445, y + 10, 457, step * 0.35, 25);
+      body(r, i, 445, y + step * 0.4 + 5, 457, step * 0.55 - 4, 21);
     });
   } else {
-    const hasImage = slide.layout === 'image' && slide.image;
-    const width = hasImage ? 445 : 846;
-    const step = 286 / items.length;
-    items.forEach((row, i) => {
-      const y = 181 + i * step;
-      rect(53, y + 4, 4, step - 15, teal);
-      text(73, y, width - 20, step * 0.39, row.label, 25, ink, true, 'label-' + i);
-      text(73, y + step * 0.4, width - 20, step * 0.56, row.text, 20, grey, false, 'text-' + i);
-    });
-    if (hasImage) {
-      rect(548, 184, 359, 270, pale);
-      objects.push({ type: 'image', x: 548, y: 184, w: 359, h: 270, data: slide.image });
+    title(52, 46, 855, 95, 43);
+    if (slide.layout === 'chart') {
+      objects.push({ type: 'chart', x: 59, y: 155, w: 840, h: 300, items, accent, ink, rule });
+    } else if (slide.layout === 'comparison') {
+      const step = 864 / items.length;
+      items.forEach((r, i) => {
+        const x = 49 + i * step;
+        rect(x, 167, step - 14, 274, i ? tint : bg);
+        rect(x, 167, step - 14, 3, i ? accent : ink);
+        label(r, i, x + 18, 194, step - 53, 77, 32);
+        body(r, i, x + 18, 285, step - 53, 137, 23);
+      });
+    } else if (slide.layout === 'timeline') {
+      const step = 852 / items.length;
+      rect(58, 221, Math.max(24, (items.length - 1) * step), 2, rule);
+      items.forEach((r, i) => {
+        const x = 54 + i * step;
+        ellipse(x, 214, 16, 16, accent);
+        label(r, i, x, 247, step - 15, 74, 25);
+        body(r, i, x, 328, step - 15, 127, 20);
+      });
+    } else {
+      const image = !!slide.image,
+        width = image ? 400 : 840,
+        step = 293 / items.length;
+      items.forEach((r, i) => {
+        const y = 155 + i * step;
+        rect(54, y, width, 1, rule);
+        label(r, i, 54, y + 7, width, step * 0.38, 24);
+        body(r, i, 54, y + step * 0.4 + 4, width, step * 0.54, 20);
+      });
+      if (image) objects.push({ type: 'image', x: 496, y: 145, w: 401, h: 302, data: slide.image });
     }
   }
-  text(842, 492, 68, 26, String(page) + ' / ' + total, 13, cover ? 'BBD8CF' : grey);
+  rect(54, 480, 852, 1, rule);
+  text(
+    833,
+    495,
+    78,
+    25,
+    String(page).padStart(2, '0') + ' / ' + String(total).padStart(2, '0'),
+    12,
+    soft,
+  );
   return objects;
 }

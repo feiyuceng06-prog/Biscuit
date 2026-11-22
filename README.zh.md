@@ -31,8 +31,8 @@ feiyu          # 终端版
 
 到 [下载页面](https://github.com/feiyuceng06-prog/Biscuit/releases/latest) 选择一种格式：
 
-- **deb**：适用于使用 apt 的发行版。下载后在文件所在目录运行 `sudo apt install ./feiyu-desktop_0.93.0_amd64.deb`。
-- **AppImage**：下载后运行 `chmod +x Biscuit-0.93.0.AppImage`，再双击打开。若提示缺少 FUSE，建议使用上方一键安装方式。
+- **deb**：适用于使用 apt 的发行版。下载后在文件所在目录运行 `sudo apt install ./feiyu-desktop_0.94.0_amd64.deb`。
+- **AppImage**：下载后运行 `chmod +x Biscuit-0.94.0.AppImage`，再双击打开。若提示缺少 FUSE，建议使用上方一键安装方式。
 
 安装包未签名。各版本的系统验证范围和已知限制见下载页面。
 
@@ -65,7 +65,7 @@ cd Biscuit
 
 ## Windows
 
-到[下载页面](https://github.com/feiyuceng06-prog/Biscuit/releases/latest)下载 **Biscuit Setup 0.93.0.exe**，双击安装即可。安装包已包含 Git Bash，升级会保留原有 Feiyu 配置和对话。
+到[下载页面](https://github.com/feiyuceng06-prog/Biscuit/releases/latest)下载 **Biscuit Setup 0.94.0.exe**，双击安装即可。安装包已包含 Git Bash，升级会保留原有 Feiyu 配置和对话。
 
 安装包尚未签名，Windows 可能显示安全提示；安装前请核对下载来源和发布页的 SHA256。Windows 的已知限制见发布说明。
 

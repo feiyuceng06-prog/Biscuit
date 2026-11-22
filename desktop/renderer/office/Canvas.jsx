@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { composition } from '../../electron/office/deck.mjs';
 
 function Chart({ o }) {
@@ -12,7 +12,7 @@ function Chart({ o }) {
     step = (o.w - 40) / values.length;
   return (
     <g transform={'translate(' + o.x + ' ' + o.y + ')'}>
-      <path d={'M10 ' + baseline + 'h' + (o.w - 20)} stroke="#9BAFAA" />
+      <path d={'M10 ' + baseline + 'h' + (o.w - 20)} stroke={'#' + o.rule} />
       {o.items.map((r, i) => {
         const x = 20 + step * (i + 0.5),
           top = baseline - (height * (r.value / scale)) / span;
@@ -23,19 +23,21 @@ function Chart({ o }) {
               y={Math.min(top, baseline)}
               width={step * 0.56}
               height={Math.max(1, Math.abs(top - baseline))}
-              fill="#007E75"
+              fill={'#' + o.accent}
             />
             <text
               x={x}
               y={r.value >= 0 ? top - 8 : top + 18}
               textAnchor="middle"
               fontSize="17"
-              fill="#172F37"
+              fill={'#' + o.ink}
             >
               {r.value}
             </text>
             <foreignObject x={x - step * 0.5} y={o.h - 28} width={step} height="30">
-              <div className="office-chart-label">{r.label}</div>
+              <div className="office-chart-label" style={{ color: '#' + o.ink }}>
+                {r.label}
+              </div>
             </foreignObject>
           </g>
         );
@@ -43,36 +45,82 @@ function Chart({ o }) {
     </g>
   );
 }
-export function Canvas({ slide, index, total, onEdit }) {
+export function Canvas({ slide, index, total, theme, onEdit }) {
+  const [active, setActive] = useState(null);
+  const preview = onEdit
+    ? {
+        ...slide,
+        title: slide.title || '点击添加标题',
+        items: slide.items.map((r) => ({
+          ...r,
+          label: r.label || '添加小标题',
+          text: r.text || '点击添加正文',
+        })),
+      }
+    : slide;
   return (
     <svg
       className="office-slide"
       viewBox="0 0 960 540"
-      role="img"
+      role={onEdit?'group':'img'}
       aria-label={slide.title || '无标题幻灯片'}
     >
-      {composition(slide, index + 1, total).map((o, i) => {
+      {composition(preview, index + 1, total, theme).map((o, i) => {
         const box = { x: o.x, y: o.y, width: o.w, height: o.h };
         if (o.type === 'rect') return <rect key={i} {...box} fill={'#' + o.color} />;
+        if (o.type === 'ellipse')
+          return (
+            <ellipse
+              key={i}
+              cx={o.x + o.w / 2}
+              cy={o.y + o.h / 2}
+              rx={o.w / 2}
+              ry={o.h / 2}
+              fill={o.outline ? 'none' : '#' + o.color}
+              stroke={o.outline ? '#' + o.color : 'none'}
+              strokeWidth="1.25"
+            />
+          );
         if (o.type === 'image')
           return <image key={i} {...box} href={o.data} preserveAspectRatio="none" />;
         if (o.type === 'chart') return <Chart key={i} o={o} />;
+        const [field, row] = o.field?.split('-') || [];
+        const value = field === 'title' ? slide.title : slide.items[row]?.[field];
+        const style = { textAlign:o.align||'left',fontSize: o.size, color: '#' + o.color, fontWeight: o.bold ? 700 : 400 };
         return (
-          <foreignObject
-            key={i}
-            {...box}
-            onDoubleClick={onEdit && o.field ? () => onEdit(o.field) : undefined}
-          >
-            <div
-              className="office-slide-text"
-              style={{
-                fontSize: o.size,
-                color: '#' + o.color,
-                fontWeight: o.bold ? 700 : 400,
-              }}
-            >
-              {o.value}
-            </div>
+          <foreignObject key={o.field || i} {...box}>
+            {onEdit && o.field && active === o.field ? (
+              <textarea
+                className="studio-inline"
+                style={style}
+                aria-label="画布文字"
+                autoFocus
+                maxLength={field === 'title' ? 120 : field === 'label' ? 60 : 220}
+                value={value}
+                onFocus={(e) => e.target.select()}
+                onChange={(e) => onEdit(field, row, e.target.value)}
+                onBlur={() => setActive(null)}
+                onKeyDown={(e) => {
+                  if (
+                    !e.nativeEvent.isComposing &&
+                    (e.key === 'Escape' || (e.key === 'Enter' && !e.shiftKey))
+                  ) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setActive(null);
+                  }
+                }}
+              />
+            ) : (
+              <div
+                className="office-slide-text"
+                data-editable={onEdit && o.field ? true : undefined}
+                onClick={onEdit && o.field ? () => setActive(o.field) : undefined}
+                style={{ ...style, opacity: onEdit && o.field && !value?.trim() ? 0.5 : 1 }}
+              >
+                {o.value}
+              </div>
+            )}
           </foreignObject>
         );
       })}

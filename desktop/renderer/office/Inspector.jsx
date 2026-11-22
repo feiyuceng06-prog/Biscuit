@@ -21,7 +21,7 @@ async function loadImage(file) {
     image.close();
   }
 }
-export function Inspector({ slide, edit, change, setChange, rewrite, busy, error }) {
+export function Inspector({ slide, edit, error }) {
   const updateItem = (id, patch) =>
     edit({ items: slide.items.map((item) => (item.id === id ? { ...item, ...patch } : item)) });
   const imageInput = async (e) => {
@@ -123,19 +123,6 @@ export function Inspector({ slide, edit, change, setChange, rewrite, busy, error
           onChange={(e) => edit({ notes: e.target.value })}
         />
       </label>
-      <hr />
-      <label>
-        让 AI 修改本页正文
-        <textarea
-          maxLength={800}
-          value={change}
-          onChange={(e) => setChange(e.target.value)}
-          placeholder="例如：把风险和应对措施写得更具体"
-        />
-      </label>
-      <button disabled={busy} onClick={rewrite}>
-        重新生成本页正文
-      </button>
     </aside>
   );
 }

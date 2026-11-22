@@ -7,12 +7,11 @@ import {
   generatedBody,
   applyBody,
   readDeck,
-  layouts,
 } from '../../electron/office/deck.mjs';
 import { requestPage } from './model.mjs';
 import { draft } from './drafts.mjs';
-import { Canvas } from './Canvas.jsx';
-import { Inspector } from './Inspector.jsx';
+import { Studio } from './Studio.jsx';
+
 import './office.css';
 
 export function Office({ workspace }) {
@@ -266,6 +265,7 @@ export function Office({ workspace }) {
         <dialog
           ref={dialog}
           className="office"
+          data-stage={stage}
           aria-label="办公"
           onCancel={() => {
             if (job.current) stop();
@@ -283,44 +283,32 @@ export function Office({ workspace }) {
             }
           }}
         >
-          <header className="office-bar">
-            <div>
-              <button onClick={() => enter('home')} disabled={!!busy || stage === 'home'}>
-                办公
-              </button>
-              {stage !== 'home' && (
-                <>
-                  <span>／</span>
-                  <strong>演示文稿</strong>
-                </>
-              )}
-            </div>
-            <div>
-              {stage === 'edit' && (
-                <>
-                  <button disabled={!!busy} onClick={() => enter('source')}>
-                    参考材料
-                  </button>
-                  <button disabled={!history.current.length || !!busy} onClick={undo}>
-                    撤销
-                  </button>
-                  <button onClick={() => save('json')}>保存源文件</button>
-                  <button className="office-primary" onClick={() => save('pptx')}>
-                    导出 PPTX
-                  </button>
-                </>
-              )}
-              <button
-                aria-label="关闭办公"
-                onClick={() => {
-                  if (job.current) stop();
-                  dialog.current.close();
-                }}
-              >
-                ×
-              </button>
-            </div>
-          </header>
+          {stage !== 'edit' && (
+            <header className="office-bar">
+              <div>
+                <button onClick={() => enter('home')} disabled={!!busy || stage === 'home'}>
+                  办公
+                </button>
+                {stage !== 'home' && (
+                  <>
+                    <span>／</span>
+                    <strong>演示文稿</strong>
+                  </>
+                )}
+              </div>
+              <div>
+                <button
+                  aria-label="关闭办公"
+                  onClick={() => {
+                    if (job.current) stop();
+                    dialog.current.close();
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            </header>
+          )}
           <input hidden ref={fileInput} type="file" accept=".json" onChange={openFile} />
           {stage === 'home' && (
             <main className="office-home">
@@ -415,88 +403,33 @@ export function Office({ workspace }) {
             </main>
           )}
           {stage === 'edit' && slide && (
-            <div className="office-editor">
-              <aside className="office-pages">
-                <h3>页面</h3>
-                {deck.slides.map((s, i) => (
-                  <button
-                    key={s.id}
-                    className="office-thumb"
-                    aria-current={s.id === slide.id ? 'page' : undefined}
-                    onClick={() => select(s.id)}
-                  >
-                    <Canvas slide={s} index={i} total={deck.slides.length} />
-                    <span>
-                      {i + 1}　{s.title || '无标题'}
-                    </span>
-                  </button>
-                ))}
-                <button
-                  disabled={!!busy || deck.slides.length >= 20}
-                  onClick={() => {
-                    const s = newSlide();
-                    commit({ ...deck, slides: [...deck.slides, s] });
-                    select(s.id);
-                  }}
-                >
-                  ＋ 添加页面
-                </button>
-              </aside>
-              <main className="office-canvas">
-                <label className="office-name">
-                  文稿名称
-                  <input
-                    maxLength={120}
-                    value={deck.title}
-                    onChange={(e) => commit({ ...deck, title: e.target.value })}
-                  />
-                </label>
-                <Canvas
-                  slide={slide}
-                  index={index}
-                  total={deck.slides.length}
-                  onEdit={(field) => {
-                    const input = document.getElementById('office-field-' + field);
-                    input?.focus();
-                    input?.select();
-                  }}
-                />
-                <div className="office-actions">
-                  <span>
-                    {index + 1} / {deck.slides.length} · {layouts[slide.layout]}
-                  </span>
-                  <button disabled={!index || !!busy} onClick={() => move(-1)}>
-                    前移
-                  </button>
-                  <button disabled={index === deck.slides.length - 1 || !!busy} onClick={() => move(1)}>
-                    后移
-                  </button>
-                  <button
-                    disabled={deck.slides.length < 2 || !!busy}
-                    onClick={() =>
-                      commit({ ...deck, slides: deck.slides.filter((s) => s.id !== slide.id) })
-                    }
-                  >
-                    删除本页
-                  </button>
-                </div>
-                {!!pending && (
-                  <button className="office-primary" disabled={!!busy} onClick={() => generate(true)}>
-                    生成剩余 {pending} 页正文
-                  </button>
-                )}
-              </main>
-              <Inspector
-                key={slide.id}
-                slide={slide}
-                edit={(patch) => editSlide(slide.id, patch)}
-                change={change}
-                setChange={setChange}
-                rewrite={() => generate(false)}
-                busy={!!busy}
-                error={setError}
-              />
-            </div>
+            <Studio
+              deck={deck}
+              index={index}
+              select={select}
+              commit={commit}
+              edit={(patch) => editSlide(slide.id, patch)}
+              onError={setError}
+              move={move}
+              busy={!!busy}
+              canUndo={history.current.length > 0 && !busy}
+              undo={undo}
+              save={save}
+              enter={enter}
+              close={() => {
+                if (job.current) stop();
+                dialog.current.close();
+              }}
+              add={() => {
+                const s = newSlide();
+                commit({ ...deck, slides: [...deck.slides, s] });
+                select(s.id);
+              }}
+              pending={pending}
+              generate={generate}
+              change={change}
+              setChange={setChange}
+            />
           )}
           {(error || busy || message) && (
             <footer className="office-status" role={error ? 'alert' : 'status'}>

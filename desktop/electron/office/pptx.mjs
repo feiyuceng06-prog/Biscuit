@@ -9,7 +9,7 @@ export async function powerPoint(raw) {
   ppt.title = deck.title;
   for (const [index, slide] of deck.slides.entries()) {
     const page = ppt.addSlide();
-    for (const o of composition(slide, index + 1, deck.slides.length)) {
+    for (const o of composition(slide, index + 1, deck.slides.length, deck.theme)) {
       const box = { x: o.x / 72, y: o.y / 72, w: o.w / 72, h: o.h / 72 };
       if (o.type === 'rect')
         page.addShape(ppt.ShapeType.rect, {
@@ -17,10 +17,17 @@ export async function powerPoint(raw) {
           line: { transparency: 100 },
           fill: { color: o.color },
         });
+      if (o.type === 'ellipse')
+        page.addShape(ppt.ShapeType.ellipse, {
+          ...box,
+          line: o.outline ? { color: o.color, width: 1.25 } : { transparency: 100 },
+          fill: o.outline ? { color: o.color, transparency: 100 } : { color: o.color },
+        });
       if (o.type === 'text')
         page.addText(o.value, {
           ...box,
           fontFace: 'Microsoft YaHei',
+          align: o.align || 'left',
           fontSize: o.size,
           bold: o.bold,
           color: o.color,
@@ -41,15 +48,16 @@ export async function powerPoint(raw) {
             showTitle: false,
             showValue: true,
             catAxisLabelFontSize: 13,
+            catAxisLabelColor: o.ink,
             valAxisHidden: true,
             valGridLine: { style: 'none' },
             catAxisLineShow: true,
-            catAxisLineColor: '9BAFAA',
+            catAxisLineColor: o.rule,
             catAxisLabelPos: 'low',
             dataLabelPosition: 'outEnd',
             dataLabelFormatCode: 'General',
-            dataLabelColor: '172F37',
-            chartColors: ['007E75'],
+            dataLabelColor: o.ink,
+            chartColors: [o.accent],
             showCatName: false,
             showBorder: false,
           },
