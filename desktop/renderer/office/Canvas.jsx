@@ -118,6 +118,14 @@ export function Canvas({ slide, index, total, theme, onEdit }) {
               <div
                 className="office-slide-text"
                 data-editable={onEdit && o.field ? true : undefined}
+                role={onEdit && o.field ? 'button' : undefined}
+                tabIndex={onEdit && o.field ? 0 : undefined}
+                onKeyDown={onEdit && o.field ? (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setActive(o.field);
+                  }
+                } : undefined}
                 onClick={onEdit && o.field ? () => setActive(o.field) : undefined}
                 style={{ ...style, opacity: onEdit && o.field && !value?.trim() ? 0.5 : 1 }}
               >

@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { ArrowRight, BriefcaseBusiness, FileText, FolderOpen, Plus, Upload, X, CircleAlert, Info, LoaderCircle } from 'lucide-react';
+import { Canvas } from './Canvas.jsx';
 import { createPortal } from 'react-dom';
 import {
   newDeck,
@@ -16,6 +18,8 @@ import { Studio } from './Studio.jsx';
 
 import './office.css';
 
+const sample = libraryExample(readingRoom);
+
 export function Office({ workspace }) {
   const [deck, setDeck] = useState(null),
     current = useRef(null),
@@ -26,6 +30,7 @@ export function Office({ workspace }) {
     [count, setCount] = useState(8),
     [change, setChange] = useState('');
   const [busy, setBusy] = useState(''),
+    [workingPage, setWorkingPage] = useState(null),
     [message, setMessage] = useState(''),
     [error, setError] = useState('');
   const dialog = useRef(null),
@@ -174,6 +179,7 @@ export function Office({ workspace }) {
       if (job.current === controller) {
         job.current = null;
         setBusy('');
+        setWorkingPage(null);
       }
     }
   }
@@ -210,6 +216,7 @@ export function Office({ workspace }) {
           skipped++;
           continue;
         }
+        setWorkingPage(active.id);
         setBusy(all ? '正在生成正文 ' + (i + 1) + ' / ' + targets.length : '正在重写本页正文');
         const response = await requestPage(
           {
@@ -289,11 +296,11 @@ export function Office({ workspace }) {
             <header className="office-bar">
               <div>
                 <button onClick={() => enter('home')} disabled={!!busy || stage === 'home'}>
-                  办公
+                  <BriefcaseBusiness size={18} aria-hidden="true" /> 办公
                 </button>
                 {stage !== 'home' && (
                   <>
-                    <span>／</span>
+                    <span aria-hidden="true">/</span>
                     <strong>演示文稿</strong>
                   </>
                 )}
@@ -306,7 +313,7 @@ export function Office({ workspace }) {
                     dialog.current.close();
                   }}
                 >
-                  ×
+                  <X size={18} aria-hidden="true" />
                 </button>
               </div>
             </header>
@@ -314,31 +321,33 @@ export function Office({ workspace }) {
           <input hidden ref={fileInput} type="file" accept=".json" onChange={openFile} />
           {stage === 'home' && (
             <main className="office-home">
-              <h1>办公</h1>
-              <section className="office-card">
-                <div className="office-card-art" aria-hidden="true">
-                  <i />
-                  <b />
-                  <em />
-                </div>
-                <h2>演示文稿</h2>
-                <p>从项目材料生成大纲，逐页编辑并导出 PowerPoint。</p>
-                <button className="office-primary" disabled={!ready} onClick={() => newPresentation()}>
-                  新建演示文稿
-                </button>
-                <button disabled={!ready} onClick={() => fileInput.current.click()}>
-                  打开源文件
-                </button>
-                <button disabled={!ready} onClick={() => newPresentation(true)}>打开示例文稿</button>
-              </section>
-              {deck && (
-                <section className="office-recent">
-                  <h3>本工作区草稿</h3>
-                  <button onClick={() => enter('edit')}>
-                    {deck.title} <span>{deck.slides.length} 页　→</span>
+              <div className="office-library">
+                <h1>演示文稿</h1>
+                <p className="office-lead">从参考材料起草，在画布上编辑，再导出 PowerPoint。</p>
+                <div className="office-actions">
+                  <button className="office-primary" disabled={!ready} onClick={() => newPresentation()}>
+                    <Plus size={17} />新建演示文稿
                   </button>
+                  <button disabled={!ready} onClick={() => fileInput.current.click()}>
+                    <FolderOpen size={17} />打开源文件
+                  </button>
+                </div>
+                <section className="office-recent" aria-label="本工作区草稿">
+                  <h2>本工作区草稿</h2>
+                  {deck ? (
+                    <button onClick={() => enter('edit')}>
+                      <FileText size={18} /><strong>{deck.title}</strong><small>{deck.slides.length} 页</small><ArrowRight size={16} />
+                    </button>
+                  ) : <p>{ready ? '暂无草稿。新建后可在这里继续编辑。' : '正在读取草稿…'}</p>}
                 </section>
-              )}
+              </div>
+              <section className="office-sample">
+                <h2>示例文稿</h2>
+                <button className="office-sample-link" aria-label="打开示例文稿" disabled={!ready} onClick={() => newPresentation(true)}>
+                  <Canvas slide={sample.slides[0]} index={0} total={sample.slides.length} theme={sample.theme} />
+                  <span><strong>{sample.title}</strong><small>{sample.slides.length} 页</small><ArrowRight size={16} /></span>
+                </button>
+              </section>
             </main>
           )}
           {stage === 'source' && deck && (
@@ -372,7 +381,7 @@ export function Office({ workspace }) {
                   />
                 </label>
                 <div className="office-actions">
-                  <button onClick={() => reportInput.current.click()}>导入材料</button>
+                  <button onClick={() => reportInput.current.click()}><Upload size={16} />导入材料</button>
                   <input
                     type="file"
                     hidden
@@ -392,7 +401,7 @@ export function Office({ workspace }) {
                     </select>
                   </label>
                 </div>
-                <div className="office-actions">
+                <div className="office-actions office-submit">
                   <button
                     className="office-primary"
                     disabled={!deck.brief.trim() && !deck.source.trim()}
@@ -414,6 +423,7 @@ export function Office({ workspace }) {
               edit={(patch) => editSlide(slide.id, patch)}
               onError={setError}
               move={move}
+              workingPage={workingPage}
               busy={!!busy}
               canUndo={history.current.length > 0 && !busy}
               undo={undo}
@@ -436,7 +446,8 @@ export function Office({ workspace }) {
           )}
           {(error || busy || message) && (
             <footer className="office-status" role={error ? 'alert' : 'status'}>
-              {error || busy || message}
+              {error ? <CircleAlert size={17} /> : busy ? <LoaderCircle className="office-loading" size={17} /> : <Info size={17} />}
+              <span>{error || busy || message}</span>
               {busy && <button onClick={stop}>停止生成</button>}
             </footer>
           )}
