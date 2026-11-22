@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "deckId": "70a6d298-1609-434a-8680-f8962738ce3f",
+  "pptxSha256": "c998183dd97809486e153f9deacf536c07fc76c911e06749c594a90acc8fd23a",
+  "status": "checked",
+  "critic": {
+    "status": "not_requested"
+  },
+  "pages": [
+    {
+      "slideId": "f7a4a487-06ec-49b2-8327-06d9a0ec0af7",
+      "png": "slide-1.png",
+      "sha256": "9939b1c911c4e6819aa030ca2d757a01c6447eb804d0e42d97deedd2bd5364ad"
+    },
+    {
+      "slideId": "8e397a85-37c8-4068-9093-1c8b96b3ea72",
+      "png": "slide-2.png",
+      "sha256": "f6a5ba2d44e707eca64fbcbf94fd4239e454a20f30df6c795846555453e600c5"
+    },
+    {
+      "slideId": "1c1e9ac7-c404-4082-a819-54d590568a29",
+      "png": "slide-3.png",
+      "sha256": "f2f1f5c33b126cb8ed706dd0791b300923eb8ed233ed274b0e31889474d4f5d8"
+    }
+  ],
+  "issues": [],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "46c665b09c7667367e7611bb0e27bbf41af81c5a8c0f9881aedd41632a4e06bb",
+  "fonts": [
+    "BAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     77  0",
+    "CAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     67  0",
+    "DAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes     97  0",
+    "EAAAAA+InterVariable                 TrueType          WinAnsi          yes yes yes    112  0",
+    "FAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     72  0",
+    "GAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes     92  0",
+    "HAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     87  0",
+    "IAAAAA+SourceHanSansCN-Regular       Type 1            Builtin          yes yes yes    102  0",
+    "JAAAAA+InterVariable                 TrueType          WinAnsi          yes yes yes    107  0",
+    "KAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     82  0"
+  ],
+  "contactSheet": "contact.png",
+  "durationMs": 1740
+}

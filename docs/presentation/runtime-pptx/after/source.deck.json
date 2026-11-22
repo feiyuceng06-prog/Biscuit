@@ -1,0 +1,544 @@
+{
+  "version": 1,
+  "id": "70a6d298-1609-434a-8680-f8962738ce3f",
+  "title": "馆务会排班简报",
+  "source": "PPTX 共 4 页\n\n== 第 1 页 ==\n是否延长周五开放时间\n馆务会\n本月只决定下一轮试点的排班范围。\n01 / 04\n【演讲者备注】\n设计对照样例。是否延长周五开放时间。材料来自固定输入 operations。\n\n== 第 2 页 ==\n阅览室贡献最多晚间到访\n人次\n【图表】\n类型：barChart\n系列 1：数值\n类别：[\"阅览室\", \"少儿借阅区\", \"地方文献查询台\", \"数字资源体验区\"]\n数值：[\"48\", \"26\", \"11\", \"7\"]\n02 / 04\n【演讲者备注】\n设计对照样例。阅览室贡献最多晚间到访。材料来自固定输入 operations。\n\n== 第 3 页 ==\n相同开放时长，两种排班成本\n仅开放阅览室\n现有值班表可覆盖延时一小时，借还服务维持原有时间。\n同步开放借还\n需要增加一名服务台人员，晚班交接必须由两人共同签字。\n03 / 04\n【演讲者备注】\n设计对照样例。相同开放时长，两种排班成本。材料来自固定输入 operations。\n\n== 第 4 页 ==\n分三周跟踪试点\n第 1 周\n记录晚间客流。\n第 2 周\n核对岗位负荷。\n第 3 周\n提交排班建议。\n04 / 04\n【演讲者备注】\n设计对照样例。分三周跟踪试点。材料来自固定输入 operations。",
+  "brief": "馆务会会前阅读。三页汇报，按以下顺序使用英文布局键：cover（是否延长周五开放时间）、chart（晚间到访按区域分布，从参考材料提取各区原名、单位与原始数值）、conclusion（试点的开放范围，分“值班安排”和“借还服务”两个自然段）。只使用参考材料中的经营事实，勿自行补充数据，备注标明来源为馆务会经营简报。生成大纲时请严格使用这个 JSON：{\"title\":\"馆务会排班简报\",\"slides\":[{\"title\":\"是否延长周五开放时间\",\"layout\":\"cover\"},{\"title\":\"晚间到访按区域分布\",\"layout\":\"chart\"},{\"title\":\"试点的开放范围\",\"layout\":\"conclusion\"}]}。生成单页正文时按系统的 items 和 notes 格式。",
+  "slides": [
+    {
+      "id": "f7a4a487-06ec-49b2-8327-06d9a0ec0af7",
+      "title": "是否延长周五开放时间",
+      "layout": "cover",
+      "items": [
+        {
+          "id": "2df8232b-c2be-4c40-bae9-dd990f0a42e3",
+          "label": "馆务会",
+          "text": "本月只决定下一轮试点的排班范围",
+          "value": 0
+        }
+      ],
+      "notes": "来源：馆务会经营简报。封面页，供馆务会会前阅读。",
+      "image": "",
+      "revision": 1,
+      "generated": true
+    },
+    {
+      "id": "8e397a85-37c8-4068-9093-1c8b96b3ea72",
+      "title": "晚间到访按区域分布",
+      "layout": "chart",
+      "items": [
+        {
+          "id": "4764e547-1c27-408d-8609-4d7d52a5de87",
+          "label": "阅览室",
+          "text": "晚间到访最多，是延时开放需重点保障的区域。",
+          "value": 48,
+          "valueKind": "chart-data"
+        },
+        {
+          "id": "e723dc46-47e8-4b34-97ef-bcea3476b8cc",
+          "label": "少儿借阅区",
+          "text": "",
+          "value": 26,
+          "valueKind": "chart-data"
+        },
+        {
+          "id": "5cfd8f7a-0ce6-4130-86dc-303bddbe9321",
+          "label": "地方文献查询台",
+          "text": "",
+          "value": 11,
+          "valueKind": "chart-data"
+        },
+        {
+          "id": "c3f0e0f6-1624-4bd7-a66c-ddaba0189d06",
+          "label": "数字资源体验区",
+          "text": "",
+          "value": 7,
+          "valueKind": "chart-data"
+        }
+      ],
+      "notes": "来源：馆务会经营简报。图表单位为 人次；阅览室贡献最多晚间到访。",
+      "image": "",
+      "revision": 1,
+      "generated": true,
+      "unit": "人次"
+    },
+    {
+      "id": "1c1e9ac7-c404-4082-a819-54d590568a29",
+      "title": "试点的开放范围",
+      "layout": "conclusion",
+      "items": [
+        {
+          "id": "f12276fc-8fb9-42f6-b30d-9d5e3d13f4ac",
+          "label": "值班安排",
+          "text": "仅开放阅览室时，现有值班表可覆盖延时一小时；同步开放借还则需增加一名服务台人员。",
+          "value": 0
+        },
+        {
+          "id": "cb6c0827-f1f6-4db8-bc5e-f9f60d7537f0",
+          "label": "借还服务",
+          "text": "仅开放阅览室时维持原有时间；同步开放借还时，晚班交接须由两人共同签字。",
+          "value": 0
+        }
+      ],
+      "notes": "来源：馆务会经营简报。依据材料第3页“相同开放时长，两种排班成本”：仅开放阅览室时现有值班表可覆盖延时一小时，借还服务维持原有时间；同步开放借还需增加一名服务台人员，晚班交接必须由两人共同签字。",
+      "image": "",
+      "revision": 1,
+      "generated": true
+    }
+  ],
+  "design": {
+    "version": 2,
+    "slidePlans": [
+      {
+        "slideId": "f7a4a487-06ec-49b2-8327-06d9a0ec0af7",
+        "sourceLayout": "cover",
+        "layout": "cover",
+        "variant": "cover-title",
+        "keyMessage": "是否延长周五开放时间",
+        "focalPoint": "headline",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "f7a4a487-06ec-49b2-8327-06d9a0ec0af7",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "2df8232b-c2be-4c40-bae9-dd990f0a42e3",
+            "slotId": "opening-detail-0-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "2df8232b-c2be-4c40-bae9-dd990f0a42e3",
+            "slotId": "opening-detail-0-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "f7a4a487-06ec-49b2-8327-06d9a0ec0af7",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "corporate-briefing"
+        ],
+        "selectionReason": "以全宽标题建立开场焦点。",
+        "candidates": [
+          {
+            "layout": "cover",
+            "variant": "cover-title",
+            "score": 56,
+            "feasible": true,
+            "reasons": [
+              "以全宽标题建立开场焦点。"
+            ]
+          },
+          {
+            "layout": "cover",
+            "variant": "cover-brief",
+            "score": 47,
+            "feasible": true,
+            "reasons": [
+              "把开场说明分行，给正文和配图留足空间。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": null,
+          "chart": null
+        }
+      },
+      {
+        "slideId": "8e397a85-37c8-4068-9093-1c8b96b3ea72",
+        "sourceLayout": "chart",
+        "layout": "chart",
+        "variant": "columns-focus",
+        "keyMessage": "晚间到访按区域分布",
+        "focalPoint": "chart",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "8e397a85-37c8-4068-9093-1c8b96b3ea72",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "8e397a85-37c8-4068-9093-1c8b96b3ea72",
+            "slotId": "chart-unit",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "4764e547-1c27-408d-8609-4d7d52a5de87",
+            "slotId": "chart-focus-category",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "4764e547-1c27-408d-8609-4d7d52a5de87",
+            "slotId": "chart-focus-value",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "4764e547-1c27-408d-8609-4d7d52a5de87",
+            "slotId": "chart-focus-note",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "4764e547-1c27-408d-8609-4d7d52a5de87",
+            "slotId": "chart-category",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "4764e547-1c27-408d-8609-4d7d52a5de87",
+            "slotId": "chart-value",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "e723dc46-47e8-4b34-97ef-bcea3476b8cc",
+            "slotId": "chart-category",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "e723dc46-47e8-4b34-97ef-bcea3476b8cc",
+            "slotId": "chart-value",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "5cfd8f7a-0ce6-4130-86dc-303bddbe9321",
+            "slotId": "chart-category",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "5cfd8f7a-0ce6-4130-86dc-303bddbe9321",
+            "slotId": "chart-value",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "c3f0e0f6-1624-4bd7-a66c-ddaba0189d06",
+            "slotId": "chart-category",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "c3f0e0f6-1624-4bd7-a66c-ddaba0189d06",
+            "slotId": "chart-value",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "8e397a85-37c8-4068-9093-1c8b96b3ea72",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "corporate-evidence"
+        ],
+        "selectionReason": "以共同零基线对照离散类别的原始数值。",
+        "candidates": [
+          {
+            "layout": "chart",
+            "variant": "columns-focus",
+            "score": 59,
+            "feasible": true,
+            "reasons": [
+              "以共同零基线对照离散类别的原始数值。"
+            ]
+          },
+          {
+            "layout": "chart",
+            "variant": "columns-details",
+            "score": 54,
+            "feasible": true,
+            "reasons": [
+              "以共同零基线对照离散类别的原始数值。 单独排列类别说明和其他内容。"
+            ]
+          },
+          {
+            "layout": "chart",
+            "variant": "bars-focus",
+            "score": 46,
+            "feasible": true,
+            "reasons": [
+              "水平条形给类别标签与排名留出空间。"
+            ]
+          },
+          {
+            "layout": "chart",
+            "variant": "bars-details",
+            "score": 41,
+            "feasible": true,
+            "reasons": [
+              "水平条形给类别标签与排名留出空间。 单独排列类别说明和其他内容。"
+            ]
+          }
+        ],
+        "chartEncoding": "columns",
+        "assetStrategy": {
+          "image": null,
+          "chart": {
+            "source": "slide-items",
+            "editable": true,
+            "encoding": "columns"
+          }
+        }
+      },
+      {
+        "slideId": "1c1e9ac7-c404-4082-a819-54d590568a29",
+        "sourceLayout": "conclusion",
+        "layout": "statement",
+        "variant": "statement-reading",
+        "keyMessage": "试点的开放范围",
+        "focalPoint": "headline",
+        "density": "balanced",
+        "contentBindings": [
+          {
+            "nodeId": "1c1e9ac7-c404-4082-a819-54d590568a29",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "f12276fc-8fb9-42f6-b30d-9d5e3d13f4ac",
+            "slotId": "reading-0-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "f12276fc-8fb9-42f6-b30d-9d5e3d13f4ac",
+            "slotId": "reading-0-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "cb6c0827-f1f6-4db8-bc5e-f9f60d7537f0",
+            "slotId": "reading-1-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "cb6c0827-f1f6-4db8-bc5e-f9f60d7537f0",
+            "slotId": "reading-1-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "1c1e9ac7-c404-4082-a819-54d590568a29",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "corporate-briefing"
+        ],
+        "selectionReason": "会前阅读使用连续的文字层级，保留原文并按段落分配空间。",
+        "candidates": [
+          {
+            "layout": "statement",
+            "variant": "statement-reading",
+            "score": 76.12,
+            "feasible": true,
+            "reasons": [
+              "会前阅读使用连续的文字层级，保留原文并按段落分配空间。"
+            ]
+          },
+          {
+            "layout": "statement",
+            "variant": "statement-led",
+            "score": 61,
+            "feasible": true,
+            "reasons": [
+              "放大主张，用独立区域承接正文。"
+            ]
+          },
+          {
+            "layout": "statement",
+            "variant": "statement-rows",
+            "score": 40,
+            "feasible": true,
+            "reasons": [
+              "用宽行保留小标题和较长正文。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": null,
+          "chart": null
+        }
+      }
+    ],
+    "direction": "corporate",
+    "rationale": "采用指定的设计方向。用清晰的左对齐、深蓝标题和有边界的内容区组织证据与对比。",
+    "rhythm": [
+      {
+        "slideId": "f7a4a487-06ec-49b2-8327-06d9a0ec0af7",
+        "layout": "cover",
+        "role": "opening",
+        "emphasis": "text",
+        "density": "sparse",
+        "referenceId": "corporate-briefing",
+        "rationale": "保持稳定的标题与页脚位置，便于浏览。"
+      },
+      {
+        "slideId": "8e397a85-37c8-4068-9093-1c8b96b3ea72",
+        "layout": "chart",
+        "role": "evidence",
+        "emphasis": "data",
+        "density": "sparse",
+        "referenceId": "corporate-evidence",
+        "rationale": "为证据安排一致的横向空间，保留可编辑图表。"
+      },
+      {
+        "slideId": "1c1e9ac7-c404-4082-a819-54d590568a29",
+        "layout": "conclusion",
+        "role": "conclusion",
+        "emphasis": "text",
+        "density": "balanced",
+        "referenceId": "corporate-briefing",
+        "rationale": "保持稳定的标题与页脚位置，便于浏览。"
+      }
+    ],
+    "tokens": {
+      "palette": {
+        "bg": "F7F9FD",
+        "ink": "152C48",
+        "soft": "465A72",
+        "tint": "E8EEF8",
+        "rule": "AABCD6",
+        "accent": "244F96",
+        "mutedBar": "7089AE"
+      },
+      "fonts": {
+        "title": {
+          "latin": "Segoe UI",
+          "cjk": "Noto Sans CJK SC",
+          "fallback": [
+            "Arial",
+            "Microsoft YaHei",
+            "PingFang SC",
+            "sans-serif"
+          ]
+        },
+        "body": {
+          "latin": "Segoe UI",
+          "cjk": "Noto Sans CJK SC",
+          "fallback": [
+            "Arial",
+            "Microsoft YaHei",
+            "PingFang SC",
+            "sans-serif"
+          ]
+        },
+        "data": {
+          "latin": "Segoe UI",
+          "cjk": "Noto Sans CJK SC",
+          "fallback": [
+            "Arial",
+            "Microsoft YaHei",
+            "PingFang SC",
+            "sans-serif"
+          ]
+        }
+      },
+      "typography": {
+        "cover": 58,
+        "title": 43,
+        "label": 23,
+        "body": 20,
+        "lineHeight": 1.24,
+        "boldTitle": true,
+        "display": 50,
+        "caption": 13,
+        "category": 14,
+        "value": 15
+      },
+      "spacing": {
+        "margin": 54,
+        "top": 40,
+        "gap": 22,
+        "gutter": 22,
+        "inset": 17,
+        "footer": 501
+      },
+      "graphics": {
+        "motif": "rail",
+        "rule": 2,
+        "marker": "square",
+        "cover": "rail",
+        "imageSide": "right",
+        "imageShare": 0.46,
+        "chartSide": "left",
+        "panelFill": true
+      },
+      "titleAlignment": "left",
+      "readingCopy": true,
+      "density": "balanced"
+    },
+    "preferences": {
+      "direction": "corporate",
+      "audience": "",
+      "setting": "馆务会会前阅读"
+    },
+    "visualThesis": "用清晰的左对齐、深蓝标题和有边界的内容区组织证据与对比。",
+    "imageryPolicy": "existing-slide-images",
+    "constraints": {
+      "aspectRatio": "16:9",
+      "preserveContent": true,
+      "nativeCharts": true
+    },
+    "negativeRules": [
+      "no-reference-content-or-assets",
+      "no-meaning-by-color-alone"
+    ],
+    "references": [
+      {
+        "id": "corporate-briefing",
+        "direction": "corporate",
+        "title": "经营简报",
+        "layouts": [
+          "cover",
+          "conclusion"
+        ],
+        "topics": [
+          "report",
+          "investor"
+        ],
+        "density": "balanced",
+        "source": "builtin",
+        "owner": "Biscuit project",
+        "rights": "Original text-only design study authored for Biscuit.",
+        "allowedLessons": [
+          "保持稳定的标题与页脚位置，便于浏览。"
+        ],
+        "prohibitedReuse": [
+          "slide text",
+          "imagery",
+          "logos",
+          "template or geometry"
+        ],
+        "legibility": 3,
+        "editability": 3
+      },
+      {
+        "id": "corporate-evidence",
+        "direction": "corporate",
+        "title": "指标与对照",
+        "layouts": [
+          "chart",
+          "comparison"
+        ],
+        "topics": [
+          "report",
+          "investor"
+        ],
+        "density": "dense",
+        "source": "builtin",
+        "owner": "Biscuit project",
+        "rights": "Original text-only design study authored for Biscuit.",
+        "allowedLessons": [
+          "为证据安排一致的横向空间，保留可编辑图表。"
+        ],
+        "prohibitedReuse": [
+          "slide text",
+          "imagery",
+          "logos",
+          "template or geometry"
+        ],
+        "legibility": 2,
+        "editability": 3
+      }
+    ]
+  }
+}
