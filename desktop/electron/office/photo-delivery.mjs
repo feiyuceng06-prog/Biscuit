@@ -30,9 +30,13 @@ async function publish(file, destination, previous) {
   }
 }
 
-export async function deliverPhotography(destination, raw, { backend, backendError } = {}) {
-  const start = performance.now();
+export function deliverPhotography(destination, raw, options) {
   const deck = readDeck(raw);
+  return deliverComposedPhotography(destination, deck, exportPages(deck), options);
+}
+
+export async function deliverComposedPhotography(destination, deck, pages, { backend, backendError } = {}) {
+  const start = performance.now();
   const output = await fs.mkdtemp(destination + '.review-');
   const reportPath = path.join(output, 'report.json');
   const rounds = [];
@@ -67,7 +71,7 @@ export async function deliverPhotography(destination, raw, { backend, backendErr
     return { pages, report, round };
   }
 
-  const initial = await render('initial', exportPages(deck), []);
+  const initial = await render('initial', pages, []);
   let best = initial;
   initial.round.accepted = Boolean(initial.round.pptx);
 

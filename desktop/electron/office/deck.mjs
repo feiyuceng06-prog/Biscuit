@@ -666,7 +666,8 @@ function plannedComposition(slide, page, total, tokens, plan) {
     const cjk = eastAsian.test(value);
     size = plannedSize(value, size, region, cjk);
     objects.push({ type: 'text', x, y, w, h, value, field, size, color, bold, align, ...(italic && { italic }),
-      ...(cjk && { wrapPadding: size }), lineHeight: type.lineHeight, ...fontFor(font, value) });
+      ...(cjk && { wrapPadding: size }), ...(field?.startsWith('caption-') && { fit: 'none' }),
+      lineHeight: type.lineHeight, ...fontFor(font, value) });
   }
 
   for (const { type: kind, color, ...region } of marks) {

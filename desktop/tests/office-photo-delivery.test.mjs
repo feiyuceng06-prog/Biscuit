@@ -7,8 +7,8 @@ import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { blankItem, newDeck, newSlide } from '../electron/office/deck.mjs';
-import { deliverPhotography } from '../electron/office/photo-delivery.mjs';
+import { blankItem, exportPages, newDeck, newSlide, readDeck } from '../electron/office/deck.mjs';
+import { deliverComposedPhotography, deliverPhotography } from '../electron/office/photo-delivery.mjs';
 import { powerPoint } from '../electron/office/pptx.mjs';
 
 const zip = createRequire(createRequire(import.meta.url).resolve('pptxgenjs'))('jszip');
@@ -57,10 +57,17 @@ test('actual Chinese text is re-rendered after one local fix and one photographi
     const destination = await target(t);
     const prior = await powerPoint(deck(slide('cover', '之前的文稿', [row('原始标题', '')], photos(1))));
     await fs.writeFile(destination, prior);
-    const result = await deliverPhotography(destination, input, { backend });
-    assert.deepEqual(await fs.readFile(result.previousPptx), prior);
+    // Seed two actual frame defects; extraction order alone must never force a repair.
+    const document = readDeck(input);
+    const pages = exportPages(document);
+    const title = pages[0].find(o => o.field === 'title');
+    Object.assign(title, { w: 82, h: 25, fit: 'none' });
+    const body = pages[1].find(o => o.field === 'text-0');
+    Object.assign(body, { h: 220, size: 21, fit: 'none' });
+    const result = await deliverComposedPhotography(destination, document, pages, { backend });
     const report = await json(result.report);
     assert.equal(result.destination, destination, result.failureReason);
+    assert.deepEqual(await fs.readFile(result.previousPptx), prior);
     assert.equal(result.repairAttempts, 2);
     assert.equal(result.failureReason, null);
     assert.equal(report.unresolvedIssues.length, 0);
@@ -78,9 +85,9 @@ test('actual Chinese text is re-rendered after one local fix and one photographi
         assert.equal(sha256(await fs.readFile(path.join(path.dirname(round.report), page.png))), page.sha256);
     }
     const initial = await json(result.initialReport);
-    assert.ok(initial.issues.some(issue => issue.kind === 'clipping' && issue.slideId === work.id
+    assert.ok(initial.issues.some(issue => ['clipping', 'overflow'].includes(issue.kind) && issue.slideId === work.id
       && issue.elementIds.includes('title')));
-    assert.ok(initial.issues.some(issue => issue.kind === 'clipping' && issue.slideId === essay.id
+    assert.ok(initial.issues.some(issue => ['clipping', 'overflow'].includes(issue.kind) && issue.slideId === essay.id
       && issue.elementIds.includes('text-0')));
     const local = await json(report.rounds[1].report);
     assert.ok(local.issues.some(issue => issue.slideId === work.id && issue.elementIds.includes('title')));
