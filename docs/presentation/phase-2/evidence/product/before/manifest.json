@@ -1,0 +1,343 @@
+{
+  "deckId": "product",
+  "brief": "为图书馆读者讲述夜读笔记产品的由来和使用方式。",
+  "slides": [
+    {
+      "slideId": "product-1",
+      "layout": "cover",
+      "objects": [
+        {
+          "type": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "color": "FFFFFF",
+          "id": "rect-1"
+        },
+        {
+          "type": "image",
+          "x": 415,
+          "y": 66,
+          "w": 544,
+          "h": 409,
+          "id": "image-2"
+        },
+        {
+          "type": "text",
+          "x": 47,
+          "y": 64,
+          "w": 336,
+          "h": 58,
+          "value": "夜读笔记",
+          "size": 17,
+          "color": "2449AD",
+          "field": "label-0",
+          "bold": true,
+          "serif": false,
+          "align": "left",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 44,
+          "y": 155,
+          "w": 350,
+          "h": 180,
+          "value": "把阅览室带回家",
+          "size": 58,
+          "color": "14181E",
+          "field": "title",
+          "bold": true,
+          "serif": false,
+          "align": "left",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 47,
+          "y": 368,
+          "w": 335,
+          "h": 100,
+          "value": "闭馆以后，继续读完借来的那本书。",
+          "size": 22,
+          "color": "454D5A",
+          "field": "text-0",
+          "bold": false,
+          "serif": false,
+          "align": "left",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 808,
+          "y": 504,
+          "w": 99,
+          "h": 23,
+          "value": "01 / 03",
+          "size": 12,
+          "color": "454D5A",
+          "field": null,
+          "bold": false,
+          "serif": false,
+          "align": "right",
+          "id": "text-6"
+        }
+      ]
+    },
+    {
+      "slideId": "product-2",
+      "layout": "image",
+      "objects": [
+        {
+          "type": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "color": "FFFFFF",
+          "id": "rect-1"
+        },
+        {
+          "type": "text",
+          "x": 51,
+          "y": 39,
+          "w": 855,
+          "h": 106,
+          "value": "下一次从这句话读起",
+          "size": 44,
+          "color": "14181E",
+          "field": "title",
+          "bold": true,
+          "serif": false,
+          "align": "left",
+          "id": "title"
+        },
+        {
+          "type": "image",
+          "x": 507,
+          "y": 157,
+          "w": 400,
+          "h": 301,
+          "id": "image-3"
+        },
+        {
+          "type": "rect",
+          "x": 53,
+          "y": 161,
+          "w": 408,
+          "h": 1,
+          "color": "CFD6E0",
+          "id": "rect-4"
+        },
+        {
+          "type": "text",
+          "x": 53,
+          "y": 171,
+          "w": 408,
+          "h": 55.13,
+          "value": "书签",
+          "size": 24,
+          "color": "14181E",
+          "field": "label-0",
+          "bold": true,
+          "serif": false,
+          "align": "left",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 53,
+          "y": 227.13,
+          "w": 408,
+          "h": 74.41999999999999,
+          "value": "记下页码和一句原文。",
+          "size": 20,
+          "color": "454D5A",
+          "field": "text-0",
+          "bold": false,
+          "serif": false,
+          "align": "left",
+          "id": "text-0"
+        },
+        {
+          "type": "rect",
+          "x": 53,
+          "y": 310,
+          "w": 408,
+          "h": 1,
+          "color": "CFD6E0",
+          "id": "rect-7"
+        },
+        {
+          "type": "text",
+          "x": 53,
+          "y": 320,
+          "w": 408,
+          "h": 55.13,
+          "value": "重读",
+          "size": 24,
+          "color": "14181E",
+          "field": "label-1",
+          "bold": true,
+          "serif": false,
+          "align": "left",
+          "id": "label-1"
+        },
+        {
+          "type": "text",
+          "x": 53,
+          "y": 376.13,
+          "w": 408,
+          "h": 74.41999999999999,
+          "value": "从上次的批注回到那一页。",
+          "size": 20,
+          "color": "454D5A",
+          "field": "text-1",
+          "bold": false,
+          "serif": false,
+          "align": "left",
+          "id": "text-1"
+        },
+        {
+          "type": "text",
+          "x": 808,
+          "y": 504,
+          "w": 99,
+          "h": 23,
+          "value": "02 / 03",
+          "size": 12,
+          "color": "454D5A",
+          "field": null,
+          "bold": false,
+          "serif": false,
+          "align": "right",
+          "id": "text-10"
+        }
+      ]
+    },
+    {
+      "slideId": "product-3",
+      "layout": "conclusion",
+      "objects": [
+        {
+          "type": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "color": "FFFFFF",
+          "id": "rect-1"
+        },
+        {
+          "type": "text",
+          "x": 49,
+          "y": 73,
+          "w": 343,
+          "h": 356,
+          "value": "内测先回答两个问题",
+          "size": 52,
+          "color": "14181E",
+          "field": "title",
+          "bold": true,
+          "serif": false,
+          "align": "left",
+          "id": "title"
+        },
+        {
+          "type": "rect",
+          "x": 457,
+          "y": 68,
+          "w": 448,
+          "h": 1,
+          "color": "CFD6E0",
+          "id": "rect-3"
+        },
+        {
+          "type": "text",
+          "x": 457,
+          "y": 78,
+          "w": 448,
+          "h": 73.445,
+          "value": "记录",
+          "size": 24,
+          "color": "14181E",
+          "field": "label-0",
+          "bold": true,
+          "serif": false,
+          "align": "left",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 457,
+          "y": 152.445,
+          "w": 448,
+          "h": 103.13,
+          "value": "读者能否在离馆前保存书签？",
+          "size": 20,
+          "color": "454D5A",
+          "field": "text-0",
+          "bold": false,
+          "serif": false,
+          "align": "left",
+          "id": "text-0"
+        },
+        {
+          "type": "rect",
+          "x": 457,
+          "y": 266.5,
+          "w": 448,
+          "h": 1,
+          "color": "CFD6E0",
+          "id": "rect-6"
+        },
+        {
+          "type": "text",
+          "x": 457,
+          "y": 276.5,
+          "w": 448,
+          "h": 73.445,
+          "value": "找回",
+          "size": 24,
+          "color": "14181E",
+          "field": "label-1",
+          "bold": true,
+          "serif": false,
+          "align": "left",
+          "id": "label-1"
+        },
+        {
+          "type": "text",
+          "x": 457,
+          "y": 350.945,
+          "w": 448,
+          "h": 103.13,
+          "value": "下次阅读能否找到原文位置？",
+          "size": 20,
+          "color": "454D5A",
+          "field": "text-1",
+          "bold": false,
+          "serif": false,
+          "align": "left",
+          "id": "text-1"
+        },
+        {
+          "type": "text",
+          "x": 808,
+          "y": 504,
+          "w": 99,
+          "h": 23,
+          "value": "03 / 03",
+          "size": 12,
+          "color": "454D5A",
+          "field": null,
+          "bold": false,
+          "serif": false,
+          "align": "right",
+          "id": "text-9"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "deckId": "business",
+  "pptxSha256": "599d1ccf6bbac9bd23e35c76e57f0b08196819c7c83eea57e39baa48fa6e01df",
+  "status": "needs_review",
+  "critic": {
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "business-1",
+      "business-2",
+      "business-3"
+    ]
+  },
+  "pages": [
+    {
+      "slideId": "business-1",
+      "png": "slide-1.png",
+      "sha256": "6f6e9c9e21cb468dc121e7f727031746a6d220310372fddf8b62fd2c81d46373"
+    },
+    {
+      "slideId": "business-2",
+      "png": "slide-2.png",
+      "sha256": "58ebda3e0b9a8a7f6077fa89468810c90403e0e30a9d1c8e390e02b31c6fd57e"
+    },
+    {
+      "slideId": "business-3",
+      "png": "slide-3.png",
+      "sha256": "e0195470ebaf6d6dd5664581ed7736ebd4504599ec19b1f264f599ce792d955f"
+    }
+  ],
+  "issues": [
+    {
+      "slideId": "business-1",
+      "elementIds": [],
+      "kind": "weak-hierarchy",
+      "severity": "minor",
+      "confidence": 0.7,
+      "evidence": "封面页面(y 0–540)上半部仅标题与标签，下半蓝色条仅一行说明；内容与页码在底部拥挤，主标题占位过大而信息密度低。",
+      "suggestedChange": "缩小标题字号并上移，将底部说明与页码间距拉开，或补充副标题以平衡版式。",
+      "source": "vision-model",
+      "issueId": "vision:business-1:1"
+    },
+    {
+      "slideId": "business-1",
+      "elementIds": [
+        "text-6"
+      ],
+      "kind": "poor-alignment",
+      "severity": "suggestion",
+      "confidence": 0.6,
+      "evidence": "页码“01 / 03”位于蓝色条右下角(x 808–907,y 504–527)，与左侧说明文字“讨论是否继续周五延时开放”基线不一致，视觉上偏下。",
+      "suggestedChange": "将页码与说明文字基线对齐，或统一右下角内边距。",
+      "source": "vision-model",
+      "issueId": "vision:business-1:2"
+    },
+    {
+      "slideId": "business-3",
+      "elementIds": [
+        "text-0",
+        "text-1"
+      ],
+      "kind": "crowded",
+      "severity": "minor",
+      "confidence": 0.63,
+      "evidence": "Both comparison body lines in text-0 ('沿用现有班次。') and text-1 ('需要服务台另排晚班。') sit in tall 129px frames with roughly 70% unused vertical space, while the headline gaps remain uneven, making the two-column body look top-heavy and loosely arranged.",
+      "suggestedChange": "Tighten the body frame heights to the single-line content or vertically center the two body lines against their headings for an even comparison layout.",
+      "source": "vision-model",
+      "issueId": "vision:business-3:1"
+    },
+    {
+      "slideId": "business-3",
+      "elementIds": [
+        "rect-6",
+        "rect-3",
+        "rect-7"
+      ],
+      "kind": "inconsistent-style",
+      "severity": "minor",
+      "confidence": 0.7,
+      "evidence": "The right comparison column has a full-height tinted panel rect-6 (EAF0FA, y=168–456), but the left column has no panel behind its content, and both the left divider rect-3 (x=53–468) and right divider rect-7 (x=480–895) span different visual treatments.",
+      "suggestedChange": "Add an equivalent light panel behind the left column or remove the right tinted panel so the two options are visually balanced.",
+      "source": "vision-model",
+      "issueId": "vision:business-3:2"
+    }
+  ],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "bae6e2bf2d20cb64953e6f92c6837be58dc74f802f811b2177a2d414b803da7f",
+  "fonts": [
+    "BAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     92  0",
+    "CAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes    112  0",
+    "DAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     82  0",
+    "EAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     62  0",
+    "FAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes    107  0",
+    "GAAAAA+SourceHanSansCN-Regular       Type 1            Builtin          yes yes yes    122  0",
+    "HAAAAA+Arial                         TrueType          WinAnsi          yes yes yes    117  0",
+    "IAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     67  0",
+    "JAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     97  0",
+    "KAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     87  0",
+    "LAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     72  0",
+    "MAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     77  0",
+    "NAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes    102  0"
+  ],
+  "contactSheet": "contact.png",
+  "durationMs": 15429
+}

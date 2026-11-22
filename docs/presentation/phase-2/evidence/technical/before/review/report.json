@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "deckId": "technical",
+  "pptxSha256": "eda6dead70cad6417b74a60aa531e8519f42be5e23ec71c558e8158e1b8a4ddc",
+  "status": "needs_review",
+  "critic": {
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "technical-1",
+      "technical-2",
+      "technical-3"
+    ]
+  },
+  "pages": [
+    {
+      "slideId": "technical-1",
+      "png": "slide-1.png",
+      "sha256": "78477fdcb312c3a2cef363fc63301301bf9593fc191a3f83aed1fb82d858d86a"
+    },
+    {
+      "slideId": "technical-2",
+      "png": "slide-2.png",
+      "sha256": "51ab09c2c279bfb2a3a8a0590c66aec03b7b88a6e41494e87b54eb20036f8be8"
+    },
+    {
+      "slideId": "technical-3",
+      "png": "slide-3.png",
+      "sha256": "b00b825a85e4fd79cf8bc553cc2a342936c59ce198edac32adfcf704812fef01"
+    }
+  ],
+  "issues": [
+    {
+      "slideId": "technical-2",
+      "elementIds": [
+        "title"
+      ],
+      "kind": "clipping",
+      "severity": "major",
+      "confidence": 0.95,
+      "evidence": "Title glyphs at the right end of '文稿在本机经过三个步骤' extend beyond the 855px text frame into the blank area right of x=906; the final character '骤' appears cut at the frame edge in the full slide view.",
+      "suggestedChange": "Reduce title font size to fit within the 855px width or widen the title frame.",
+      "source": "vision-model",
+      "issueId": "vision:technical-2:1"
+    },
+    {
+      "slideId": "technical-2",
+      "elementIds": [
+        "text-1"
+      ],
+      "kind": "poor-alignment",
+      "severity": "minor",
+      "confidence": 0.9,
+      "evidence": "Body text '写入可编辑的原生对象。' under '导出' begins at x=337, while the first body text '核对版本与页标识。' begins at x=53; the middle column's description is visibly offset to the right relative to its label.",
+      "suggestedChange": "Align the description text-frame x-position with its corresponding label and marker (x=337) so all three columns share consistent left alignment.",
+      "source": "vision-model",
+      "issueId": "vision:technical-2:2"
+    },
+    {
+      "slideId": "technical-2",
+      "elementIds": [
+        "rect-3"
+      ],
+      "kind": "poor-alignment",
+      "severity": "minor",
+      "confidence": 0.85,
+      "evidence": "The horizontal timeline line spans x=54 to x=634, but the third marker rect-10 is placed at x=621, causing the rightmost marker to sit 13px left of the line's end rather than at its terminus.",
+      "suggestedChange": "Extend rect-3 to end at the center of the third marker (around x=626) or reposition rect-10 to x=634 to align with the line end.",
+      "source": "vision-model",
+      "issueId": "vision:technical-2:3"
+    },
+    {
+      "slideId": "technical-3",
+      "elementIds": [
+        "rect-6",
+        "text-1"
+      ],
+      "kind": "inconsistent-style",
+      "severity": "minor",
+      "confidence": 0.9,
+      "evidence": "右侧“预览失败”栏从左基线（x≈480）到右边缘（x≈895）均为浅蓝色填充，而左侧“导出失败”栏无填充；分隔线（rect-3、rect-7）在两侧均存在，但只有右侧栏有背景块，使一对比较项视觉权重不对等。",
+      "suggestedChange": "为左右两栏使用一致的背景处理（同时加浅色底或同时不加），保持比较布局对称。",
+      "source": "vision-model",
+      "issueId": "vision:technical-3:1"
+    },
+    {
+      "slideId": "technical-3",
+      "elementIds": [
+        "text-0",
+        "text-1"
+      ],
+      "kind": "weak-hierarchy",
+      "severity": "suggestion",
+      "confidence": 0.7,
+      "evidence": "两栏正文（text-0、text-1）均为24px、#454D5A，与标题37px黑色形成较大跳跃，正文下方两栏各有约120px空白（text-0底≈437、text-1底≈437，而右栏背景块底≈456），信息密度偏低。",
+      "suggestedChange": "可适度增大正文行距或补充失败处理要点（如重试/回滚），或缩小右栏背景块高度使内容与容器比例更协调。",
+      "source": "vision-model",
+      "issueId": "vision:technical-3:2"
+    }
+  ],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "a55648503214c6d6cb55e091025b7552e9b2a26f24d9bbe1256608a9485bef92",
+  "fonts": [
+    "BAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     82  0",
+    "CAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     97  0",
+    "DAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     77  0",
+    "EAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     62  0",
+    "FAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     72  0",
+    "GAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     92  0",
+    "HAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     67  0",
+    "IAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     87  0"
+  ],
+  "contactSheet": "contact.png",
+  "durationMs": 15821
+}

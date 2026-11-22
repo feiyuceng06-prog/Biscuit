@@ -1,0 +1,208 @@
+{
+  "version": 1,
+  "direction": "technology",
+  "rationale": "技术语境或参考的明暗特征适合采用高对比线框。用高对比配色、精准的线框和等宽数字突出图表与流程。",
+  "rhythm": [
+    {
+      "slideId": "technical-1",
+      "layout": "cover",
+      "role": "opening",
+      "emphasis": "text",
+      "density": "sparse",
+      "referenceId": "technology-opening",
+      "rationale": "用框角和单一亮色建立视觉识别。"
+    },
+    {
+      "slideId": "technical-2",
+      "layout": "timeline",
+      "role": "mechanism",
+      "emphasis": "text",
+      "density": "sparse",
+      "referenceId": "technology-sequence",
+      "rationale": "用规则的节点和细线表示时间顺序。"
+    },
+    {
+      "slideId": "technical-3",
+      "layout": "comparison",
+      "role": "contrast",
+      "emphasis": "text",
+      "density": "sparse",
+      "referenceId": "technology-evidence",
+      "rationale": "用对齐的数值和高对比标签帮助扫描数据。"
+    }
+  ],
+  "tokens": {
+    "palette": {
+      "bg": "101D27",
+      "ink": "EFF8FD",
+      "soft": "B5CBD8",
+      "tint": "1B3140",
+      "rule": "466B7A",
+      "accent": "78DBEF",
+      "mutedBar": "648EA0"
+    },
+    "fonts": {
+      "title": {
+        "latin": "Arial",
+        "cjk": "Noto Sans CJK SC",
+        "fallback": [
+          "Microsoft YaHei",
+          "PingFang SC",
+          "sans-serif"
+        ]
+      },
+      "body": {
+        "latin": "Arial",
+        "cjk": "Noto Sans CJK SC",
+        "fallback": [
+          "Microsoft YaHei",
+          "PingFang SC",
+          "sans-serif"
+        ]
+      },
+      "data": {
+        "latin": "Courier New",
+        "cjk": "Noto Sans CJK SC",
+        "fallback": [
+          "Microsoft YaHei",
+          "PingFang SC",
+          "monospace"
+        ]
+      }
+    },
+    "typography": {
+      "cover": 60,
+      "title": 45,
+      "label": 22,
+      "body": 20,
+      "lineHeight": 1.22,
+      "boldTitle": true,
+      "display": 52,
+      "caption": 13,
+      "category": 13,
+      "value": 16
+    },
+    "spacing": {
+      "margin": 60,
+      "top": 44,
+      "gap": 24,
+      "gutter": 24,
+      "inset": 15,
+      "footer": 501
+    },
+    "graphics": {
+      "motif": "corner",
+      "rule": 2,
+      "marker": "square",
+      "cover": "frame",
+      "imageSide": "left",
+      "imageShare": 0.48,
+      "chartSide": "left",
+      "panelFill": true
+    },
+    "titleAlignment": "left",
+    "density": "balanced"
+  },
+  "preferences": {
+    "direction": "auto",
+    "audience": "平台工程师",
+    "setting": "系统架构技术评审"
+  },
+  "visualThesis": "用高对比配色、精准的线框和等宽数字突出图表与流程。",
+  "imageryPolicy": "existing-slide-images",
+  "constraints": {
+    "aspectRatio": "16:9",
+    "preserveContent": true,
+    "nativeCharts": true
+  },
+  "negativeRules": [
+    "no-reference-content-or-assets",
+    "no-meaning-by-color-alone"
+  ],
+  "references": [
+    {
+      "id": "technology-opening",
+      "direction": "technology",
+      "title": "技术发布",
+      "layouts": [
+        "cover",
+        "conclusion"
+      ],
+      "topics": [
+        "technology",
+        "launch"
+      ],
+      "density": "sparse",
+      "source": "builtin",
+      "owner": "Biscuit project",
+      "rights": "Original text-only design study authored for Biscuit.",
+      "allowedLessons": [
+        "用框角和单一亮色建立视觉识别。"
+      ],
+      "prohibitedReuse": [
+        "slide text",
+        "imagery",
+        "logos",
+        "template or geometry"
+      ],
+      "legibility": 3,
+      "editability": 3
+    },
+    {
+      "id": "technology-sequence",
+      "direction": "technology",
+      "title": "过程与实例",
+      "layouts": [
+        "timeline",
+        "image"
+      ],
+      "topics": [
+        "technology",
+        "teaching"
+      ],
+      "density": "balanced",
+      "source": "builtin",
+      "owner": "Biscuit project",
+      "rights": "Original text-only design study authored for Biscuit.",
+      "allowedLessons": [
+        "用规则的节点和细线表示时间顺序。"
+      ],
+      "prohibitedReuse": [
+        "slide text",
+        "imagery",
+        "logos",
+        "template or geometry"
+      ],
+      "legibility": 3,
+      "editability": 3
+    },
+    {
+      "id": "technology-evidence",
+      "direction": "technology",
+      "title": "产品系统指标",
+      "layouts": [
+        "chart",
+        "comparison"
+      ],
+      "topics": [
+        "technology",
+        "report"
+      ],
+      "density": "dense",
+      "source": "builtin",
+      "owner": "Biscuit project",
+      "rights": "Original text-only design study authored for Biscuit.",
+      "allowedLessons": [
+        "用对齐的数值和高对比标签帮助扫描数据。"
+      ],
+      "prohibitedReuse": [
+        "slide text",
+        "imagery",
+        "logos",
+        "template or geometry"
+      ],
+      "legibility": 2,
+      "editability": 3
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 import { app, BrowserWindow, ipcMain, dialog, shell, Notification, Menu, net } from 'electron';
 import { randomUUID } from 'node:crypto';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { readDeck } from './office/deck.mjs';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
@@ -145,6 +147,21 @@ ipcMain.handle('feiyu:window', (event, action) => {
 ipcMain.handle('feiyu:command', async (event, command, args = {}) => {
   trusted(event);
   switch (command) {
+    case 'presentation_design_enabled': return process.env.presentation_design_engine === '1';
+    case 'presentation_reference': {
+      const selected = await dialog.showOpenDialog(win, { title: '分析参考演示文稿', properties: ['openFile'],
+        filters: [{ name: 'PowerPoint', extensions: ['pptx'] }] });
+      if (selected.canceled || !selected.filePaths.length) return null;
+      const backend = resolveBackend({ packaged: app.isPackaged, resources: process.resourcesPath, root });
+      try {
+        const { stdout } = await promisify(execFile)(backend.command,
+          [...backend.args, '--presentation-reference', selected.filePaths[0]],
+          { windowsHide: true, timeout: 15000, maxBuffer: 65536, env: { ...process.env, PYTHONUTF8: '1' } });
+        return JSON.parse(stdout);
+      } catch {
+        throw Error('无法读取参考 PPTX。请选择有效的 .pptx 文件（最多 16 MB、100 页）。');
+      }
+    }
     case 'presentation_save': {
       const deck = readDeck(args.deck);
       if (!['pptx', 'json'].includes(args.format)) throw Error('未知文件格式');

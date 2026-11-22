@@ -14,6 +14,8 @@ import { requestPage } from './model.mjs';
 import { draft } from './drafts.mjs';
 import { libraryExample } from './library-example.mjs';
 import readingRoom from './reading-room.jpg';
+import { planDesign } from '../../electron/office/director.mjs';
+import { DesignBrief } from './DesignBrief.jsx';
 import { Studio } from './Studio.jsx';
 
 import './office.css';
@@ -33,6 +35,7 @@ export function Office({ workspace }) {
     [workingPage, setWorkingPage] = useState(null),
     [message, setMessage] = useState(''),
     [error, setError] = useState('');
+  const autoDesign = useRef(false);
   const dialog = useRef(null),
     fileInput = useRef(null),
     reportInput = useRef(null),
@@ -42,20 +45,24 @@ export function Office({ workspace }) {
 
   useEffect(() => {
     let live = true;
-    if (workspace)
-      draft(workspace)
-        .then((value) => {
-          if (live && value) {
-            current.current = readDeck(value);
-            setDeck(current.current);
-          }
-        })
-        .catch(() => {
-          if (live) setError('无法读取本地草稿，可打开已保存的源文件');
-        })
-        .finally(() => {
-          if (live) setReady(true);
-        });
+    setReady(false);
+    const flag = window.feiyuDesktop.core.invoke('presentation_design_enabled').catch(() => false);
+    const saved = (workspace ? draft(workspace) : Promise.resolve(null)).catch(() => {
+      if (live) setError('无法读取本地草稿，可打开已保存的源文件');
+      return null;
+    });
+    Promise.all([flag, saved]).then(([enabled, value]) => {
+      if (!live) return;
+      autoDesign.current = enabled === true;
+      if (value) {
+        current.current = readDeck(value);
+        setDeck(current.current);
+      }
+    }).catch(() => {
+      if (live) setError('无法读取本地草稿，可打开已保存的源文件');
+    }).finally(() => {
+      if (live) setReady(true);
+    });
     return () => {
       live = false;
       job.current?.abort();
@@ -65,6 +72,9 @@ export function Office({ workspace }) {
   function commit(next, record = true) {
     const previous = current.current;
     if (next === previous) return;
+    if (next.design && next.design === previous?.design) {
+      next = { ...next, design: planDesign(next, next.design.preferences) };
+    }
     if (record && previous) history.current = [...history.current.slice(-29), previous];
     current.current = next;
     setDeck(next);
@@ -118,6 +128,7 @@ export function Office({ workspace }) {
     )
       return;
     const next = example ? libraryExample(readingRoom) : newDeck();
+    if (!example && autoDesign.current) next.design = planDesign(next);
     history.current = [];
     commit(next, false);
     select(next.slides[0].id);
@@ -408,6 +419,7 @@ export function Office({ workspace }) {
                     </select>
                   </label>
                 </div>
+                <DesignBrief key={deck.id} deck={deck} commit={commit} onError={setError} disabled={!!busy} />
                 <div className="office-actions office-submit">
                   <button
                     className="office-primary"

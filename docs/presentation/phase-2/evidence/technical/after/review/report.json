@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "deckId": "technical",
+  "pptxSha256": "66e4137b87afe54e72a35ae1279f457b77285334dacb57b242ec1d3694a2e631",
+  "status": "needs_review",
+  "critic": {
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "technical-1",
+      "technical-2",
+      "technical-3"
+    ]
+  },
+  "pages": [
+    {
+      "slideId": "technical-1",
+      "png": "slide-1.png",
+      "sha256": "eba561079dd3bea3e980a2dbb675d42fe3bf3e545f9a8e9352af8bef6a6ff9f2"
+    },
+    {
+      "slideId": "technical-2",
+      "png": "slide-2.png",
+      "sha256": "f6a7787ac846d9fa5396753814a83e7247b49eb081aece96caa3a15ddc4a149e"
+    },
+    {
+      "slideId": "technical-3",
+      "png": "slide-3.png",
+      "sha256": "ba58d52cdda22082e210f213ae3681c893ec12e33a0f39578aae936468d5f460"
+    }
+  ],
+  "issues": [
+    {
+      "slideId": "technical-3",
+      "elementIds": [
+        "text-0",
+        "text-1"
+      ],
+      "kind": "crowded",
+      "severity": "major",
+      "confidence": 0.85,
+      "evidence": "The body text in the left and right columns ('保留草稿，提示文件写入失败。' / '保留已导出文稿并标记无法检查。') sits at y≈340 while the text frames extend to y≈463, leaving a large empty area below; the content is concentrated in the top 40% of each column while the canvas below is empty.",
+      "suggestedChange": "Reduce each body text frame height to fit its single line, or add explanatory detail (failure cause, retry action, boundary of responsibility) to fill the columns; this balances the layout and directly supports the brief's '失败处理' and '接口边界' requirements.",
+      "source": "vision-model",
+      "issueId": "vision:technical-3:1"
+    },
+    {
+      "slideId": "technical-3",
+      "elementIds": [
+        "title",
+        "label-0",
+        "label-1"
+      ],
+      "kind": "weak-hierarchy",
+      "severity": "major",
+      "confidence": 0.8,
+      "evidence": "The title '把异常定位到具体步骤' dominates the top half at 45pt, while the two comparison labels '导出失败' and '预览失败' are 22pt and their body text is 20pt—a nearly 2:1 size gap that leaves the real comparison content visually subordinate to a generic heading.",
+      "suggestedChange": "Increase the label size or weight relative to the title (or reduce the title to ~36pt) so the two failure-mode columns read as the primary content of this comparison slide.",
+      "source": "vision-model",
+      "issueId": "vision:technical-3:2"
+    }
+  ],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "097ecd759f90d28c83529801023cb093c40d95bf01efbf76e1278f5f1d20ca48",
+  "fonts": [
+    "BAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     84  0",
+    "CAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     89  0",
+    "DAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes     94  0",
+    "EAAAAA+CourierNew                    TrueType          WinAnsi          yes yes yes     99  0",
+    "FAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     79  0",
+    "GAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     74  0"
+  ],
+  "contactSheet": "contact.png",
+  "durationMs": 13460
+}

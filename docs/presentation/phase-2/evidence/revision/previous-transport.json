@@ -1,0 +1,142 @@
+[
+  {
+    "case": "business",
+    "version": "after",
+    "pages": [
+      {
+        "slideId": "business-1",
+        "sha256": "1826f290255b490523a9b962b50fcc8a88388cb5c11ef9e76564f3fa007fe231",
+        "status": "unavailable",
+        "errorType": "JSONDecodeError"
+      },
+      {
+        "slideId": "business-2",
+        "sha256": "0e35ca60e2548b901debc2f9eded06df7097e9ad0b62384a415d60c2a5ace3b9",
+        "status": "unavailable",
+        "errorType": "JSONDecodeError"
+      },
+      {
+        "slideId": "business-3",
+        "sha256": "8554ed0f5565a7f8f08014e7e7524702bdd2cb44d1be23961352eed8ed8efe8a",
+        "status": "unavailable",
+        "errorType": "JSONDecodeError"
+      }
+    ]
+  },
+  {
+    "case": "business",
+    "version": "before",
+    "pages": [
+      {
+        "slideId": "business-1",
+        "sha256": "6f6e9c9e21cb468dc121e7f727031746a6d220310372fddf8b62fd2c81d46373",
+        "status": "checked"
+      },
+      {
+        "slideId": "business-2",
+        "sha256": "58ebda3e0b9a8a7f6077fa89468810c90403e0e30a9d1c8e390e02b31c6fd57e",
+        "status": "unavailable",
+        "errorType": "JSONDecodeError"
+      },
+      {
+        "slideId": "business-3",
+        "sha256": "e0195470ebaf6d6dd5664581ed7736ebd4504599ec19b1f264f599ce792d955f",
+        "status": "unavailable",
+        "errorType": "JSONDecodeError"
+      }
+    ]
+  },
+  {
+    "case": "product",
+    "version": "after",
+    "pages": [
+      {
+        "slideId": "product-1",
+        "sha256": "a5a297787c59ec2de11c7ff573900c60b9243b7fbcc12ae796069511e2239276",
+        "status": "unavailable",
+        "errorType": "JSONDecodeError"
+      },
+      {
+        "slideId": "product-2",
+        "sha256": "1d48a827c423760906b55aceed302b5b48738c8003f813cb02d16c36a44bff4a",
+        "status": "unavailable",
+        "errorType": "JSONDecodeError"
+      },
+      {
+        "slideId": "product-3",
+        "sha256": "cef17e8de0bc2d6f50ef746017bf3e3e3f9f5020c2397390981d6e87557c22db",
+        "status": "unavailable",
+        "errorType": "JSONDecodeError"
+      }
+    ]
+  },
+  {
+    "case": "product",
+    "version": "before",
+    "pages": [
+      {
+        "slideId": "product-1",
+        "sha256": "f127b68ab744a5654dff168dca19d1bc0799099fece809714fe4a9577819e76b",
+        "status": "checked"
+      },
+      {
+        "slideId": "product-2",
+        "sha256": "656054313240568d3b01de268e9af7082f5c1dff6b776cfcf5c2830540c40c6a",
+        "status": "unavailable",
+        "errorType": "JSONDecodeError"
+      },
+      {
+        "slideId": "product-3",
+        "sha256": "2baf0b357f3a9d3a7f2e4a267d1faef4a3f9aa053d1a3f94fc86b80e9ed6febc",
+        "status": "checked"
+      }
+    ]
+  },
+  {
+    "case": "technical",
+    "version": "after",
+    "pages": [
+      {
+        "slideId": "technical-1",
+        "sha256": "eba561079dd3bea3e980a2dbb675d42fe3bf3e545f9a8e9352af8bef6a6ff9f2",
+        "status": "unavailable",
+        "errorType": "JSONDecodeError"
+      },
+      {
+        "slideId": "technical-2",
+        "sha256": "f6a7787ac846d9fa5396753814a83e7247b49eb081aece96caa3a15ddc4a149e",
+        "status": "unavailable",
+        "errorType": "JSONDecodeError"
+      },
+      {
+        "slideId": "technical-3",
+        "sha256": "ba58d52cdda22082e210f213ae3681c893ec12e33a0f39578aae936468d5f460",
+        "status": "unavailable",
+        "errorType": "JSONDecodeError"
+      }
+    ]
+  },
+  {
+    "case": "technical",
+    "version": "before",
+    "pages": [
+      {
+        "slideId": "technical-1",
+        "sha256": "78477fdcb312c3a2cef363fc63301301bf9593fc191a3f83aed1fb82d858d86a",
+        "status": "unavailable",
+        "errorType": "JSONDecodeError"
+      },
+      {
+        "slideId": "technical-2",
+        "sha256": "51ab09c2c279bfb2a3a8a0590c66aec03b7b88a6e41494e87b54eb20036f8be8",
+        "status": "unavailable",
+        "errorType": "JSONDecodeError"
+      },
+      {
+        "slideId": "technical-3",
+        "sha256": "b00b825a85e4fd79cf8bc553cc2a342936c59ce198edac32adfcf704812fef01",
+        "status": "checked"
+      }
+    ]
+  }
+]
