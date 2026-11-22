@@ -1,0 +1,100 @@
+[
+  {
+    "deck": "launch",
+    "identicalPages": 1,
+    "durationMs": 1355,
+    "status": "checked",
+    "issues": []
+  },
+  {
+    "deck": "pitch",
+    "identicalPages": 1,
+    "durationMs": 1342,
+    "status": "checked",
+    "issues": []
+  },
+  {
+    "deck": "monthly",
+    "identicalPages": 5,
+    "durationMs": 2192,
+    "status": "needs_review",
+    "issues": [
+      [
+        "monthly-2",
+        "overflow"
+      ]
+    ]
+  },
+  {
+    "deck": "academic",
+    "identicalPages": 1,
+    "durationMs": 1290,
+    "status": "checked",
+    "issues": []
+  },
+  {
+    "deck": "lesson",
+    "identicalPages": 1,
+    "durationMs": 1331,
+    "status": "checked",
+    "issues": []
+  },
+  {
+    "deck": "architecture",
+    "identicalPages": 1,
+    "durationMs": 1336,
+    "status": "checked",
+    "issues": []
+  },
+  {
+    "deck": "analysis",
+    "identicalPages": 1,
+    "durationMs": 1299,
+    "status": "checked",
+    "issues": []
+  },
+  {
+    "deck": "speech",
+    "identicalPages": 1,
+    "durationMs": 1402,
+    "status": "checked",
+    "issues": []
+  },
+  {
+    "deck": "mixed",
+    "identicalPages": 1,
+    "durationMs": 1280,
+    "status": "checked",
+    "issues": []
+  },
+  {
+    "deck": "dense",
+    "identicalPages": 1,
+    "durationMs": 1389,
+    "status": "checked",
+    "issues": []
+  },
+  {
+    "deck": "brand",
+    "identicalPages": 1,
+    "durationMs": 1497,
+    "status": "checked",
+    "issues": []
+  },
+  {
+    "deck": "exception",
+    "identicalPages": 1,
+    "durationMs": 1377,
+    "status": "blocked",
+    "issues": [
+      [
+        "exception-1",
+        "low-resolution"
+      ],
+      [
+        "exception-1",
+        "missing-glyph"
+      ]
+    ]
+  }
+]

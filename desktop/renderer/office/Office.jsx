@@ -159,7 +159,14 @@ export function Office({ workspace }) {
         format,
         deck: current.current,
       });
-      if (destination) setMessage('已保存到 ' + destination);
+      if (typeof destination === 'string') setMessage('已保存到 ' + destination);
+      else if (destination) {
+        const label = { checked: '基础检查通过', needs_review: '需复核', blocked: '发现阻断问题',
+          preview_unavailable: '无法完成预览检查' }[destination.status];
+        setMessage('已保存到 ' + destination.destination + ' · ' + label +
+          (destination.critic === 'checked' ? ' · 已完成模型视觉审查' : ' · 模型视觉审查未完成') +
+          (destination.report ? ' · 报告 ' + destination.report : ''));
+      }
     } catch (e) {
       setError(e.message);
     }

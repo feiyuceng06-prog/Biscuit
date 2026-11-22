@@ -51,6 +51,10 @@ def main() -> int:
     # Desktop uses this exact flag. Configure before argparse diagnostics or any
     # agent setup; a positional prompt after -- must not change terminal I/O.
     argv = sys.argv[1:]
+    if len(argv) == 3 and argv[0] == '--presentation-review':
+        from .presentation_review import review
+        review(Path(argv[1]), Path(argv[2]))
+        return 0
     if '--serve' in argv[:argv.index('--') if '--' in argv else len(argv)]:
         configure_serve_stdio()
     parser = argparse.ArgumentParser(prog="feiyu", description="Feiyu 编程助手")

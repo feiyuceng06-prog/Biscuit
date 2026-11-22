@@ -123,6 +123,13 @@ export async function checkOffice(application, page, workspace, output, fixture)
     if (button === '保存源文件') await page.getByRole('button', { name: '文稿选项' }).click();
     await page.getByRole('button', { name: button, exact: true }).click();
     await expect(page.locator('.office-status')).toContainText(filename, { timeout: 15000 });
+    if (filename.endsWith('.pptx') && process.env.presentation_design_engine === '1') {
+      const folder = (await fs.readdir(workspace)).find(name => name.startsWith(filename + '.review-'));
+      const report = JSON.parse(await fs.readFile(path.join(workspace, folder, 'report.json')));
+      expect(['checked', 'needs_review', 'blocked']).toContain(report.status);
+      expect(report.pages).toHaveLength(8);
+      await expect(page.locator('.office-status')).toContainText('report.json');
+    }
     expect((await fs.stat(out)).size).toBeGreaterThan(100);
     await fs.copyFile(out, path.join(output, filename));
   }

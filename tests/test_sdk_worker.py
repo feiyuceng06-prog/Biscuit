@@ -21,7 +21,7 @@ class SDKWorkerTests(unittest.TestCase):
     setUp = test_runcontrol.ParentControlTests.setUp
 
     @contextlib.contextmanager
-    def server(self, mode='silent', anthropic=False, errors=(), error_text='cache unsupported'):
+    def server(self, mode='silent', anthropic=False, errors=(), error_text='cache unsupported', ask_text='answer'):
         received, stop = threading.Event(), threading.Event()
         requests = []
         class Handler(BaseHTTPRequestHandler):
@@ -46,10 +46,10 @@ class SDKWorkerTests(unittest.TestCase):
                     self.end_headers()
                     if not body.get('stream'):
                         value = ({'id':'m', 'type':'message','role':'assistant','model':'offline',
-                            'content':[{'type':'text','text':'answer'}], 'stop_reason':'end_turn',
+                            'content':[{'type':'text','text':ask_text}], 'stop_reason':'end_turn',
                             'usage':{'input_tokens':10,'output_tokens':2}} if anthropic else {
                             'id':'c','object':'chat.completion','created':0,'model':'offline',
-                            'choices':[{'index':0,'message':{'role':'assistant','content':'answer'},'finish_reason':'stop'}],
+                            'choices':[{'index':0,'message':{'role':'assistant','content':ask_text},'finish_reason':'stop'}],
                             'usage':{'prompt_tokens':10,'completion_tokens':2,'total_tokens':12}})
                         self.wfile.write(json.dumps(value).encode()); return
                     if anthropic:

@@ -33,4 +33,4 @@ python -m unittest discover -s tests -p test_presentations.py
 (cd desktop && node --test tests/office-deck.test.mjs)
 ```
 
-briefs.json 固定 12 份用途、内容及布局，月报使用项目内虚构夜读素材。export.mjs 固定 ID 和模型输出，仍调用生产 powerPoint。耗时分别测量 PPTX 写入缓冲区与 LibreOffice/Poppler 生成并校验全部 PNG 的时间，不包含模型响应。封面、数据页和异常输入均保留在样本内。输出目录含完整草稿、PPTX、PDF、PNG 以及逐页哈希，evidence 目录保留实测汇总与代表性样例。
+briefs.json 固定 12 份用途、内容及布局，月报使用项目内虚构夜读素材。export.mjs 固定 ID 和模型输出，仍调用生产 powerPoint。耗时分别测量 PPTX 写入缓冲区与 LibreOffice/Poppler 生成并校验全部 PNG 的时间，不包含模型响应。封面、数据页和异常输入均保留在样本内。输出目录含完整草稿、PPTX、PDF、PNG 以及逐页哈希，docs/presentation/evidence 目录保留实测汇总与代表性样例。

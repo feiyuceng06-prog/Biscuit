@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "deckId": "monthly",
+  "pptxSha256": "e95b77733f12cf3bd8ce44f94a49f72e0bdeea5f2f8793195b1a2b11f5556443",
+  "status": "blocked",
+  "critic": {
+    "status": "not_requested"
+  },
+  "pages": [
+    {
+      "slideId": "monthly-1",
+      "png": "slide-1.png",
+      "sha256": "e37e964c0e1a93779f6e2de1dabf4875fecf57e3fab092fee9b31eed61a8b013"
+    },
+    {
+      "slideId": "monthly-2",
+      "png": "slide-2.png",
+      "sha256": "225ccf39303c4f6ca6b9a080a8e69ab00e73030c175cb6ba6b0c2ea75b8ebabe"
+    },
+    {
+      "slideId": "monthly-3",
+      "png": "slide-3.png",
+      "sha256": "685152bce393f13e5a2d07a1484042afa911b027419de0bb1da5544ce361eb71"
+    },
+    {
+      "slideId": "monthly-4",
+      "png": "slide-4.png",
+      "sha256": "bb31111f875db40791eec1e6df10d4ae1cd758e39fd462dcb30bc547022e45e6"
+    },
+    {
+      "slideId": "monthly-5",
+      "png": "slide-5.png",
+      "sha256": "a720a79e989dfe3be2bd3c7ab4c8996be03a4d23a801473f9a759f10852f0283"
+    }
+  ],
+  "issues": [
+    {
+      "issueId": "monthly-1:label-0:low-contrast",
+      "slideId": "monthly-1",
+      "elementIds": [
+        "label-0"
+      ],
+      "kind": "low-contrast",
+      "severity": "blocker",
+      "confidence": 1,
+      "evidence": "Foreground/background contrast 1.00:1, minimum 3:1.",
+      "suggestedChange": "Choose a higher-contrast foreground or solid background.",
+      "source": "deterministic"
+    },
+    {
+      "issueId": "monthly-1:title:missing-text",
+      "slideId": "monthly-1",
+      "elementIds": [
+        "title"
+      ],
+      "kind": "missing-text",
+      "severity": "blocker",
+      "confidence": 1,
+      "evidence": "Native text differs from the source composition.",
+      "suggestedChange": "Restore the original characters before export.",
+      "source": "deterministic"
+    },
+    {
+      "issueId": "monthly-1:title:clipping",
+      "slideId": "monthly-1",
+      "elementIds": [
+        "title"
+      ],
+      "kind": "clipping",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "Expected text is incomplete in PDF words inside the PPTX text box.",
+      "suggestedChange": "Inspect the PNG and enlarge or reposition the text box.",
+      "source": "deterministic"
+    },
+    {
+      "issueId": "monthly-1:text-0:overflow",
+      "slideId": "monthly-1",
+      "elementIds": [
+        "text-0"
+      ],
+      "kind": "overflow",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "PDF word bounding box extends 81.6 pt beyond the text frame.",
+      "suggestedChange": "Check surrounding content in the PNG and increase the text frame.",
+      "source": "deterministic"
+    },
+    {
+      "issueId": "monthly-1:text-7:out-of-bounds",
+      "slideId": "monthly-1",
+      "elementIds": [
+        "text-7"
+      ],
+      "kind": "out-of-bounds",
+      "severity": "blocker",
+      "confidence": 1,
+      "evidence": "PPTX box (950.0, 504.0, 1049.0, 527.0) pt exceeds 960 × 540 pt.",
+      "suggestedChange": "Move the object inside the slide.",
+      "source": "deterministic"
+    },
+    {
+      "issueId": "monthly-1:text-7:clipping",
+      "slideId": "monthly-1",
+      "elementIds": [
+        "text-7"
+      ],
+      "kind": "clipping",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "Expected text is incomplete in PDF words inside the PPTX text box.",
+      "suggestedChange": "Inspect the PNG and enlarge or reposition the text box.",
+      "source": "deterministic"
+    },
+    {
+      "issueId": "monthly-2:text-2:overflow",
+      "slideId": "monthly-2",
+      "elementIds": [
+        "text-2"
+      ],
+      "kind": "overflow",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "PDF word bounding box extends 17.0 pt beyond the text frame.",
+      "suggestedChange": "Check surrounding content in the PNG and increase the text frame.",
+      "source": "deterministic"
+    }
+  ],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "02c95be53dbe2d5f2e7b4a3dadc629818b218164751c599dd187a8d3f3940c90",
+  "contactSheet": "contact.png",
+  "fonts": [
+    "BAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes    115  0",
+    "CAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes    170  0",
+    "DAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes    125  0",
+    "EAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes    110  0",
+    "FAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes    175  0",
+    "GAAAAA+SourceHanSansCN-Regular       Type 1            Builtin          yes yes yes    160  0",
+    "HAAAAA+Arial                         TrueType          WinAnsi          yes yes yes    155  0",
+    "IAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes    135  0",
+    "JAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes    120  0",
+    "KAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes    165  0",
+    "LAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes    140  0",
+    "MAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes    130  0",
+    "NAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes    180  0",
+    "OAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes    150  0",
+    "PAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes    145  0",
+    "QAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes    105  0"
+  ],
+  "durationMs": 2233
+}
