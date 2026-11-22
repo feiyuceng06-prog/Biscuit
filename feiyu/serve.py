@@ -948,6 +948,12 @@ class Server:
             self.agent.refresh_credits(fresh=True, then=self.push_status)
         elif op == "models":
             self.push_models()
+        elif op == "presentation":
+            ticket = str(msg.get("ticket", ""))[:80]
+            if self.trusted and len(line) <= MAX_TEXT and not self.busy:
+                self.inbox.put(("presentation", line))
+            else:
+                self.proto.send("presentation", ticket=ticket, error="工作台忙碌或请求不可用")
         elif op == "model_list":
             # 要出网、可能十几秒 —— 不能堵着读线程（esc、停止都从这儿进来），另起一个
             threading.Thread(target=self.model_list, args=(msg,), daemon=True).start()
@@ -1046,6 +1052,18 @@ class Server:
                     row = json.loads(text)
                     self.toggle(str(row.get("kind") or ""), str(row.get("name") or ""),
                                 bool(row.get("on")))
+                elif op == "presentation":
+                    from .presentations import generate
+                    from .runcontrol import RunStopped
+                    request = json.loads(text)
+                    ticket = str(request.get("ticket", ""))[:80]
+                    try:
+                        result = generate(self.agent, request)
+                        self.proto.send("presentation", ticket=ticket, data=result)
+                    except RunStopped as exc:
+                        self.proto.send("presentation", ticket=ticket, error="生成已中止：" + exc.reason)
+                    except Exception as exc:
+                        self.proto.send("presentation", ticket=ticket, error=str(exc))
                 elif op == "command" or text.startswith("/"):
                     self.run_command(text if text.startswith("/") else "/" + text)
                 else:
