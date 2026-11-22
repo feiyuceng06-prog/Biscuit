@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "deckId": "unassigned",
+  "pptxSha256": "4112c71346e6cac54b30334c0316834fe16b876b5f85cd50105a0d0b834907f8",
+  "status": "blocked",
+  "critic": {
+    "status": "not_requested"
+  },
+  "pages": [
+    {
+      "slideId": "s",
+      "png": "slide-1.png",
+      "sha256": "0911274dd4ba329ac71daf69465b51846a720275212847a645838399365bd316"
+    }
+  ],
+  "issues": [
+    {
+      "issueId": "s:page:missing-glyph",
+      "slideId": "s",
+      "elementIds": [],
+      "kind": "missing-glyph",
+      "severity": "blocker",
+      "confidence": 1,
+      "evidence": "PDF page uses a placeholder font: LastResortHE-Regular.",
+      "suggestedChange": "Inspect the PNG and use a font that covers the original characters.",
+      "source": "deterministic"
+    }
+  ],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "84e0f618454c53b57b59ce5365497bb11633444e244039b2ec2d13711f72c1f1",
+  "fonts": [
+    "BAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     25  0",
+    "CAAAAA+LastResortHE-Regular          TrueType          WinAnsi          yes yes yes     15  0",
+    "DAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     20  0"
+  ],
+  "contactSheet": "contact.png",
+  "durationMs": 1822
+}

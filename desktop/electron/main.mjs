@@ -165,6 +165,14 @@ ipcMain.handle('feiyu:command', async (event, command, args = {}) => {
         await fsp.writeFile(temp, data, { flag: 'wx', mode: 0o600 });
         await fsp.rename(temp, destination);
       } finally { await fsp.rm(temp, { force: true }); }
+      if (pptx && process.env.presentation_design_engine === '1') {
+        try {
+          const backend = resolveBackend({ packaged: app.isPackaged, resources: process.resourcesPath, root });
+          return await (await import('./office/review.mjs')).reviewExport(destination, data, deck, backend);
+        } catch {
+          return { destination, status: 'preview_unavailable' };
+        }
+      }
       return destination;
     }
     case 'update_state': return updateState;

@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "deckId": "exception",
+  "pptxSha256": "9bde29f9de35d60ee2f9493f92398985f2d1908751b60448deb39bb3597e8b0e",
+  "status": "blocked",
+  "critic": {
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "exception-1"
+    ]
+  },
+  "pages": [
+    {
+      "slideId": "exception-1",
+      "png": "slide-1.png",
+      "sha256": "0e157cd6c469941477b65eb9c8eb2ca6ecdfa3f4f2fcfacbb2fef963692e1e03"
+    }
+  ],
+  "issues": [
+    {
+      "issueId": "exception-1:image-3:low-resolution",
+      "slideId": "exception-1",
+      "elementIds": [
+        "image-3"
+      ],
+      "kind": "low-resolution",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "2 × 2 px in 400 × 301 pt.",
+      "suggestedChange": "Supply a larger source image.",
+      "source": "deterministic"
+    },
+    {
+      "issueId": "exception-1:text-0:missing-glyph",
+      "slideId": "exception-1",
+      "elementIds": [
+        "text-0"
+      ],
+      "kind": "missing-glyph",
+      "severity": "blocker",
+      "confidence": 1,
+      "evidence": "Rendered text contains a replacement or control character.",
+      "suggestedChange": "Check the original character and font coverage.",
+      "source": "deterministic"
+    },
+    {
+      "slideId": "exception-1",
+      "elementIds": [
+        "text-0"
+      ],
+      "kind": "missing-glyph",
+      "severity": "blocker",
+      "confidence": 1,
+      "evidence": "Right body text at x=498, y=282: the string '原文含替代符 �，需要人工核对。' renders a replacement/tofu glyph after '替代符'.",
+      "suggestedChange": "Replace the unsupported character with the correct original codepoint and verify SourceHanSansSC covers it.",
+      "source": "vision-model",
+      "issueId": "vision:exception-1:1"
+    },
+    {
+      "slideId": "exception-1",
+      "elementIds": [
+        "image-3"
+      ],
+      "kind": "image-mismatch",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "Left image area at x=52, y=157 is a flat orange block; the 2×2 px source stretched to 400×301 pt provides no discernible sample content.",
+      "suggestedChange": "Supply a higher-resolution source image that shows the intended sample content.",
+      "source": "vision-model",
+      "issueId": "vision:exception-1:2"
+    }
+  ],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "02be1bdcac9c363d2bdcc5931869534598a646b5f5daad8b3c45567ddf38683e",
+  "contactSheet": "contact.png",
+  "fonts": [
+    "BAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     32  0",
+    "CAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     37  0",
+    "DAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     42  0",
+    "EAAAAA+LastResortHE-Regular          TrueType          WinAnsi          yes yes yes     22  0",
+    "FAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     27  0"
+  ],
+  "durationMs": 18481
+}

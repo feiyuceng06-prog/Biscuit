@@ -1,5 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 import {
   newDeck,
   newSlide,
@@ -8,6 +12,7 @@ import {
   readDeck,
   composition,
 } from '../electron/office/deck.mjs';
+import { reviewExport } from '../electron/office/review.mjs';
 
 test('single-slide regeneration preserves seven siblings, concurrent title and a newer body', () => {
   const deck = newDeck();
@@ -91,4 +96,54 @@ test('chart units survive reopening and only the annotated category is highlight
   }
   slide.unit = {};
   assert.throws(() => readDeck(deck));
+});
+
+test('a review worker that exits without a valid report leaves an explicit fallback', async (t) => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'biscuit-review-test-'));
+  t.after(() => fs.rm(dir, { recursive: true, force: true }));
+  const destination = path.join(dir, 'saved.pptx');
+  const bytes = Buffer.from('saved export snapshot');
+  await fs.writeFile(destination, bytes);
+  const deck = newDeck();
+  const incomplete = { schemaVersion: 1, deckId: deck.id, status: 'checked', pages: [], issues: [],
+    pptxSha256: createHash('sha256').update(bytes).digest('hex'), critic: { status: 'not_requested' } };
+  for (const script of [
+    `require('node:fs').writeFileSync(require('node:path').join(process.argv.at(-1), 'report.json'),
+      JSON.stringify(${JSON.stringify(incomplete)}))`,
+    '',
+    'require("node:fs").writeFileSync(require("node:path").join(process.argv.at(-1), "report.json"), "{}")',
+  ]) {
+    const result = await reviewExport(destination, bytes, deck, {
+      command: process.execPath, args: ['-e', script, '--'],
+    });
+    assert.equal(result.status, 'preview_unavailable');
+    const report = JSON.parse(await fs.readFile(result.report, 'utf8'));
+    assert.equal(report.deckId, deck.id);
+    assert.equal(report.pptxSha256, createHash('sha256').update(bytes).digest('hex'));
+    assert.deepEqual(report.pages, []);
+    assert.deepEqual(await fs.readFile(destination), bytes);
+  }
+});
+
+test('a failed review worker preserves a valid preflight report for the saved bytes', async (t) => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'biscuit-review-test-'));
+  t.after(() => fs.rm(dir, { recursive: true, force: true }));
+  const destination = path.join(dir, 'saved.pptx');
+  const bytes = Buffer.from('saved export snapshot');
+  await fs.writeFile(destination, bytes);
+  const deck = newDeck();
+  const checkpoint = {
+    schemaVersion: 1, deckId: deck.id, status: 'needs_review', pptxSha256: createHash('sha256').update(bytes).digest('hex'),
+    critic: { status: 'unavailable' }, pages: [{ slideId: deck.slides[0].id, png: 'slide-1.png' }], issues: [],
+  };
+  const script = `
+    require('node:fs').writeFileSync(require('node:path').join(process.argv.at(-1), 'report.json'),
+      JSON.stringify(${JSON.stringify(checkpoint)}));
+    process.exit(124);
+  `;
+  const result = await reviewExport(destination, bytes, deck, {
+    command: process.execPath, args: ['-e', script, '--'],
+  });
+  assert.equal(result.status, 'needs_review');
+  assert.deepEqual(JSON.parse(await fs.readFile(result.report, 'utf8')), checkpoint);
 });

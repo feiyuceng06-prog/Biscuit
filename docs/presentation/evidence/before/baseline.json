@@ -1,0 +1,114 @@
+[
+  {
+    "deck": "launch",
+    "pages": 1,
+    "exportMs": 14,
+    "renderMs": 1325,
+    "pngSha256": [
+      "c512f84c6f6333cf87edf86f2d78775512f85569d6185d2813d477f4ebbe7a47"
+    ]
+  },
+  {
+    "deck": "pitch",
+    "pages": 1,
+    "exportMs": 2,
+    "renderMs": 639,
+    "pngSha256": [
+      "9bc8bec54c38ee58fae728438bf130e29b0974bc5a9aa5eea5585dc4b266c9b2"
+    ]
+  },
+  {
+    "deck": "monthly",
+    "pages": 5,
+    "exportMs": 15,
+    "renderMs": 1492,
+    "pngSha256": [
+      "e4352983f7e73d216e8f7b505a96a38a75da4a1b4885081ed4e87e988be0671e",
+      "225ccf39303c4f6ca6b9a080a8e69ab00e73030c175cb6ba6b0c2ea75b8ebabe",
+      "685152bce393f13e5a2d07a1484042afa911b027419de0bb1da5544ce361eb71",
+      "bb31111f875db40791eec1e6df10d4ae1cd758e39fd462dcb30bc547022e45e6",
+      "a720a79e989dfe3be2bd3c7ab4c8996be03a4d23a801473f9a759f10852f0283"
+    ]
+  },
+  {
+    "deck": "academic",
+    "pages": 1,
+    "exportMs": 2,
+    "renderMs": 691,
+    "pngSha256": [
+      "7a7b4d2a51430f87c6b2b8f45dce7cc052b162fc2e862bd79a0ec59af4bc0f15"
+    ]
+  },
+  {
+    "deck": "lesson",
+    "pages": 1,
+    "exportMs": 2,
+    "renderMs": 692,
+    "pngSha256": [
+      "cd0744126ac61c63efb5d62849c6e545ac1b4f0b475223eaa0880a312cfeb622"
+    ]
+  },
+  {
+    "deck": "architecture",
+    "pages": 1,
+    "exportMs": 1,
+    "renderMs": 745,
+    "pngSha256": [
+      "75b2572e627218e4a88bcef98866591c00f738008898ea813c47718860b120e5"
+    ]
+  },
+  {
+    "deck": "analysis",
+    "pages": 1,
+    "exportMs": 3,
+    "renderMs": 695,
+    "pngSha256": [
+      "99727f6bef3e658bc4f713b40bd1a011a00af802f952873e4e7f20e1db39ed07"
+    ]
+  },
+  {
+    "deck": "speech",
+    "pages": 1,
+    "exportMs": 1,
+    "renderMs": 747,
+    "pngSha256": [
+      "441a68f5cd56d701e80cd73baa21d076fe5c44118f971d50767517f2dbe38a00"
+    ]
+  },
+  {
+    "deck": "mixed",
+    "pages": 1,
+    "exportMs": 1,
+    "renderMs": 695,
+    "pngSha256": [
+      "ee27be5c192a7c32b7dcf51a1a794db9cf00a9ce9f2559eb362ed769831e67b1"
+    ]
+  },
+  {
+    "deck": "dense",
+    "pages": 1,
+    "exportMs": 2,
+    "renderMs": 744,
+    "pngSha256": [
+      "169af50ca7e824a27c873286ba39bede62cdce6f9e8ca5227612e369b6eacd68"
+    ]
+  },
+  {
+    "deck": "brand",
+    "pages": 1,
+    "exportMs": 6,
+    "renderMs": 907,
+    "pngSha256": [
+      "fe0f8b8e4e6c01d8192cb4db5d56538ee6098e0a25ed2248c6d5fb484e8a3848"
+    ]
+  },
+  {
+    "deck": "exception",
+    "pages": 1,
+    "exportMs": 1,
+    "renderMs": 747,
+    "pngSha256": [
+      "0e157cd6c469941477b65eb9c8eb2ca6ecdfa3f4f2fcfacbb2fef963692e1e03"
+    ]
+  }
+]
