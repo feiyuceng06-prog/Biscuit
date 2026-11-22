@@ -38,3 +38,29 @@ test('open pages share assets in order, impossible counts preserve the input for
   assert.deepEqual(photos.map(p => p.id), ['one','two','three','four']);
   assert.throws(() => readDeck({ ...newDeck(), pendingPhotos: [{ data: '' }] }), /无效/);
 });
+
+test('paired catalogue titles follow picture order and measured orientations on the comparison page', async () => {
+  const { catalogueComparison } = await import('../electron/office/photos.mjs');
+  const { composition, generatedBody } = await import('../electron/office/deck.mjs');
+  const sample = name => 'data:image/jpeg;base64,' + readFileSync(
+    new URL('../../evals/presentation/photo-pilot/media/' + name + '.jpg', import.meta.url)).toString('base64');
+  const pendingPhotos = [
+    { id: 'vertical', name: 'portrait.jpg', data: sample('260348') },
+    { id: 'horizontal', name: 'landscape.jpg', data: sample('260089') },
+  ];
+  const draft = { ...newDeck(), photoInput: { title: '', copy: '' }, pendingPhotos, brief: '比较画幅',
+    source: 'landscape | B | Cedars | 1857 | https://example.com/b\nportrait | A | Sitters | 1870s | https://example.com/a' };
+  const deck = outlineDeck(draft, { slides: [{ title: '比较', layout: 'comparison' }] }, 1);
+  const slide = deck.slides[0];
+  const body = catalogueComparison(deck, slide);
+  assert.deepEqual(body.items.map(({ label, text }) => [label, text]), [['竖幅', 'Sitters'], ['横幅', 'Cedars']]);
+  assert.equal(catalogueComparison({ ...deck, source: 'Free prose without catalogue rows' }, slide), undefined);
+  const generated = readDeck(applyBody(deck, slide, generatedBody(slide, body)));
+  assert.equal(generated.design.slidePlans[0].variant, 'photo-comparison');
+  const objects = composition(generated.slides[0], 1, 1, generated.theme, generated.design);
+  for (const [i, picture] of objects.filter(o => o.type === 'image').entries()) {
+    const text = objects.find(o => o.field === 'text-' + i);
+    assert.ok(text.y > picture.y + picture.h);
+    assert.ok(picture.x + picture.w / 2 >= text.x && picture.x + picture.w / 2 <= text.x + text.w);
+  }
+});

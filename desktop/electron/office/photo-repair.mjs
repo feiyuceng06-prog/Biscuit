@@ -9,7 +9,7 @@ const bottom = box => box.y + box.h;
 const intersects = (a, b) => a.x < right(b) && right(a) > b.x && a.y < bottom(b) && bottom(a) > b.y;
 const caption = object => object.field?.startsWith('caption-');
 const floor = object => {
-  if (object.field === 'title') return 22;
+  if (object.field === 'title') return 20;
   if (object.field?.startsWith('text-')) return 14;
   if (object.field?.startsWith('label-')) return 11;
   return 10;
@@ -93,7 +93,14 @@ function fallback(page, targets, variant) {
   }
   if (!placed || placed.some(object => anchors.some(anchor => intersects(anchor, object)))) return page;
   const fields = new Map(placed.map(object => [object.field, object]));
-  return page.map(object => object.type === 'text' ? fields.get(object.field) ?? object : object);
+  const background = page[0].color;
+  return page.map(object => {
+    if (object.type === 'text') return fields.get(object.field) ?? object;
+    // Old row dividers would run through the text after reflow.
+    if (object.type === 'rect' && object.h <= 2 && placed.some(field => intersects(field, object)))
+      return { ...object, color: background };
+    return object;
+  });
 }
 
 export function repairPhotoPages(deck, pages, issues, stage) {

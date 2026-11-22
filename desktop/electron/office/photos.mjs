@@ -183,7 +183,7 @@ export function galleryFrames(photos, { x, y, w, h }, strip = false) {
 export function distributePhotos(slides, photos, brief) {
   if (!photos.length) return slides;
   const requested = photoCounts(brief);
-  const counts = slides.map(s => ['cover', 'image', 'conclusion'].includes(s.layout)
+  const counts = slides.map(s => ['cover', 'image', 'conclusion', 'comparison'].includes(s.layout)
     ? requested[s.layout] : 0);
   for (const role of Object.keys(requested)) {
     if (requested[role] && !slides.some(s => s.layout === role))
@@ -211,4 +211,23 @@ export function photoCredits(source, photos = []) {
     const bar = line.indexOf('|');
     return bar > 0 && names.has(line.slice(0, bar).trim()) && line.slice(bar + 1).trim();
   });
+}
+
+// A catalogue comparison can be written from the original records without guessing what the photos show.
+export function catalogueComparison(deck, slide) {
+  if (!deck.photoInput || slide.layout !== 'comparison' || slide.photos?.length !== 2
+    || !/横幅|竖幅|横竖|画幅|landscape|portrait orientation|aspect ratios?/i.test(deck.brief + deck.source)) return;
+  const records = slide.photos.map(photo => {
+    const lines = photoCredits(deck.source, [photo]);
+    if (lines.length !== 1) return;
+    const fields = lines[0].split('|').map(field => field.trim());
+    if (fields.length !== 5 || !fields[1] || !fields[2] || fields[2].length > 220
+      || !fields[3] || !/^https?:\/\/\S+$/.test(fields[4])) return;
+    const ratio = pictureRatio(photo.data);
+    if (!ratio) return;
+    const chinese = /[\u3400-\u9fff]/u.test(deck.brief + deck.photoInput.title);
+    const labels = chinese ? ['横幅', '竖幅', '方幅'] : ['Landscape', 'Portrait', 'Square'];
+    return { label: labels[ratio === 1 ? 2 : ratio > 1 ? 0 : 1], text: fields[2], value: 0 };
+  });
+  if (records.every(Boolean)) return { items: records, notes: '' };
 }

@@ -86,6 +86,8 @@ function candidateSet(slide, content, rhythm, tokens) {
   const meta = (family, variant, score, reason, extra) => ({ layout: family, variant, score, reason, ...extra });
   const album = tokens.graphics.photoAlbum;
   if (!data.length && (album || slide.photos?.length)) {
+    if (layout === 'comparison' && slide.photos?.length === 2 && !slide.image && items.length === 2)
+      return [meta('comparison', 'photo-comparison', 67, '把每幅照片与同序的对照文字放进同一栏。')];
     if (layout === 'cover')
       return [meta('cover', 'photo-cover', 68, '按素材顺序布置居中的照片组，标题、副标题和图注各有独立空间。')];
     if (layout === 'image' && image) return [
@@ -455,6 +457,13 @@ export function resolveSlideLayout(slide, tokens, plan, content = slideContent(s
         const cell = (width - (extra.length - 1) * gap) / extra.length;
         extra.forEach((i, n) => entry(i, left + n * (cell + gap), rowsY, cell, spacing.footer - rowsY, 'opening-extra-' + i));
       }
+    } else if (variant === 'photo-comparison') {
+      heading(box(left, top, width, header), type.title, 'left');
+      const mediaY = top + header + gap;
+      const labelY = bottom - 86;
+      setPictures(box(left, mediaY, width, labelY - mediaY - 10));
+      gallery.forEach((frame, i) => entry(i, frame.x, labelY, frame.w, bottom - labelY - unitHeight, 'pair-' + i));
+      showUnit(box(left, bottom - unitHeight, width, unitHeight));
     } else if (variant === 'photo-work') {
       const footerY = written.length ? 373 : 412;
       setPictures(box(left, top, width, footerY - top - 20));

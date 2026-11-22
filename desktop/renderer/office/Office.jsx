@@ -16,7 +16,7 @@ import { draft } from './drafts.mjs';
 import { libraryExample } from './library-example.mjs';
 import readingRoom from './reading-room.jpg';
 import { planDesign } from '../../electron/office/director.mjs';
-import { hasPhotos, maxDeckPictureData, maxPhotos, photoCredits, photographyIntent, pictureDataSize } from '../../electron/office/photos.mjs';
+import { catalogueComparison, hasPhotos, maxDeckPictureData, maxPhotos, photoCredits, photographyIntent, pictureDataSize } from '../../electron/office/photos.mjs';
 import { DesignBrief } from './DesignBrief.jsx';
 import { loadPhoto } from './Inspector.jsx';
 import { Studio } from './Studio.jsx';
@@ -197,7 +197,6 @@ export function Office({ workspace }) {
   async function save(format) {
     try {
       setError('');
-      setMessage('');
       const destination = await window.feiyuDesktop.core.invoke('presentation_save', {
         format,
         deck: current.current,
@@ -209,8 +208,7 @@ export function Office({ workspace }) {
           : status === 'checked' ? '基础检查通过' : '需复核';
         setMessage(label + (destination.destination ? ' · ' + destination.destination : '') +
           ' · 修复尝试 ' + repairAttempts + ' 次 · 报告 ' + report);
-      }
-      else if (destination) {
+      } else if (destination) {
         const label = { checked: '基础检查通过', needs_review: '需复核', blocked: '发现阻断问题',
           preview_unavailable: '无法完成预览检查' }[destination.status];
         setMessage('已保存到 ' + destination.destination + ' · ' + label +
@@ -290,7 +288,8 @@ export function Office({ workspace }) {
               })),
             })
           : undefined;
-        const response = await requestPage(
+        const catalogue = all && catalogueComparison(now, active);
+        const response = catalogue || await requestPage(
           {
             action: 'slide',
             source: now.source,

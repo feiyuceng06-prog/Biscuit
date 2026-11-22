@@ -22,7 +22,7 @@ async function publish(file, destination) {
   }
 }
 
-export async function deliverPhotography(destination, raw, { backend, backendError }) {
+export async function deliverPhotography(destination, raw, { backend, backendError } = {}) {
   const start = performance.now();
   const deck = readDeck(raw);
   const output = await fs.mkdtemp(destination + '.review-');
@@ -42,7 +42,7 @@ export async function deliverPhotography(destination, raw, { backend, backendErr
       bytes = await powerPoint(deck, pages);
       await fs.writeFile(pptx, bytes, { flag: 'wx', mode: 0o600 });
       exported = true;
-      report = await inspectExport(reviewDir, bytes, deck, { backend, backendError, pages, deterministicOnly: true });
+      report = await inspectExport(reviewDir, bytes, deck, { backend, backendError, pages, deterministicOnly: !process.env.BISCUIT_PRESENTATION_CRITIC });
     } catch (error) {
       report = {
         schemaVersion: 1, deckId: deck.id, status: 'preview_unavailable', pages: [], issues: [],
@@ -77,6 +77,8 @@ export async function deliverPhotography(destination, raw, { backend, backendErr
     const added = deterministic(candidate.report).filter(issue => !prior.has(issue.issueId));
     if (added.length) {
       candidate.round.reason = 'New deterministic findings: ' + added.map(issue => issue.issueId).join(', ');
+    } else if (candidate.report.renderWarning && candidate.report.renderWarning !== best.report.renderWarning) {
+      candidate.round.reason = 'The renderer reported a new warning.';
     } else if (unresolved(candidate.report).length >= unresolved(best.report).length) {
       candidate.round.reason = 'The renderer did not clear any additional delivery blockers.';
     } else {
@@ -107,6 +109,7 @@ export async function deliverPhotography(destination, raw, { backend, backendErr
     await writeReport(reportPath, {
       ...best.report, ...delivery, critic: best.report.critic, rounds, skipped,
       pages: best.report.pages.map(page => ({ ...page, png: relative(page.png) })),
+      ...(best.report.pdfSha256 && { pdf: relative('deck.pdf') }),
       ...(best.report.contactSheet && { contactSheet: relative(best.report.contactSheet) }),
       unresolvedIssues: remaining.map(issue => issue.issueId),
     });
