@@ -10,6 +10,7 @@ import { createRequire } from 'node:module';
 import { AgentProcess, resolveBackend } from './agent.mjs';
 import { underRoot, readBounded, listFiles, previewFile, uploadFile, MAX_IMAGE } from './files.mjs';
 import { pickWorkspace, readLast, writeLast } from './workspace.mjs';
+import { installTarget, downloadPackage, installPackage } from './install-update.mjs';
 import { createUpdateChecker } from './updates.mjs';
 
 // Preserve Chromium workspace/localStorage identity across the display-name change.
@@ -18,6 +19,61 @@ app.setName('Biscuit');
 const checkUpdates = createUpdateChecker({ current: app.getVersion(), platform: process.platform,
   linuxDeb: process.platform === 'linux' && !process.env.APPIMAGE && process.execPath === '/opt/Biscuit/feiyu-desktop',
   arch: process.arch, request: (...args) => net.fetch(...args) });
+
+const target = installTarget({ packaged: app.isPackaged, platform: process.platform,
+  executable: process.execPath, env: process.env, current: app.getVersion() });
+let updateState = { phase: 'idle' };
+let prepared, staging;
+const updateCache = path.join(app.getPath('userData'), 'updates');
+async function clearOldUpdates() {
+  for (const entry of await fsp.readdir(updateCache, {withFileTypes:true}).catch(()=>[])) {
+    const match = /^stage-(\d+\.\d+\.\d+)-[a-zA-Z0-9]+$/.exec(entry.name);
+    if (!match || !entry.isDirectory()) continue;
+    const dir = path.join(updateCache, entry.name);
+    const stat = await fsp.stat(dir).catch(()=>null);
+    if (match[1] === app.getVersion() || (stat && Date.now()-stat.mtimeMs > 2*86400_000))
+      await fsp.rm(dir,{recursive:true,force:true}).catch(()=>{});
+  }
+}
+function updatePhase(phase, details = {}) {
+  updateState = { phase, ...details };
+  emit('feiyu://update', updateState);
+}
+async function prepareUpdate(latest) {
+  if (!target || !['idle', 'error'].includes(updateState.phase)) return;
+  updatePhase('downloading', { percent: 0, latest });
+  try {
+    const release = await checkUpdates();
+    if (release.status !== 'available' || release.latest !== latest) throw Error('版本信息已变化，请重新检查');
+    await fsp.mkdir(updateCache, {recursive:true, mode:0o700});
+    staging = await fsp.mkdtemp(path.join(updateCache, 'stage-' + release.latest + '-'));
+    const file = path.join(staging, path.basename(release.downloadUrl));
+    await downloadPackage(release, file, (...args) => net.fetch(...args),
+      percent => updatePhase('downloading', { percent, latest }));
+    prepared = { file, release };
+    updatePhase('ready', { latest });
+  } catch (error) {
+    if (staging) await fsp.rm(staging, {recursive:true,force:true}).catch(()=>{});
+    staging = null; prepared = null;
+    updatePhase('error', { message: error.message, latest });
+  }
+}
+async function applyUpdate() {
+  if (!target || !prepared || updateState.phase !== 'ready') return;
+  const { file, release } = prepared;
+  updatePhase('installing', { latest: release.latest });
+  try {
+    await installPackage(target, file, release.digest, process.resourcesPath, workspace ? ['-w',workspace] : []);
+  } catch (error) {
+    await fsp.rm(staging, {recursive:true,force:true}).catch(()=>{});
+    prepared = null; staging = null;
+    updatePhase('error', { latest: release.latest, message: '更新失败：' + error.message });
+    return;
+  }
+  if (target.kind !== 'nsis') await fsp.rm(staging, {recursive:true,force:true}).catch(()=>{});
+  staging = null;
+  app.quit();
+}
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '../..');
@@ -111,11 +167,14 @@ ipcMain.handle('feiyu:command', async (event, command, args = {}) => {
       } finally { await fsp.rm(temp, { force: true }); }
       return destination;
     }
+    case 'update_state': return updateState;
+    case 'prepare_update': return prepareUpdate(args.latest);
+    case 'apply_update': return applyUpdate();
     case 'check_updates':
       if (args.automatic === true && process.env.FEIYU_DISABLE_UPDATE_CHECK === '1') {
         return { status: 'idle', current: app.getVersion() };
       }
-      return checkUpdates({ automatic: args.automatic === true });
+      return { ...await checkUpdates({ automatic: args.automatic === true }), inApp: !!target };
     case 'connect':
       if (agent?.child && !transition) { emit('feiyu://state', state); return workspace; }
       return startAgent(workspace || options.workspace, options.resume);
@@ -163,6 +222,7 @@ ipcMain.handle('feiyu:command', async (event, command, args = {}) => {
 });
 
 app.whenReady().then(async () => {
+await clearOldUpdates();
 lastFile = path.join(app.getPath('userData'), 'workspace.json');
 options.workspace = pickWorkspace({ given: options.workspace, cwd: process.cwd(), home: os.homedir(), last: readLast(lastFile) });
 Menu.setApplicationMenu(null);
@@ -187,7 +247,7 @@ app.on('before-quit', event => {
   event.preventDefault();
   quitting = true;
   stopTerminal();
-  Promise.resolve(agent?.stop()).finally(() => app.quit());
+  Promise.allSettled([agent?.stop(), staging && updateState.phase !== 'installing' ? fsp.rm(staging,{recursive:true,force:true}) : null]).finally(() => app.quit());
 });
 app.on('window-all-closed', () => app.quit());
 await win.loadURL(rendererURL);

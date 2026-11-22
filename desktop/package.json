@@ -1,6 +1,6 @@
 {
   "name": "feiyu-desktop",
-  "version": "0.92.0",
+  "version": "0.93.0",
   "description": "Biscuit desktop workbench",
   "author": {
     "name": "Feiyu",
@@ -57,6 +57,7 @@
       ]
     },
     "linux": {
+      "extraResources": [{ "from": "../get.sh", "to": "get.sh" }],
       "target": [
         "deb",
         "AppImage"

@@ -24,7 +24,8 @@ export function releaseStatus(current, release, platform, arch, linuxDeb = false
     return { status: 'unavailable', current, latest };
   }
   const filename = platform === 'linux' && linuxDeb ? names[1] : names[0];
-  return { status: 'available', current, latest, url,
+  const asset = release.assets.find(entry => entry.name === filename);
+  return { status: 'available', current, latest, url, size: asset.size, digest: asset.digest,
     downloadUrl: `${releases}/download/desktop-v${latest}/${filename}` };
 }
 
