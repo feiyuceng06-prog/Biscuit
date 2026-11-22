@@ -59,6 +59,13 @@ python -u -X faulthandler -m unittest discover -v -s tests -t .
 
 4 项新增 Python 测试通过，包含同色文字、真实缺字、溢出、越界、失败回退、非法模型输出及双供应商传输。33 项桌面 Node 测试、前端构建、Linux 冻结后端构建、真实 Electron 编辑与导出 smoke 和信任边界测试通过。
 
+全量 Python 回归在独立虚拟环境执行 1,948 项，1,932 项通过、15 项跳过、1 项失败，耗时 677.852 秒。失败项是 `test_public_create_rejects_adapter_drift_before_observation`，SDK 恢复测试预期 3 条记录，实际得到 5 条。在相同环境中分别对本分支与升级前的 `cd490c8` 独立复跑该测试，两次均在原断言得到 `5 != 3`。
+
+```text
+Ran 1948 tests in 677.852s
+FAILED (failures=1, skipped=15)
+```
+
 ## 已知边界
 
 当前仅检查 Biscuit 原生 16:9 导出。跨平台字体替换会改变断行；同环境哈希用于复现，跨系统应核对截图。PDF 字词边界包含字体度量留白，越过文本框不一定代表文字被裁掉；报告保留这一区别。带图片或透明层的背景、复杂矢量遮挡，以及能正确抽取文字但屏幕上显示方框的字形，仍需核对实际图片。PowerPoint、Keynote 原生应用及多人盲评未在此次实测中覆盖。Phase 0/1 建立观察能力，暂不改动布局或自动修复内容。
