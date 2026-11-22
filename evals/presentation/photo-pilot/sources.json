@@ -1,0 +1,107 @@
+[
+  {
+    "objectID": 260971,
+    "title": "Banks of the Nile at Cairo",
+    "objectDate": "ca. 1857, printed 1870s",
+    "artistDisplayName": "Francis Frith",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/260971",
+    "isPublicDomain": true,
+    "imageURL": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/260971/main-image",
+    "dimensions": [
+      1100,
+      849
+    ],
+    "originalSha256": "bb7713b0aec71ded40825707878bf7774916a88e7dd01f59879b1e84e45344b7",
+    "jpegSha256": "2256d7ed168df929fbef4bd62a74b3117a4234a61c54c110438b133dba7d98d9"
+  },
+  {
+    "objectID": 260348,
+    "title": "[Six East Indian Men]",
+    "objectDate": "1870s",
+    "artistDisplayName": "Francis Frith",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/260348",
+    "isPublicDomain": true,
+    "imageURL": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/260348/main-image",
+    "dimensions": [
+      996,
+      1100
+    ],
+    "originalSha256": "9b83b2a960172581936d2255946cf8c8523ec3ad8e45406217c1ea090207eccc",
+    "jpegSha256": "3fa27c67984ddd0606262cd28c1c7146591cb2bae42bcd8df22ee75a9ee210d6"
+  },
+  {
+    "objectID": 260089,
+    "title": "Distant View of the Cedars of Lebanon",
+    "objectDate": "ca. 1857",
+    "artistDisplayName": "Francis Frith",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/260089",
+    "isPublicDomain": true,
+    "imageURL": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/260089/main-image",
+    "dimensions": [
+      1100,
+      828
+    ],
+    "originalSha256": "109939c6f43af8376e1d17acf5702b6e8a2770f39ae1a6075c95a364f78def85",
+    "jpegSha256": "b0fad08c4067650022f2c509b00c2aa916a1da11792a90d19558cab5ebbe5882"
+  },
+  {
+    "objectID": 260349,
+    "title": "Rajpoots",
+    "objectDate": "1870s",
+    "artistDisplayName": "Francis Frith",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/260349",
+    "isPublicDomain": true,
+    "imageURL": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/260349/main-image",
+    "dimensions": [
+      1007,
+      1100
+    ],
+    "originalSha256": "36ab368952d7d276abdcb7abc5c12be1381921582549d5a4e41c48b3616befaf",
+    "jpegSha256": "d3554124b44325441a296e5a9502f532b33fe4512cb216836583e63a3e975545"
+  },
+  {
+    "objectID": 260090,
+    "title": "Cedars of Lebanon",
+    "objectDate": "ca. 1857",
+    "artistDisplayName": "Francis Frith",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/260090",
+    "isPublicDomain": true,
+    "imageURL": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/260090/main-image",
+    "dimensions": [
+      1100,
+      821
+    ],
+    "originalSha256": "d25beee8cdbb5c905081e7e437ba05846336d557688586e8208583468c40ac4d",
+    "jpegSha256": "1ff6363404f7456fab51765f18efb34dd4eb0438f60d3f4e4e6386ea10a1b0eb"
+  },
+  {
+    "objectID": 260350,
+    "title": "[Three East Indian Women]",
+    "objectDate": "1870s",
+    "artistDisplayName": "Francis Frith",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/260350",
+    "isPublicDomain": true,
+    "imageURL": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/260350/main-image",
+    "dimensions": [
+      889,
+      1100
+    ],
+    "originalSha256": "5863eac7fec52f572158dcb74e9c7bcfc284e4751756947de18e6c4874b30748",
+    "jpegSha256": "0f0ed4ffde0af007ca062d32800b528af842429260d6411cdd147e223798ad0b"
+  },
+  {
+    "objectID": 260734,
+    "title": "Coombe Martin Bay",
+    "objectDate": "1870s",
+    "artistDisplayName": "Francis Frith",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/260734",
+    "isPublicDomain": true,
+    "imageURL": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/260734/main-image",
+    "dimensions": [
+      1100,
+      703
+    ],
+    "originalSha256": "d791ce216dc2ce320dfeaf08b5950bf87866f58f0d1c134d8919f7abf0c45847",
+    "jpegSha256": "ddad347399aafd5f3e8f3b176b3a9ed5d9c99d967baa52bb503e05feac0f8851"
+  }
+]
