@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "deckId": "operations",
+  "pptxSha256": "69e15cab3fe24327e1193d555284fa4375cc0d479cc0de54a58f3c21db83e446",
+  "status": "needs_review",
+  "critic": {
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "operations-1",
+      "operations-2",
+      "operations-3",
+      "operations-4"
+    ]
+  },
+  "pages": [
+    {
+      "slideId": "operations-1",
+      "png": "slide-1.png",
+      "sha256": "b9b79ccfcfe7216da9700ef05f9e2e009f20e5c9d87ab5898bc5f6815c49001e"
+    },
+    {
+      "slideId": "operations-2",
+      "png": "slide-2.png",
+      "sha256": "3ad7691f8a1d9c73e89b2a1cddd0b0fc0d4d4b9036dcf9626251c3312dd8d58a"
+    },
+    {
+      "slideId": "operations-3",
+      "png": "slide-3.png",
+      "sha256": "9c2656a661f93750bd167d1d918ab767b7b86ca98637e0f5a9cc153316bc57a4"
+    },
+    {
+      "slideId": "operations-4",
+      "png": "slide-4.png",
+      "sha256": "1e88cd74ec613d87b330377654cf3080c43861ddad9061d69211c0081fb703f0"
+    }
+  ],
+  "issues": [
+    {
+      "slideId": "operations-1",
+      "elementIds": [
+        "text-0"
+      ],
+      "kind": "weak-hierarchy",
+      "severity": "minor",
+      "confidence": 0.6,
+      "evidence": "Body line '本月只决定下一轮试点的排班范围。' sits at 20px below a 58px title, leaving a large empty gap between title and divider; the sole takeaway reads as low-emphasis body text on the cover.",
+      "suggestedChange": "Increase the body line to 22–24px and tighten vertical spacing so the decision statement reads as the key message.",
+      "source": "vision-model",
+      "issueId": "vision:operations-1:1"
+    },
+    {
+      "slideId": "operations-2",
+      "elementIds": [
+        "chart-5"
+      ],
+      "kind": "chart-misleading",
+      "severity": "minor",
+      "confidence": 0.7,
+      "evidence": "Bar chart at 62,192–898,478 titled 阅览室贡献最多晚间到访: the four bars (48, 26, 11, 7) are all rendered in the same single blue (#244F96) with no series differentiation or baseline emphasis, and the largest bar tops at only ~352 px while the frame reaches ~478 px, leaving the chart reading as a plain ranking rather than supporting the 排班决策. Additionally the y-axis has no scale ticks, so the 48 vs 26 ratio cannot be verified visually.",
+      "suggestedChange": "Add y-axis tick labels/scale or a data table, and use color to separate 阅览室 from other areas so the 22-person gap is legible; consider a secondary annotation tying the 48-value to the staffing implication.",
+      "source": "vision-model",
+      "issueId": "vision:operations-2:1"
+    },
+    {
+      "slideId": "operations-3",
+      "elementIds": [
+        "label-0",
+        "text-0",
+        "label-1",
+        "text-1"
+      ],
+      "kind": "poor-alignment",
+      "severity": "minor",
+      "confidence": 0.6,
+      "evidence": "标签栏与说明文字的行间垂直间距较大，标签和说明文字对不齐，版面略显松散。",
+      "suggestedChange": "将标签与对应说明文字的对齐方式统一为垂直居中或顶部对齐，使两行内容视觉上更紧凑。",
+      "source": "vision-model",
+      "issueId": "vision:operations-3:1"
+    },
+    {
+      "slideId": "operations-3",
+      "elementIds": [
+        "text-10"
+      ],
+      "kind": "low-contrast",
+      "severity": "suggestion",
+      "confidence": 0.55,
+      "evidence": "右下角页码“03 / 04”字号为13pt、颜色为#465A72，在#F7F9FD背景上对比度偏低。",
+      "suggestedChange": "可以适当加深页码颜色或略微增大字号，以提升可读性。",
+      "source": "vision-model",
+      "issueId": "vision:operations-3:2"
+    },
+    {
+      "slideId": "operations-4",
+      "elementIds": [
+        "text-0",
+        "text-1",
+        "text-2",
+        "title"
+      ],
+      "kind": "crowded",
+      "severity": "minor",
+      "confidence": 0.7,
+      "evidence": "正文三列各仅一行（如“记录晚间客流。”），却占用从 y≈231 到 y≈478 的高文本框，导致标题与时间轴之间、正文下方出现大片空白，三列信息密度极低。",
+      "suggestedChange": "压缩正文文本框高度或增加本周的具体动作/指标行，平衡时间轴与页脚之间的留白。",
+      "source": "vision-model",
+      "issueId": "vision:operations-4:1"
+    },
+    {
+      "slideId": "operations-4",
+      "elementIds": [
+        "label-0",
+        "label-1",
+        "label-2",
+        "text-0",
+        "text-1",
+        "text-2"
+      ],
+      "kind": "weak-hierarchy",
+      "severity": "suggestion",
+      "confidence": 0.6,
+      "evidence": "三列标签字号 23、颜色 244F96，正文 20、颜色 465A72，层级差异仅约 3pt，视觉上标签与正文几乎同权。",
+      "suggestedChange": "加大标签与正文字号差或改用不同字重/颜色，使“第 1/2/3 周”成为明确主层级。",
+      "source": "vision-model",
+      "issueId": "vision:operations-4:2"
+    },
+    {
+      "slideId": "operations-4",
+      "elementIds": [
+        "title"
+      ],
+      "kind": "poor-alignment",
+      "severity": "suggestion",
+      "confidence": 0.55,
+      "evidence": "标题左边缘与时间轴起点 rect-5（x=62）对齐，但标题上方装饰线 rect-2 仅宽 54，视觉上短于标题“分三周跟踪试点”的宽度，形成顶部悬空短线。",
+      "suggestedChange": "将装饰线加宽至与标题基线宽度协调，或取消短线改用其他层级标识。",
+      "source": "vision-model",
+      "issueId": "vision:operations-4:3"
+    }
+  ],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "19e08edee2734a8272d58e7a2852fec7eaf46d37b04d10e76d308da36551f137",
+  "fonts": [
+    "BAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes    100  0",
+    "CAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     95  0",
+    "DAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes    115  0",
+    "EAAAAA+InterVariable                 TrueType          WinAnsi          yes yes yes    125  0",
+    "FAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     90  0",
+    "GAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes    110  0",
+    "HAAAAA+SourceHanSansCN-Bold          Type 1            Builtin          yes yes yes    130  0",
+    "IAAAAA+InterVariable                 TrueType          WinAnsi          yes yes yes    120  0",
+    "JAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes    105  0",
+    "KAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     85  0"
+  ],
+  "contactSheet": "contact.png",
+  "durationMs": 19212
+}

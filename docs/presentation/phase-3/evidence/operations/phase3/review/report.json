@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "deckId": "operations",
+  "pptxSha256": "db6ced97f8babd4a109bf86d3858079ad1f77f919a886d300f70e2ff154628ff",
+  "status": "needs_review",
+  "critic": {
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "operations-1",
+      "operations-2",
+      "operations-3",
+      "operations-4"
+    ]
+  },
+  "pages": [
+    {
+      "slideId": "operations-1",
+      "png": "slide-1.png",
+      "sha256": "c071250c6b68470b175b2c50a84c35dfc1273b5fe403cec60110d0e371ae91a4"
+    },
+    {
+      "slideId": "operations-2",
+      "png": "slide-2.png",
+      "sha256": "1f2b5d79185323d3c25a7eba940360bb0d0960384d47f196d5aa3db1539007de"
+    },
+    {
+      "slideId": "operations-3",
+      "png": "slide-3.png",
+      "sha256": "e560fb253b93a4376e858a12c3a2f03035e171b71fce1fa67286c2c489605a2d"
+    },
+    {
+      "slideId": "operations-4",
+      "png": "slide-4.png",
+      "sha256": "e3d3ed6b4c4bf248a3db27c8c4b06ad84d97f46fde2aee3859f3d1f6370d6ad3"
+    }
+  ],
+  "issues": [
+    {
+      "slideId": "operations-1",
+      "elementIds": [
+        "text-0"
+      ],
+      "kind": "clipping",
+      "severity": "minor",
+      "confidence": 0.55,
+      "evidence": "In the contact sheet thumbnail (bottom right), the subtitle '本月只决定下一轮试点的排班范围。' ends with '。', and the paragraph mark appears cut off at the right edge of the text frame; the full-slide render shows it intact.",
+      "suggestedChange": "Widen text-0's frame (w 565 → ~600) or reduce wrap so the sentence and its punctuation fit inside the frame at thumbnail scale.",
+      "source": "vision-model",
+      "issueId": "vision:operations-1:1"
+    },
+    {
+      "slideId": "operations-2",
+      "elementIds": [
+        "chart-5"
+      ],
+      "kind": "poor-alignment",
+      "severity": "minor",
+      "confidence": 0.6,
+      "evidence": "Value labels (48, 26, 11, 7) sit immediately at each bar end with no consistent gap; the 48 label nearly touches the plot right boundary at x≈822, while the 7 label sits ~4px from its bar.",
+      "suggestedChange": "Add a fixed 6–8px offset between each bar end and its value label so labels align consistently.",
+      "source": "vision-model",
+      "issueId": "vision:operations-2:1"
+    },
+    {
+      "slideId": "operations-2",
+      "elementIds": [
+        "chart-5"
+      ],
+      "kind": "weak-hierarchy",
+      "severity": "suggestion",
+      "confidence": 0.55,
+      "evidence": "All four bars use the identical color 244F96, so the lead category (阅览室, 48) is not visually distinguished despite the title claiming it dominates.",
+      "suggestedChange": "Emphasize the lead bar with a darker/accent fill and mute the remaining three.",
+      "source": "vision-model",
+      "issueId": "vision:operations-2:2"
+    },
+    {
+      "slideId": "operations-4",
+      "elementIds": [
+        "text-0",
+        "text-1",
+        "text-2"
+      ],
+      "kind": "crowded",
+      "severity": "minor",
+      "confidence": 0.6,
+      "evidence": "The body text frames for week 1-3 are 298.22px tall but contain only a single short line of text, leaving large empty areas (visible as vast whitespace in the lower half of the slide).",
+      "suggestedChange": "Reduce the height of text-0, text-1, and text-2 to fit their content, or add supporting visual elements (icons, bullet points) to fill the space.",
+      "source": "vision-model",
+      "issueId": "vision:operations-4:1"
+    }
+  ],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "a92958e72b4f0538d3e09d46068cf4c36588d8479524d1c0767bce7ff2dfcbcf",
+  "fonts": [
+    "BAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     96  0",
+    "CAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     86  0",
+    "DAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes    106  0",
+    "EAAAAA+InterVariable                 TrueType          WinAnsi          yes yes yes    121  0",
+    "FAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     91  0",
+    "GAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes    101  0",
+    "HAAAAA+SourceHanSansCN-Regular       Type 1            Builtin          yes yes yes    111  0",
+    "IAAAAA+InterVariable                 TrueType          WinAnsi          yes yes yes    116  0"
+  ],
+  "contactSheet": "contact.png",
+  "durationMs": 16348
+}

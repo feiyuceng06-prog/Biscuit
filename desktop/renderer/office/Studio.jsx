@@ -305,11 +305,11 @@ export function Studio({
               </div>
             )}
             {panel === 'content' && (
-              <Inspector key={slide.id} slide={slide} edit={edit} error={onError} />
+              <Inspector key={slide.id} slide={slide} planned={deck.design?.version === 2} edit={edit} error={onError} />
             )}
             {panel === 'design' && (
               <>
-                <DesignBrief key={deck.id} deck={deck} commit={commit} onError={onError} disabled={!!busy} />
+                <DesignBrief key={deck.id} deck={deck} slideId={slide.id} commit={commit} onError={onError} disabled={!!busy} />
                 <h4>整份文稿风格</h4>
                 <div className="studio-themes">
                   {Object.entries(themes).map(([key, t]) => (

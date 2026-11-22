@@ -1,0 +1,506 @@
+{
+  "launch": [
+    {
+      "slideId": "launch-1",
+      "sourceLayout": "cover",
+      "phase2": {
+        "titlePt": 49,
+        "editableTextBoxes": 4,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "overflow",
+          "poor-alignment",
+          "weak-hierarchy"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "phase3": {
+        "titlePt": 66,
+        "editableTextBoxes": 4,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "crowded",
+          "weak-hierarchy"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "family": "cover",
+      "variant": "cover-image",
+      "changedPixelFraction": 0.1711
+    },
+    {
+      "slideId": "launch-2",
+      "sourceLayout": "image",
+      "phase2": {
+        "titlePt": 49,
+        "editableTextBoxes": 6,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "poor-alignment",
+          "crowded",
+          "weak-hierarchy"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "phase3": {
+        "titlePt": 49,
+        "editableTextBoxes": 6,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "image-mismatch",
+          "weak-hierarchy",
+          "poor-alignment"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "family": "image",
+      "variant": "image-hero",
+      "changedPixelFraction": 0.2777
+    },
+    {
+      "slideId": "launch-3",
+      "sourceLayout": "conclusion",
+      "phase2": {
+        "titlePt": 49,
+        "editableTextBoxes": 4,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "crowded"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "phase3": {
+        "titlePt": 27,
+        "editableTextBoxes": 4,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "overflow",
+          "weak-hierarchy"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "family": "statement",
+      "variant": "statement-takeaway",
+      "changedPixelFraction": 0.0528
+    },
+    {
+      "slideId": "launch-4",
+      "sourceLayout": "comparison",
+      "phase2": {
+        "titlePt": 49,
+        "editableTextBoxes": 6,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "clipping",
+          "low-contrast",
+          "weak-hierarchy"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "phase3": {
+        "titlePt": 49,
+        "editableTextBoxes": 6,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "overflow",
+          "poor-alignment"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "family": "comparison",
+      "variant": "comparison-pair",
+      "changedPixelFraction": 0.05
+    }
+  ],
+  "operations": [
+    {
+      "slideId": "operations-1",
+      "sourceLayout": "cover",
+      "phase2": {
+        "titlePt": 58,
+        "editableTextBoxes": 4,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "weak-hierarchy"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "phase3": {
+        "titlePt": 58,
+        "editableTextBoxes": 4,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "clipping"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "family": "cover",
+      "variant": "cover-title",
+      "changedPixelFraction": 0.0572
+    },
+    {
+      "slideId": "operations-2",
+      "sourceLayout": "chart",
+      "phase2": {
+        "titlePt": 43,
+        "editableTextBoxes": 3,
+        "nativeChart": "col",
+        "deterministic": [],
+        "vision": [
+          "chart-misleading"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "phase3": {
+        "titlePt": 43,
+        "editableTextBoxes": 3,
+        "nativeChart": "bar",
+        "deterministic": [],
+        "vision": [
+          "poor-alignment",
+          "weak-hierarchy"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "family": "chart",
+      "variant": "bars-focus",
+      "changedPixelFraction": 0.1812
+    },
+    {
+      "slideId": "operations-3",
+      "sourceLayout": "comparison",
+      "phase2": {
+        "titlePt": 43,
+        "editableTextBoxes": 6,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "poor-alignment",
+          "low-contrast"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "phase3": {
+        "titlePt": 43,
+        "editableTextBoxes": 6,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "family": "comparison",
+      "variant": "comparison-pair",
+      "changedPixelFraction": 0.0531
+    },
+    {
+      "slideId": "operations-4",
+      "sourceLayout": "timeline",
+      "phase2": {
+        "titlePt": 43,
+        "editableTextBoxes": 8,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "crowded",
+          "weak-hierarchy",
+          "poor-alignment"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "phase3": {
+        "titlePt": 43,
+        "editableTextBoxes": 8,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "crowded"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "family": "sequence",
+      "variant": "timeline-track",
+      "changedPixelFraction": 0.0372
+    }
+  ],
+  "architecture": [
+    {
+      "slideId": "architecture-1",
+      "sourceLayout": "cover",
+      "phase2": {
+        "titlePt": 60,
+        "editableTextBoxes": 4,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "low-contrast"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "phase3": {
+        "titlePt": 60,
+        "editableTextBoxes": 4,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "weak-hierarchy"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "family": "cover",
+      "variant": "cover-title",
+      "changedPixelFraction": 0.0722
+    },
+    {
+      "slideId": "architecture-2",
+      "sourceLayout": "conclusion",
+      "phase2": {
+        "titlePt": 50,
+        "editableTextBoxes": 8,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "overflow",
+          "weak-hierarchy",
+          "source-missing"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "phase3": {
+        "titlePt": 45,
+        "editableTextBoxes": 10,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "overflow",
+          "crowded"
+        ],
+        "visionChecked": true,
+        "visionReplay": true
+      },
+      "family": "sequence",
+      "variant": "process-flow",
+      "changedPixelFraction": 0.4615
+    },
+    {
+      "slideId": "architecture-3",
+      "sourceLayout": "comparison",
+      "phase2": {
+        "titlePt": 45,
+        "editableTextBoxes": 6,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "crowded"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "phase3": {
+        "titlePt": 45,
+        "editableTextBoxes": 6,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "weak-hierarchy",
+          "poor-alignment",
+          "poor-alignment"
+        ],
+        "visionChecked": true,
+        "visionReplay": true
+      },
+      "family": "comparison",
+      "variant": "comparison-pair",
+      "changedPixelFraction": 0.0547
+    },
+    {
+      "slideId": "architecture-4",
+      "sourceLayout": "conclusion",
+      "phase2": {
+        "titlePt": 50,
+        "editableTextBoxes": 4,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "weak-hierarchy",
+          "crowded"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "phase3": {
+        "titlePt": 50,
+        "editableTextBoxes": 4,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "weak-hierarchy",
+          "poor-alignment",
+          "low-contrast"
+        ],
+        "visionChecked": true,
+        "visionReplay": true
+      },
+      "family": "statement",
+      "variant": "statement-wide",
+      "changedPixelFraction": 0.4591
+    }
+  ],
+  "analysis": [
+    {
+      "slideId": "analysis-1",
+      "sourceLayout": "cover",
+      "phase2": {
+        "titlePt": 58,
+        "editableTextBoxes": 4,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "weak-hierarchy",
+          "weak-hierarchy",
+          "source-missing"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "phase3": {
+        "titlePt": 58,
+        "editableTextBoxes": 4,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "weak-hierarchy",
+          "low-contrast"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "family": "cover",
+      "variant": "cover-title",
+      "changedPixelFraction": 0.0681
+    },
+    {
+      "slideId": "analysis-2",
+      "sourceLayout": "chart",
+      "phase2": {
+        "titlePt": 43,
+        "editableTextBoxes": 3,
+        "nativeChart": "col",
+        "deterministic": [],
+        "vision": [
+          "chart-misleading"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "phase3": {
+        "titlePt": 43,
+        "editableTextBoxes": 3,
+        "nativeChart": "lineChart",
+        "deterministic": [],
+        "vision": [
+          "weak-hierarchy",
+          "crowded"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "family": "chart",
+      "variant": "line-focus",
+      "changedPixelFraction": 0.137
+    },
+    {
+      "slideId": "analysis-3",
+      "sourceLayout": "chart",
+      "phase2": {
+        "titlePt": 43,
+        "editableTextBoxes": 3,
+        "nativeChart": "col",
+        "deterministic": [],
+        "vision": [
+          "weak-hierarchy",
+          "poor-alignment",
+          "crowded"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "phase3": {
+        "titlePt": 43,
+        "editableTextBoxes": 3,
+        "nativeChart": "bar",
+        "deterministic": [],
+        "vision": [
+          "weak-hierarchy",
+          "poor-alignment",
+          "missing-glyph"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "family": "chart",
+      "variant": "bars-focus",
+      "changedPixelFraction": 0.1369
+    },
+    {
+      "slideId": "analysis-4",
+      "sourceLayout": "conclusion",
+      "phase2": {
+        "titlePt": 48,
+        "editableTextBoxes": 6,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "crowded",
+          "poor-alignment"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "phase3": {
+        "titlePt": 51,
+        "editableTextBoxes": 6,
+        "nativeChart": null,
+        "deterministic": [],
+        "vision": [
+          "weak-hierarchy",
+          "poor-alignment",
+          "repetitive-layout"
+        ],
+        "visionChecked": true,
+        "visionReplay": false
+      },
+      "family": "statement",
+      "variant": "statement-led",
+      "changedPixelFraction": 0.0474
+    }
+  ]
+}

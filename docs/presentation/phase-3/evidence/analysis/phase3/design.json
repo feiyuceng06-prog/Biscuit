@@ -1,0 +1,556 @@
+{
+  "version": 2,
+  "slidePlans": [
+    {
+      "slideId": "analysis-1",
+      "sourceLayout": "cover",
+      "layout": "cover",
+      "variant": "cover-title",
+      "keyMessage": "自助机升级后，等待时间缩短",
+      "focalPoint": "headline",
+      "density": "sparse",
+      "contentBindings": [
+        {
+          "nodeId": "analysis-1",
+          "slotId": "headline",
+          "emphasis": "primary"
+        },
+        {
+          "nodeId": "analysis-0-0",
+          "slotId": "opening-detail-0-label",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "analysis-0-0",
+          "slotId": "opening-detail-0-body",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "analysis-1",
+          "slotId": "speaker-notes",
+          "emphasis": "supporting"
+        }
+      ],
+      "referenceIds": [
+        "corporate-briefing"
+      ],
+      "selectionReason": "以全宽标题建立开场焦点。",
+      "candidates": [
+        {
+          "layout": "cover",
+          "variant": "cover-title",
+          "score": 56,
+          "feasible": true,
+          "reasons": [
+            "以全宽标题建立开场焦点。"
+          ]
+        },
+        {
+          "layout": "cover",
+          "variant": "cover-brief",
+          "score": 47,
+          "feasible": true,
+          "reasons": [
+            "把开场说明分行，给正文和配图留足空间。"
+          ]
+        }
+      ],
+      "assetStrategy": {
+        "image": null,
+        "chart": null
+      }
+    },
+    {
+      "slideId": "analysis-2",
+      "sourceLayout": "chart",
+      "layout": "chart",
+      "variant": "line-focus",
+      "keyMessage": "中位等待时间连续四周下降",
+      "focalPoint": "chart",
+      "density": "sparse",
+      "contentBindings": [
+        {
+          "nodeId": "analysis-2",
+          "slotId": "headline",
+          "emphasis": "primary"
+        },
+        {
+          "nodeId": "analysis-2",
+          "slotId": "chart-unit",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "analysis-1-0",
+          "slotId": "chart-category",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "analysis-1-0",
+          "slotId": "chart-value",
+          "emphasis": "primary"
+        },
+        {
+          "nodeId": "analysis-1-1",
+          "slotId": "chart-category",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "analysis-1-1",
+          "slotId": "chart-value",
+          "emphasis": "primary"
+        },
+        {
+          "nodeId": "analysis-1-2",
+          "slotId": "chart-category",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "analysis-1-2",
+          "slotId": "chart-value",
+          "emphasis": "primary"
+        },
+        {
+          "nodeId": "analysis-1-3",
+          "slotId": "chart-category",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "analysis-1-3",
+          "slotId": "chart-value",
+          "emphasis": "primary"
+        },
+        {
+          "nodeId": "analysis-2",
+          "slotId": "speaker-notes",
+          "emphasis": "supporting"
+        }
+      ],
+      "referenceIds": [
+        "corporate-evidence"
+      ],
+      "selectionReason": "使用等间隔、按时间递增的观测值绘制折线。",
+      "candidates": [
+        {
+          "layout": "chart",
+          "variant": "line-focus",
+          "score": 66,
+          "feasible": true,
+          "reasons": [
+            "使用等间隔、按时间递增的观测值绘制折线。"
+          ]
+        },
+        {
+          "layout": "chart",
+          "variant": "line-details",
+          "score": 61,
+          "feasible": true,
+          "reasons": [
+            "使用等间隔、按时间递增的观测值绘制折线。 将图表集中在略窄的内容区。"
+          ]
+        },
+        {
+          "layout": "chart",
+          "variant": "columns-focus",
+          "score": 59,
+          "feasible": true,
+          "reasons": [
+            "以独立柱表示各时间点，避免暗示连续或等间隔的变化。"
+          ]
+        },
+        {
+          "layout": "chart",
+          "variant": "columns-details",
+          "score": 54,
+          "feasible": true,
+          "reasons": [
+            "以独立柱表示各时间点，避免暗示连续或等间隔的变化。 将图表集中在略窄的内容区。"
+          ]
+        }
+      ],
+      "chartEncoding": "line",
+      "assetStrategy": {
+        "image": null,
+        "chart": {
+          "source": "slide-items",
+          "editable": true,
+          "encoding": "line"
+        }
+      }
+    },
+    {
+      "slideId": "analysis-3",
+      "sourceLayout": "chart",
+      "layout": "chart",
+      "variant": "bars-focus",
+      "keyMessage": "不同服务区的耗时变化并不相同",
+      "focalPoint": "chart",
+      "density": "sparse",
+      "contentBindings": [
+        {
+          "nodeId": "analysis-3",
+          "slotId": "headline",
+          "emphasis": "primary"
+        },
+        {
+          "nodeId": "analysis-3",
+          "slotId": "chart-unit",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "analysis-2-0",
+          "slotId": "chart-category",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "analysis-2-0",
+          "slotId": "chart-value",
+          "emphasis": "primary"
+        },
+        {
+          "nodeId": "analysis-2-1",
+          "slotId": "chart-category",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "analysis-2-1",
+          "slotId": "chart-value",
+          "emphasis": "primary"
+        },
+        {
+          "nodeId": "analysis-2-2",
+          "slotId": "chart-category",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "analysis-2-2",
+          "slotId": "chart-value",
+          "emphasis": "primary"
+        },
+        {
+          "nodeId": "analysis-2-3",
+          "slotId": "chart-category",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "analysis-2-3",
+          "slotId": "chart-value",
+          "emphasis": "primary"
+        },
+        {
+          "nodeId": "analysis-3",
+          "slotId": "speaker-notes",
+          "emphasis": "supporting"
+        }
+      ],
+      "referenceIds": [
+        "corporate-evidence"
+      ],
+      "selectionReason": "以共同零点向两侧展示正负变化，保留零值标签。 与相邻同类页面采用不同的组织方式。",
+      "candidates": [
+        {
+          "layout": "chart",
+          "variant": "bars-focus",
+          "score": 63,
+          "feasible": true,
+          "reasons": [
+            "以共同零点向两侧展示正负变化，保留零值标签。"
+          ]
+        },
+        {
+          "layout": "chart",
+          "variant": "columns-focus",
+          "score": 59,
+          "feasible": true,
+          "reasons": [
+            "以共同零基线对照离散类别的原始数值。"
+          ]
+        },
+        {
+          "layout": "chart",
+          "variant": "bars-details",
+          "score": 58,
+          "feasible": true,
+          "reasons": [
+            "以共同零点向两侧展示正负变化，保留零值标签。 将图表集中在略窄的内容区。"
+          ]
+        },
+        {
+          "layout": "chart",
+          "variant": "columns-details",
+          "score": 54,
+          "feasible": true,
+          "reasons": [
+            "以共同零基线对照离散类别的原始数值。 将图表集中在略窄的内容区。"
+          ]
+        }
+      ],
+      "chartEncoding": "bars",
+      "assetStrategy": {
+        "image": null,
+        "chart": {
+          "source": "slide-items",
+          "editable": true,
+          "encoding": "bars"
+        }
+      }
+    },
+    {
+      "slideId": "analysis-4",
+      "sourceLayout": "conclusion",
+      "layout": "statement",
+      "variant": "statement-led",
+      "keyMessage": "优先跟踪跨馆借还",
+      "focalPoint": "headline",
+      "density": "sparse",
+      "contentBindings": [
+        {
+          "nodeId": "analysis-4",
+          "slotId": "headline",
+          "emphasis": "primary"
+        },
+        {
+          "nodeId": "analysis-3-0",
+          "slotId": "statement-support-0-label",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "analysis-3-0",
+          "slotId": "statement-support-0-body",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "analysis-3-1",
+          "slotId": "statement-support-1-label",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "analysis-3-1",
+          "slotId": "statement-support-1-body",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "analysis-4",
+          "slotId": "speaker-notes",
+          "emphasis": "supporting"
+        }
+      ],
+      "referenceIds": [
+        "corporate-briefing"
+      ],
+      "selectionReason": "放大主张，用独立区域承接正文。",
+      "candidates": [
+        {
+          "layout": "statement",
+          "variant": "statement-led",
+          "score": 61,
+          "feasible": true,
+          "reasons": [
+            "放大主张，用独立区域承接正文。"
+          ]
+        },
+        {
+          "layout": "statement",
+          "variant": "statement-rows",
+          "score": 40,
+          "feasible": true,
+          "reasons": [
+            "用宽行保留小标题和较长正文。"
+          ]
+        }
+      ],
+      "assetStrategy": {
+        "image": null,
+        "chart": null
+      }
+    }
+  ],
+  "direction": "corporate",
+  "rationale": "汇报语境或证据密度适合用稳定的层级组织信息。用清晰的左对齐、深蓝标题和有边界的内容区组织证据与对比。",
+  "rhythm": [
+    {
+      "slideId": "analysis-1",
+      "layout": "cover",
+      "role": "opening",
+      "emphasis": "text",
+      "density": "sparse",
+      "referenceId": "corporate-briefing",
+      "rationale": "保持稳定的标题与页脚位置，便于浏览。"
+    },
+    {
+      "slideId": "analysis-2",
+      "layout": "chart",
+      "role": "evidence",
+      "emphasis": "data",
+      "density": "sparse",
+      "referenceId": "corporate-evidence",
+      "rationale": "为证据安排一致的横向空间，保留可编辑图表。"
+    },
+    {
+      "slideId": "analysis-3",
+      "layout": "chart",
+      "role": "evidence",
+      "emphasis": "data",
+      "density": "sparse",
+      "referenceId": "corporate-evidence",
+      "rationale": "为证据安排一致的横向空间，保留可编辑图表。"
+    },
+    {
+      "slideId": "analysis-4",
+      "layout": "conclusion",
+      "role": "conclusion",
+      "emphasis": "text",
+      "density": "sparse",
+      "referenceId": "corporate-briefing",
+      "rationale": "保持稳定的标题与页脚位置，便于浏览。"
+    }
+  ],
+  "tokens": {
+    "palette": {
+      "bg": "F7F9FD",
+      "ink": "152C48",
+      "soft": "465A72",
+      "tint": "E8EEF8",
+      "rule": "AABCD6",
+      "accent": "244F96",
+      "mutedBar": "7089AE"
+    },
+    "fonts": {
+      "title": {
+        "latin": "Segoe UI",
+        "cjk": "Noto Sans CJK SC",
+        "fallback": [
+          "Arial",
+          "Microsoft YaHei",
+          "PingFang SC",
+          "sans-serif"
+        ]
+      },
+      "body": {
+        "latin": "Segoe UI",
+        "cjk": "Noto Sans CJK SC",
+        "fallback": [
+          "Arial",
+          "Microsoft YaHei",
+          "PingFang SC",
+          "sans-serif"
+        ]
+      },
+      "data": {
+        "latin": "Segoe UI",
+        "cjk": "Noto Sans CJK SC",
+        "fallback": [
+          "Arial",
+          "Microsoft YaHei",
+          "PingFang SC",
+          "sans-serif"
+        ]
+      }
+    },
+    "typography": {
+      "cover": 58,
+      "title": 43,
+      "label": 23,
+      "body": 20,
+      "lineHeight": 1.24,
+      "boldTitle": true,
+      "display": 50,
+      "caption": 13,
+      "category": 14,
+      "value": 15
+    },
+    "spacing": {
+      "margin": 54,
+      "top": 40,
+      "gap": 22,
+      "gutter": 22,
+      "inset": 17,
+      "footer": 501
+    },
+    "graphics": {
+      "motif": "rail",
+      "rule": 2,
+      "marker": "square",
+      "cover": "rail",
+      "imageSide": "right",
+      "imageShare": 0.46,
+      "chartSide": "left",
+      "panelFill": true
+    },
+    "titleAlignment": "left",
+    "density": "balanced"
+  },
+  "preferences": {
+    "direction": "auto",
+    "audience": "经营分析团队",
+    "setting": "数据分析工作会"
+  },
+  "visualThesis": "用清晰的左对齐、深蓝标题和有边界的内容区组织证据与对比。",
+  "imageryPolicy": "existing-slide-images",
+  "constraints": {
+    "aspectRatio": "16:9",
+    "preserveContent": true,
+    "nativeCharts": true
+  },
+  "negativeRules": [
+    "no-reference-content-or-assets",
+    "no-meaning-by-color-alone"
+  ],
+  "references": [
+    {
+      "id": "corporate-briefing",
+      "direction": "corporate",
+      "title": "经营简报",
+      "layouts": [
+        "cover",
+        "conclusion"
+      ],
+      "topics": [
+        "report",
+        "investor"
+      ],
+      "density": "balanced",
+      "source": "builtin",
+      "owner": "Biscuit project",
+      "rights": "Original text-only design study authored for Biscuit.",
+      "allowedLessons": [
+        "保持稳定的标题与页脚位置，便于浏览。"
+      ],
+      "prohibitedReuse": [
+        "slide text",
+        "imagery",
+        "logos",
+        "template or geometry"
+      ],
+      "legibility": 3,
+      "editability": 3
+    },
+    {
+      "id": "corporate-evidence",
+      "direction": "corporate",
+      "title": "指标与对照",
+      "layouts": [
+        "chart",
+        "comparison"
+      ],
+      "topics": [
+        "report",
+        "investor"
+      ],
+      "density": "dense",
+      "source": "builtin",
+      "owner": "Biscuit project",
+      "rights": "Original text-only design study authored for Biscuit.",
+      "allowedLessons": [
+        "为证据安排一致的横向空间，保留可编辑图表。"
+      ],
+      "prohibitedReuse": [
+        "slide text",
+        "imagery",
+        "logos",
+        "template or geometry"
+      ],
+      "legibility": 2,
+      "editability": 3
+    }
+  ]
+}

@@ -1,0 +1,146 @@
+[
+  {
+    "slideId": "architecture-2",
+    "sha256": "8fd3a755126bf99dca2b93a70ac99cb6f8be08fed55eb09b593d8a3a79977d32",
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "architecture-2"
+    ],
+    "issues": [
+      {
+        "slideId": "architecture-2",
+        "elementIds": [
+          "text-0"
+        ],
+        "kind": "overflow",
+        "severity": "minor",
+        "confidence": 0.7,
+        "evidence": "Body text frame at x60,y187 w264 h292: the character '据' on the second line extends beyond the visible text block, and the right edge of '数' appears cramped against the frame boundary.",
+        "suggestedChange": "Widen the text-0 frame or reduce font size so the line '读取页标识、文本与图表数据。' wraps without touching the right boundary.",
+        "source": "vision-model",
+        "issueId": "vision:architecture-2:1"
+      },
+      {
+        "slideId": "architecture-2",
+        "elementIds": [],
+        "kind": "crowded",
+        "severity": "suggestion",
+        "confidence": 0.6,
+        "evidence": "Large empty area from y~250 to y500 under the three columns; all content is concentrated in the top 40% of the slide.",
+        "suggestedChange": "Redistribute vertical spacing or add supporting detail/illustration in the lower empty area to balance the composition.",
+        "source": "vision-model",
+        "issueId": "vision:architecture-2:2"
+      }
+    ]
+  },
+  {
+    "slideId": "architecture-3",
+    "sha256": "c45dab7bf3473b82b3f6e0833d45118fd8a6a98180254c09ae8c0f6139da2a7c",
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "architecture-3"
+    ],
+    "issues": [
+      {
+        "slideId": "architecture-3",
+        "elementIds": [
+          "label-0",
+          "text-0",
+          "label-1",
+          "text-1"
+        ],
+        "kind": "weak-hierarchy",
+        "severity": "major",
+        "confidence": 0.72,
+        "evidence": "Below the horizontal rules at y≈215, both columns occupy only the top ~55px (labels at y≈242, body at y≈275) of roughly 290px of available vertical space; the lower two-thirds of the slide is empty dark field.",
+        "suggestedChange": "Balance the composition: enlarge or vertically center the two comparison blocks, or add differentiating structure (icons, sub-bullets, or failure-path detail) so the lower half is not vacant.",
+        "source": "vision-model",
+        "issueId": "vision:architecture-3:1"
+      },
+      {
+        "slideId": "architecture-3",
+        "elementIds": [
+          "text-0",
+          "text-1"
+        ],
+        "kind": "poor-alignment",
+        "severity": "minor",
+        "confidence": 0.6,
+        "evidence": "'写入失败' body text at x=60 and '预览失败' body text at x=492; right column body extends to approximately x≈900 while left column ends near x≈330, leaving asymmetric visual mass against the centered divider at x=480.",
+        "suggestedChange": "Normalize the two column text blocks to a consistent measure (e.g., equal width and line length) and align both bodies to the same baseline grid.",
+        "source": "vision-model",
+        "issueId": "vision:architecture-3:2"
+      },
+      {
+        "slideId": "architecture-3",
+        "elementIds": [
+          "rect-5",
+          "rect-6",
+          "rect-4"
+        ],
+        "kind": "poor-alignment",
+        "severity": "suggestion",
+        "confidence": 0.5,
+        "evidence": "Left rule spans x=60–468 and right rule spans x=492–900, but the vertical divider rect-4 sits at x=480, leaving a 12px gap on each side rather than joining the rules to the divider.",
+        "suggestedChange": "Extend the horizontal rules to meet the central divider (or remove the divider) so the rule structure reads as one continuous comparison frame.",
+        "source": "vision-model",
+        "issueId": "vision:architecture-3:3"
+      }
+    ]
+  },
+  {
+    "slideId": "architecture-4",
+    "sha256": "a4ab08dba66576189cece04d860e05d49b82c050dcf634348a8322f02900deb4",
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "architecture-4"
+    ],
+    "issues": [
+      {
+        "slideId": "architecture-4",
+        "elementIds": [
+          "title",
+          "text-0"
+        ],
+        "kind": "weak-hierarchy",
+        "severity": "minor",
+        "confidence": 0.8,
+        "evidence": "The title '只在渲染成功后发布预览' occupies x:60,y:66,w:840,h:263 (roughly half the slide height), while the body copy '必须得到与文稿页数一致的完整图片序列。' is a small single line at y:391; the visual weight is dominated by empty space above the divide line.",
+        "suggestedChange": "Reduce the title frame height to fit the actual two-line title and move the divider and body block up to rebalance vertical spacing.",
+        "source": "vision-model",
+        "issueId": "vision:architecture-4:1"
+      },
+      {
+        "slideId": "architecture-4",
+        "elementIds": [
+          "rect-4",
+          "label-0",
+          "text-0"
+        ],
+        "kind": "poor-alignment",
+        "severity": "suggestion",
+        "confidence": 0.75,
+        "evidence": "The horizontal rule rect-4 spans x:60–900, but label-0 and text-0 have wrapPadding 22 and 23, so their glyphs start at approximately x:82–83 rather than aligning to the x:60 rule.",
+        "suggestedChange": "Set the label and body text wrapPadding to 0 so their left edges align with the rule and title at x:60.",
+        "source": "vision-model",
+        "issueId": "vision:architecture-4:2"
+      },
+      {
+        "slideId": "architecture-4",
+        "elementIds": [
+          "text-8"
+        ],
+        "kind": "low-contrast",
+        "severity": "suggestion",
+        "confidence": 0.6,
+        "evidence": "Page number '04 / 04' at x:796,y:501 uses color B5CBD8 on background 101D27; measured contrast ratio is about 7.6:1, which passes for normal text but is much lighter than the title EFF8FD.",
+        "suggestedChange": "Keep as is or increase size slightly to 14px; no accessibility blocker.",
+        "source": "vision-model",
+        "issueId": "vision:architecture-4:3"
+      }
+    ]
+  }
+]

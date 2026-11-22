@@ -1,0 +1,987 @@
+{
+  "deckId": "operations",
+  "brief": "馆务会比较晚场需求和排班成本，为下一轮试点选择班次。",
+  "design": {
+    "direction": "corporate",
+    "rhythm": [
+      {
+        "slideId": "operations-1",
+        "layout": "cover",
+        "role": "opening",
+        "emphasis": "text",
+        "density": "sparse",
+        "referenceId": "corporate-briefing",
+        "rationale": "保持稳定的标题与页脚位置，便于浏览。"
+      },
+      {
+        "slideId": "operations-2",
+        "layout": "chart",
+        "role": "evidence",
+        "emphasis": "data",
+        "density": "sparse",
+        "referenceId": "corporate-evidence",
+        "rationale": "为证据安排一致的横向空间，保留可编辑图表。"
+      },
+      {
+        "slideId": "operations-3",
+        "layout": "comparison",
+        "role": "contrast",
+        "emphasis": "text",
+        "density": "balanced",
+        "referenceId": "corporate-evidence",
+        "rationale": "为证据安排一致的横向空间，保留可编辑图表。"
+      },
+      {
+        "slideId": "operations-4",
+        "layout": "timeline",
+        "role": "mechanism",
+        "emphasis": "text",
+        "density": "sparse",
+        "referenceId": "corporate-delivery",
+        "rationale": "让里程碑标记和配图使用同一套强调色。"
+      }
+    ],
+    "version": 2,
+    "slidePlans": [
+      {
+        "slideId": "operations-1",
+        "sourceLayout": "cover",
+        "layout": "cover",
+        "variant": "cover-title",
+        "keyMessage": "是否延长周五开放时间",
+        "focalPoint": "headline",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "operations-1",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "operations-0-0",
+            "slotId": "opening-detail-0-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "operations-0-0",
+            "slotId": "opening-detail-0-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "operations-1",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "corporate-briefing"
+        ],
+        "selectionReason": "以全宽标题建立开场焦点。",
+        "candidates": [
+          {
+            "layout": "cover",
+            "variant": "cover-title",
+            "score": 56,
+            "feasible": true,
+            "reasons": [
+              "以全宽标题建立开场焦点。"
+            ]
+          },
+          {
+            "layout": "cover",
+            "variant": "cover-brief",
+            "score": 47,
+            "feasible": true,
+            "reasons": [
+              "把开场说明分行，给正文和配图留足空间。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": null,
+          "chart": null
+        }
+      },
+      {
+        "slideId": "operations-2",
+        "sourceLayout": "chart",
+        "layout": "chart",
+        "variant": "bars-focus",
+        "keyMessage": "阅览室贡献最多晚间到访",
+        "focalPoint": "chart",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "operations-2",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "operations-2",
+            "slotId": "chart-unit",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "operations-1-0",
+            "slotId": "chart-category",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "operations-1-0",
+            "slotId": "chart-value",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "operations-1-1",
+            "slotId": "chart-category",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "operations-1-1",
+            "slotId": "chart-value",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "operations-1-2",
+            "slotId": "chart-category",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "operations-1-2",
+            "slotId": "chart-value",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "operations-1-3",
+            "slotId": "chart-category",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "operations-1-3",
+            "slotId": "chart-value",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "operations-2",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "corporate-evidence"
+        ],
+        "selectionReason": "水平条形给类别标签与排名留出空间。",
+        "candidates": [
+          {
+            "layout": "chart",
+            "variant": "bars-focus",
+            "score": 63,
+            "feasible": true,
+            "reasons": [
+              "水平条形给类别标签与排名留出空间。"
+            ]
+          },
+          {
+            "layout": "chart",
+            "variant": "columns-focus",
+            "score": 59,
+            "feasible": true,
+            "reasons": [
+              "以共同零基线对照离散类别的原始数值。"
+            ]
+          },
+          {
+            "layout": "chart",
+            "variant": "bars-details",
+            "score": 58,
+            "feasible": true,
+            "reasons": [
+              "水平条形给类别标签与排名留出空间。 将图表集中在略窄的内容区。"
+            ]
+          },
+          {
+            "layout": "chart",
+            "variant": "columns-details",
+            "score": 54,
+            "feasible": true,
+            "reasons": [
+              "以共同零基线对照离散类别的原始数值。 将图表集中在略窄的内容区。"
+            ]
+          }
+        ],
+        "chartEncoding": "bars",
+        "assetStrategy": {
+          "image": null,
+          "chart": {
+            "source": "slide-items",
+            "editable": true,
+            "encoding": "bars"
+          }
+        }
+      },
+      {
+        "slideId": "operations-3",
+        "sourceLayout": "comparison",
+        "layout": "comparison",
+        "variant": "comparison-pair",
+        "keyMessage": "相同开放时长，两种排班成本",
+        "focalPoint": "headline",
+        "density": "balanced",
+        "contentBindings": [
+          {
+            "nodeId": "operations-3",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "operations-2-0",
+            "slotId": "comparison-0-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "operations-2-0",
+            "slotId": "comparison-0-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "operations-2-1",
+            "slotId": "comparison-1-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "operations-2-1",
+            "slotId": "comparison-1-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "operations-3",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "corporate-evidence"
+        ],
+        "selectionReason": "为对照项分配同等宽度和文字层级。",
+        "candidates": [
+          {
+            "layout": "comparison",
+            "variant": "comparison-pair",
+            "score": 56.12,
+            "feasible": true,
+            "reasons": [
+              "为对照项分配同等宽度和文字层级。"
+            ]
+          },
+          {
+            "layout": "comparison",
+            "variant": "comparison-rows",
+            "score": 53,
+            "feasible": true,
+            "reasons": [
+              "用相同的行结构并列多个对照项，保留事实和上下文。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": null,
+          "chart": null
+        }
+      },
+      {
+        "slideId": "operations-4",
+        "sourceLayout": "timeline",
+        "layout": "sequence",
+        "variant": "timeline-track",
+        "keyMessage": "分三周跟踪试点",
+        "focalPoint": "headline",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "operations-4",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "operations-3-0",
+            "slotId": "sequence-0-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "operations-3-0",
+            "slotId": "sequence-0-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "operations-3-1",
+            "slotId": "sequence-1-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "operations-3-1",
+            "slotId": "sequence-1-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "operations-3-2",
+            "slotId": "sequence-2-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "operations-3-2",
+            "slotId": "sequence-2-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "operations-4",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "corporate-delivery"
+        ],
+        "selectionReason": "按原始顺序展示等间隔时间点。",
+        "candidates": [
+          {
+            "layout": "sequence",
+            "variant": "timeline-track",
+            "score": 54.69,
+            "feasible": true,
+            "reasons": [
+              "按原始顺序展示等间隔时间点。"
+            ]
+          },
+          {
+            "layout": "sequence",
+            "variant": "timeline-milestones",
+            "score": 53,
+            "feasible": true,
+            "reasons": [
+              "按原文排列有日期的里程碑，间距只用于分隔条目。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": null,
+          "chart": null
+        }
+      }
+    ]
+  },
+  "slides": [
+    {
+      "slideId": "operations-1",
+      "layout": "cover",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "F7F9FD",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "rect",
+          "color": "244F96",
+          "x": 0,
+          "y": 0,
+          "w": 13,
+          "h": 540,
+          "id": "rect-2"
+        },
+        {
+          "type": "rect",
+          "color": "244F96",
+          "x": 54,
+          "y": 106,
+          "w": 55,
+          "h": 4,
+          "id": "rect-3"
+        },
+        {
+          "type": "rect",
+          "color": "AABCD6",
+          "x": 54,
+          "y": 323,
+          "w": 852,
+          "h": 2,
+          "id": "rect-4"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 124,
+          "w": 852,
+          "h": 186,
+          "value": "是否延长周五开放时间",
+          "field": "title",
+          "size": 58,
+          "color": "152C48",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 58,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 330,
+          "w": 272,
+          "h": 144,
+          "value": "馆务会",
+          "field": "label-0",
+          "size": 23,
+          "color": "244F96",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 23,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 341,
+          "y": 330,
+          "w": 565,
+          "h": 144,
+          "value": "本月只决定下一轮试点的排班范围。",
+          "field": "text-0",
+          "size": 20,
+          "color": "465A72",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 20,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 802,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "01 / 04",
+          "field": null,
+          "size": 13,
+          "color": "465A72",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.24,
+          "fontFace": "Segoe UI",
+          "fontFamily": "\"Segoe UI\", \"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-8"
+        }
+      ]
+    },
+    {
+      "slideId": "operations-2",
+      "layout": "chart",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "F7F9FD",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "rect",
+          "color": "244F96",
+          "x": 54,
+          "y": 28,
+          "w": 55,
+          "h": 4,
+          "id": "rect-2"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 40,
+          "w": 852,
+          "h": 59.190000000000005,
+          "value": "阅览室贡献最多晚间到访",
+          "field": "title",
+          "size": 43,
+          "color": "152C48",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 43,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 119.19,
+          "w": 852,
+          "h": 24,
+          "value": "人次",
+          "field": "unit",
+          "size": 13,
+          "color": "465A72",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 13,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "unit"
+        },
+        {
+          "type": "chart",
+          "x": 54,
+          "y": 143.19,
+          "w": 852,
+          "h": 335.81,
+          "encoding": "bars",
+          "items": [
+            {
+              "id": "operations-1-0",
+              "label": "阅览室",
+              "text": "",
+              "value": 48
+            },
+            {
+              "id": "operations-1-1",
+              "label": "少儿借阅区",
+              "text": "",
+              "value": 26
+            },
+            {
+              "id": "operations-1-2",
+              "label": "地方文献查询台",
+              "text": "",
+              "value": 11
+            },
+            {
+              "id": "operations-1-3",
+              "label": "数字资源体验区",
+              "text": "",
+              "value": 7
+            }
+          ],
+          "focus": -1,
+          "domain": {
+            "min": -6.720000000000001,
+            "max": 54.72
+          },
+          "ink": "152C48",
+          "rule": "AABCD6",
+          "categorySize": 14,
+          "plot": {
+            "left": 301.68,
+            "right": 822,
+            "top": 3,
+            "bottom": 332.81,
+            "labelWidth": 289.68
+          },
+          "wrappedCategories": false,
+          "valueSize": 15,
+          "axisWidth": 2,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "valueFontFace": "Segoe UI",
+          "colors": [
+            "244F96",
+            "244F96",
+            "244F96",
+            "244F96"
+          ],
+          "id": "chart-5"
+        },
+        {
+          "type": "text",
+          "x": 802,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "02 / 04",
+          "field": null,
+          "size": 13,
+          "color": "465A72",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.24,
+          "fontFace": "Segoe UI",
+          "fontFamily": "\"Segoe UI\", \"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-6"
+        }
+      ]
+    },
+    {
+      "slideId": "operations-3",
+      "layout": "comparison",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "F7F9FD",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "rect",
+          "color": "244F96",
+          "x": 54,
+          "y": 28,
+          "w": 55,
+          "h": 4,
+          "id": "rect-2"
+        },
+        {
+          "type": "rect",
+          "color": "AABCD6",
+          "x": 480,
+          "y": 204.0384,
+          "w": 2,
+          "h": 124.12,
+          "id": "rect-3"
+        },
+        {
+          "type": "rect",
+          "color": "244F96",
+          "x": 54,
+          "y": 204.0384,
+          "w": 415,
+          "h": 2,
+          "id": "rect-4"
+        },
+        {
+          "type": "rect",
+          "color": "244F96",
+          "x": 491,
+          "y": 204.0384,
+          "w": 415,
+          "h": 2,
+          "id": "rect-5"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 40,
+          "w": 852,
+          "h": 59.190000000000005,
+          "value": "相同开放时长，两种排班成本",
+          "field": "title",
+          "size": 43,
+          "color": "152C48",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 43,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 231.0384,
+          "w": 415,
+          "h": 30.590000000000003,
+          "value": "仅开放阅览室",
+          "field": "label-0",
+          "size": 23,
+          "color": "244F96",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 23,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 265.6284,
+          "w": 415,
+          "h": 62.53,
+          "value": "现有值班表可覆盖延时一小时，借还服务维持原有时间。",
+          "field": "text-0",
+          "size": 20,
+          "color": "465A72",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 20,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 491,
+          "y": 231.0384,
+          "w": 415,
+          "h": 30.590000000000003,
+          "value": "同步开放借还",
+          "field": "label-1",
+          "size": 23,
+          "color": "244F96",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 23,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-1"
+        },
+        {
+          "type": "text",
+          "x": 491,
+          "y": 265.6284,
+          "w": 415,
+          "h": 62.53,
+          "value": "需要增加一名服务台人员，晚班交接必须由两人共同签字。",
+          "field": "text-1",
+          "size": 20,
+          "color": "465A72",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 20,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-1"
+        },
+        {
+          "type": "text",
+          "x": 802,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "03 / 04",
+          "field": null,
+          "size": 13,
+          "color": "465A72",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.24,
+          "fontFace": "Segoe UI",
+          "fontFamily": "\"Segoe UI\", \"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-11"
+        }
+      ]
+    },
+    {
+      "slideId": "operations-4",
+      "layout": "timeline",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "F7F9FD",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "rect",
+          "color": "244F96",
+          "x": 54,
+          "y": 28,
+          "w": 55,
+          "h": 4,
+          "id": "rect-2"
+        },
+        {
+          "type": "rect",
+          "color": "AABCD6",
+          "x": 188.66666666666666,
+          "y": 124.19,
+          "w": 582.6666666666666,
+          "h": 2,
+          "id": "rect-3"
+        },
+        {
+          "type": "rect",
+          "color": "244F96",
+          "x": 183.66666666666666,
+          "y": 119.19,
+          "w": 11,
+          "h": 11,
+          "id": "rect-4"
+        },
+        {
+          "type": "rect",
+          "color": "244F96",
+          "x": 475,
+          "y": 119.19,
+          "w": 11,
+          "h": 11,
+          "id": "rect-5"
+        },
+        {
+          "type": "rect",
+          "color": "244F96",
+          "x": 766.3333333333333,
+          "y": 119.19,
+          "w": 11,
+          "h": 11,
+          "id": "rect-6"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 40,
+          "w": 852,
+          "h": 59.190000000000005,
+          "value": "分三周跟踪试点",
+          "field": "title",
+          "size": 43,
+          "color": "152C48",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 43,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 146.19,
+          "w": 269.3333333333333,
+          "h": 30.590000000000003,
+          "value": "第 1 周",
+          "field": "label-0",
+          "size": 23,
+          "color": "244F96",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 23,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 180.78,
+          "w": 269.3333333333333,
+          "h": 298.22,
+          "value": "记录晚间客流。",
+          "field": "text-0",
+          "size": 20,
+          "color": "465A72",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 20,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 345.3333333333333,
+          "y": 146.19,
+          "w": 269.3333333333333,
+          "h": 30.590000000000003,
+          "value": "第 2 周",
+          "field": "label-1",
+          "size": 23,
+          "color": "244F96",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 23,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-1"
+        },
+        {
+          "type": "text",
+          "x": 345.3333333333333,
+          "y": 180.78,
+          "w": 269.3333333333333,
+          "h": 298.22,
+          "value": "核对岗位负荷。",
+          "field": "text-1",
+          "size": 20,
+          "color": "465A72",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 20,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-1"
+        },
+        {
+          "type": "text",
+          "x": 636.6666666666666,
+          "y": 146.19,
+          "w": 269.3333333333333,
+          "h": 30.590000000000003,
+          "value": "第 3 周",
+          "field": "label-2",
+          "size": 23,
+          "color": "244F96",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 23,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-2"
+        },
+        {
+          "type": "text",
+          "x": 636.6666666666666,
+          "y": 180.78,
+          "w": 269.3333333333333,
+          "h": 298.22,
+          "value": "提交排班建议。",
+          "field": "text-2",
+          "size": 20,
+          "color": "465A72",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 20,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-2"
+        },
+        {
+          "type": "text",
+          "x": 802,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "04 / 04",
+          "field": null,
+          "size": 13,
+          "color": "465A72",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.24,
+          "fontFace": "Segoe UI",
+          "fontFamily": "\"Segoe UI\", \"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-14"
+        }
+      ]
+    }
+  ]
+}

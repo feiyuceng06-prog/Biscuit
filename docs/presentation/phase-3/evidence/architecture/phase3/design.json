@@ -1,0 +1,484 @@
+{
+  "version": 2,
+  "slidePlans": [
+    {
+      "slideId": "architecture-1",
+      "sourceLayout": "cover",
+      "layout": "cover",
+      "variant": "cover-title",
+      "keyMessage": "一次导出，两个交付物",
+      "focalPoint": "headline",
+      "density": "sparse",
+      "contentBindings": [
+        {
+          "nodeId": "architecture-1",
+          "slotId": "headline",
+          "emphasis": "primary"
+        },
+        {
+          "nodeId": "architecture-0-0",
+          "slotId": "opening-detail-0-label",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "architecture-0-0",
+          "slotId": "opening-detail-0-body",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "architecture-1",
+          "slotId": "speaker-notes",
+          "emphasis": "supporting"
+        }
+      ],
+      "referenceIds": [
+        "technology-opening"
+      ],
+      "selectionReason": "以全宽标题建立开场焦点。",
+      "candidates": [
+        {
+          "layout": "cover",
+          "variant": "cover-title",
+          "score": 56,
+          "feasible": true,
+          "reasons": [
+            "以全宽标题建立开场焦点。"
+          ]
+        },
+        {
+          "layout": "cover",
+          "variant": "cover-brief",
+          "score": 47,
+          "feasible": true,
+          "reasons": [
+            "把开场说明分行，给正文和配图留足空间。"
+          ]
+        }
+      ],
+      "assetStrategy": {
+        "image": null,
+        "chart": null
+      }
+    },
+    {
+      "slideId": "architecture-2",
+      "sourceLayout": "conclusion",
+      "layout": "sequence",
+      "variant": "process-flow",
+      "keyMessage": "从草稿到预览的处理流程",
+      "focalPoint": "headline",
+      "density": "balanced",
+      "contentBindings": [
+        {
+          "nodeId": "architecture-2",
+          "slotId": "headline",
+          "emphasis": "primary"
+        },
+        {
+          "nodeId": "architecture-1-0",
+          "slotId": "sequence-0-label",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "architecture-1-0",
+          "slotId": "sequence-0-body",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "architecture-1-1",
+          "slotId": "sequence-1-label",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "architecture-1-1",
+          "slotId": "sequence-1-body",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "architecture-1-2",
+          "slotId": "sequence-2-label",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "architecture-1-2",
+          "slotId": "sequence-2-body",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "architecture-2",
+          "slotId": "speaker-notes",
+          "emphasis": "supporting"
+        }
+      ],
+      "referenceIds": [
+        "technology-opening"
+      ],
+      "selectionReason": "沿正向阅读顺序展示步骤。",
+      "candidates": [
+        {
+          "layout": "sequence",
+          "variant": "process-flow",
+          "score": 55.89,
+          "feasible": true,
+          "reasons": [
+            "沿正向阅读顺序展示步骤。"
+          ]
+        },
+        {
+          "layout": "sequence",
+          "variant": "process-stack",
+          "score": 54,
+          "feasible": true,
+          "reasons": [
+            "纵向安排步骤，为说明保留宽度。"
+          ]
+        },
+        {
+          "layout": "statement",
+          "variant": "statement-led",
+          "score": 53,
+          "feasible": true,
+          "reasons": [
+            "放大主张，用独立区域承接正文。"
+          ]
+        },
+        {
+          "layout": "statement",
+          "variant": "statement-rows",
+          "score": 40,
+          "feasible": true,
+          "reasons": [
+            "用宽行保留小标题和较长正文。"
+          ]
+        }
+      ],
+      "assetStrategy": {
+        "image": null,
+        "chart": null
+      }
+    },
+    {
+      "slideId": "architecture-3",
+      "sourceLayout": "comparison",
+      "layout": "comparison",
+      "variant": "comparison-pair",
+      "keyMessage": "两个失败边界需要不同处理",
+      "focalPoint": "headline",
+      "density": "sparse",
+      "contentBindings": [
+        {
+          "nodeId": "architecture-3",
+          "slotId": "headline",
+          "emphasis": "primary"
+        },
+        {
+          "nodeId": "architecture-2-0",
+          "slotId": "comparison-0-label",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "architecture-2-0",
+          "slotId": "comparison-0-body",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "architecture-2-1",
+          "slotId": "comparison-1-label",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "architecture-2-1",
+          "slotId": "comparison-1-body",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "architecture-3",
+          "slotId": "speaker-notes",
+          "emphasis": "supporting"
+        }
+      ],
+      "referenceIds": [
+        "technology-evidence"
+      ],
+      "selectionReason": "为对照项分配同等宽度和文字层级。",
+      "candidates": [
+        {
+          "layout": "comparison",
+          "variant": "comparison-pair",
+          "score": 56.26,
+          "feasible": true,
+          "reasons": [
+            "为对照项分配同等宽度和文字层级。"
+          ]
+        },
+        {
+          "layout": "comparison",
+          "variant": "comparison-rows",
+          "score": 53,
+          "feasible": true,
+          "reasons": [
+            "用相同的行结构并列多个对照项，保留事实和上下文。"
+          ]
+        }
+      ],
+      "assetStrategy": {
+        "image": null,
+        "chart": null
+      }
+    },
+    {
+      "slideId": "architecture-4",
+      "sourceLayout": "conclusion",
+      "layout": "statement",
+      "variant": "statement-wide",
+      "keyMessage": "只在渲染成功后发布预览",
+      "focalPoint": "headline",
+      "density": "sparse",
+      "contentBindings": [
+        {
+          "nodeId": "architecture-4",
+          "slotId": "headline",
+          "emphasis": "primary"
+        },
+        {
+          "nodeId": "architecture-3-0",
+          "slotId": "statement-caption",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "architecture-3-0",
+          "slotId": "statement-support",
+          "emphasis": "secondary"
+        },
+        {
+          "nodeId": "architecture-4",
+          "slotId": "speaker-notes",
+          "emphasis": "supporting"
+        }
+      ],
+      "referenceIds": [
+        "technology-opening"
+      ],
+      "selectionReason": "单一主张使用全宽标题，下方单独承接说明。",
+      "candidates": [
+        {
+          "layout": "statement",
+          "variant": "statement-wide",
+          "score": 65,
+          "feasible": true,
+          "reasons": [
+            "单一主张使用全宽标题，下方单独承接说明。"
+          ]
+        },
+        {
+          "layout": "statement",
+          "variant": "statement-led",
+          "score": 61,
+          "feasible": true,
+          "reasons": [
+            "放大主张，用独立区域承接正文。"
+          ]
+        },
+        {
+          "layout": "statement",
+          "variant": "statement-rows",
+          "score": 40,
+          "feasible": true,
+          "reasons": [
+            "用宽行保留小标题和较长正文。"
+          ]
+        }
+      ],
+      "assetStrategy": {
+        "image": null,
+        "chart": null
+      }
+    }
+  ],
+  "direction": "technology",
+  "rationale": "技术语境或参考的明暗特征适合采用高对比线框。用高对比配色、精准的线框和等宽数字突出图表与流程。",
+  "rhythm": [
+    {
+      "slideId": "architecture-1",
+      "layout": "cover",
+      "role": "opening",
+      "emphasis": "text",
+      "density": "sparse",
+      "referenceId": "technology-opening",
+      "rationale": "用框角和单一亮色建立视觉识别。"
+    },
+    {
+      "slideId": "architecture-2",
+      "layout": "conclusion",
+      "role": "context",
+      "emphasis": "text",
+      "density": "balanced",
+      "referenceId": "technology-opening",
+      "rationale": "用框角和单一亮色建立视觉识别。"
+    },
+    {
+      "slideId": "architecture-3",
+      "layout": "comparison",
+      "role": "contrast",
+      "emphasis": "text",
+      "density": "sparse",
+      "referenceId": "technology-evidence",
+      "rationale": "用对齐的数值和高对比标签帮助扫描数据。"
+    },
+    {
+      "slideId": "architecture-4",
+      "layout": "conclusion",
+      "role": "conclusion",
+      "emphasis": "text",
+      "density": "sparse",
+      "referenceId": "technology-opening",
+      "rationale": "用框角和单一亮色建立视觉识别。"
+    }
+  ],
+  "tokens": {
+    "palette": {
+      "bg": "101D27",
+      "ink": "EFF8FD",
+      "soft": "B5CBD8",
+      "tint": "1B3140",
+      "rule": "466B7A",
+      "accent": "78DBEF",
+      "mutedBar": "648EA0"
+    },
+    "fonts": {
+      "title": {
+        "latin": "Arial",
+        "cjk": "Noto Sans CJK SC",
+        "fallback": [
+          "Microsoft YaHei",
+          "PingFang SC",
+          "sans-serif"
+        ]
+      },
+      "body": {
+        "latin": "Arial",
+        "cjk": "Noto Sans CJK SC",
+        "fallback": [
+          "Microsoft YaHei",
+          "PingFang SC",
+          "sans-serif"
+        ]
+      },
+      "data": {
+        "latin": "Courier New",
+        "cjk": "Noto Sans CJK SC",
+        "fallback": [
+          "Microsoft YaHei",
+          "PingFang SC",
+          "monospace"
+        ]
+      }
+    },
+    "typography": {
+      "cover": 60,
+      "title": 45,
+      "label": 22,
+      "body": 20,
+      "lineHeight": 1.22,
+      "boldTitle": true,
+      "display": 52,
+      "caption": 13,
+      "category": 13,
+      "value": 16
+    },
+    "spacing": {
+      "margin": 60,
+      "top": 44,
+      "gap": 24,
+      "gutter": 24,
+      "inset": 15,
+      "footer": 501
+    },
+    "graphics": {
+      "motif": "corner",
+      "rule": 2,
+      "marker": "square",
+      "cover": "frame",
+      "imageSide": "left",
+      "imageShare": 0.48,
+      "chartSide": "left",
+      "panelFill": true
+    },
+    "titleAlignment": "left",
+    "density": "balanced"
+  },
+  "preferences": {
+    "direction": "auto",
+    "audience": "平台工程师",
+    "setting": "系统架构评审"
+  },
+  "visualThesis": "用高对比配色、精准的线框和等宽数字突出图表与流程。",
+  "imageryPolicy": "existing-slide-images",
+  "constraints": {
+    "aspectRatio": "16:9",
+    "preserveContent": true,
+    "nativeCharts": true
+  },
+  "negativeRules": [
+    "no-reference-content-or-assets",
+    "no-meaning-by-color-alone"
+  ],
+  "references": [
+    {
+      "id": "technology-opening",
+      "direction": "technology",
+      "title": "技术发布",
+      "layouts": [
+        "cover",
+        "conclusion"
+      ],
+      "topics": [
+        "technology",
+        "launch"
+      ],
+      "density": "sparse",
+      "source": "builtin",
+      "owner": "Biscuit project",
+      "rights": "Original text-only design study authored for Biscuit.",
+      "allowedLessons": [
+        "用框角和单一亮色建立视觉识别。"
+      ],
+      "prohibitedReuse": [
+        "slide text",
+        "imagery",
+        "logos",
+        "template or geometry"
+      ],
+      "legibility": 3,
+      "editability": 3
+    },
+    {
+      "id": "technology-evidence",
+      "direction": "technology",
+      "title": "产品系统指标",
+      "layouts": [
+        "chart",
+        "comparison"
+      ],
+      "topics": [
+        "technology",
+        "report"
+      ],
+      "density": "dense",
+      "source": "builtin",
+      "owner": "Biscuit project",
+      "rights": "Original text-only design study authored for Biscuit.",
+      "allowedLessons": [
+        "用对齐的数值和高对比标签帮助扫描数据。"
+      ],
+      "prohibitedReuse": [
+        "slide text",
+        "imagery",
+        "logos",
+        "template or geometry"
+      ],
+      "legibility": 2,
+      "editability": 3
+    }
+  ]
+}

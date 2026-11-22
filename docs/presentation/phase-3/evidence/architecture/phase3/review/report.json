@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "deckId": "architecture",
+  "pptxSha256": "111624b961d6790cb98bc7c57af5e6caf037fa31b39e8fbd66d2f01eda798a73",
+  "status": "needs_review",
+  "critic": {
+    "status": "unavailable",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "architecture-1"
+    ],
+    "errorType": "JSONDecodeError"
+  },
+  "pages": [
+    {
+      "slideId": "architecture-1",
+      "png": "slide-1.png",
+      "sha256": "9909e7180af0a66b4a8b85dc3977a51ab731ea99c4a26c1e89da6bc7fef6dcb6"
+    },
+    {
+      "slideId": "architecture-2",
+      "png": "slide-2.png",
+      "sha256": "8fd3a755126bf99dca2b93a70ac99cb6f8be08fed55eb09b593d8a3a79977d32"
+    },
+    {
+      "slideId": "architecture-3",
+      "png": "slide-3.png",
+      "sha256": "c45dab7bf3473b82b3f6e0833d45118fd8a6a98180254c09ae8c0f6139da2a7c"
+    },
+    {
+      "slideId": "architecture-4",
+      "png": "slide-4.png",
+      "sha256": "a4ab08dba66576189cece04d860e05d49b82c050dcf634348a8322f02900deb4"
+    }
+  ],
+  "issues": [
+    {
+      "slideId": "architecture-1",
+      "elementIds": [
+        "title"
+      ],
+      "kind": "weak-hierarchy",
+      "severity": "minor",
+      "confidence": 0.7,
+      "evidence": "Title '一次导出，两个交付物' at x60,y124,w840,h186 sits entirely above the interior horizontal rule at y323, leaving a large empty block below the title and separating it visually from the '架构评审' label and subtitle at y330, which carry the actual topic.",
+      "suggestedChange": "Move the section rule and the 架构评审/subtitle row upward or vertically center the title block so the title and supporting text read as one grouped hierarchy rather than two disconnected bands.",
+      "source": "vision-model",
+      "issueId": "vision:architecture-1:1"
+    }
+  ],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "e48f88c4f6327fe68b49de9e8053cda31b2b9c0ed36e6c9b01ec38df45bc1475",
+  "fonts": [
+    "BAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes    107  0",
+    "CAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     92  0",
+    "DAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes    117  0",
+    "EAAAAA+CourierNew                    TrueType          WinAnsi          yes yes yes    122  0",
+    "FAAAAA+Arial-Bold                    TrueType          WinAnsi          yes yes yes    127  0",
+    "GAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes    102  0",
+    "HAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     97  0",
+    "IAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes    112  0"
+  ],
+  "contactSheet": "contact.png",
+  "durationMs": 11001
+}

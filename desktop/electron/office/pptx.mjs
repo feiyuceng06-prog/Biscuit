@@ -47,11 +47,22 @@ export async function powerPoint(raw) {
         });
       if (o.type === 'chart')
         page.addChart(
-          ppt.ChartType.bar,
+          o.encoding === 'line' ? ppt.ChartType.line : ppt.ChartType.bar,
           [{ name: '数值', labels: o.items.map((r) => r.label), values: o.items.map((r) => r.value) }],
           {
             ...box,
-            barDir: 'col',
+            barDir: o.encoding === 'bars' ? 'bar' : 'col',
+            ...(o.encoding === 'bars' && { catAxisOrientation: 'maxMin', catAxisCrossesAt: 'max' }),
+            ...(o.wrappedCategories && { layout: {
+              x: o.plot.left / o.w, y: o.plot.top / o.h,
+              w: (o.plot.right - o.plot.left) / o.w, h: (o.plot.bottom - o.plot.top) / o.h,
+            } }),
+            ...(o.encoding === 'line' && { lineSize: 2.5, lineDataSymbol: 'circle', lineDataSymbolSize: 6 }),
+            ...(o.domain && {
+              valAxisMinVal: o.domain.min,
+              valAxisMaxVal: o.domain.max,
+              barGapWidthPct: 70,
+            }),
             showLegend: false,
             showTitle: false,
             showValue: true,
@@ -69,8 +80,8 @@ export async function powerPoint(raw) {
             valGridLine: { style: 'none' },
             catAxisLineShow: true,
             catAxisLineColor: o.rule,
-            catAxisLabelPos: 'low',
-            dataLabelPosition: 'outEnd',
+            catAxisLabelPos: o.wrappedCategories ? 'none' : 'low',
+            dataLabelPosition: o.encoding === 'line' ? 't' : 'outEnd',
             dataLabelFormatCode: 'General',
             dataLabelColor: o.ink,
             chartColors: o.colors,

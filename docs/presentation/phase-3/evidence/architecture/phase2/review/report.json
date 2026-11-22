@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "deckId": "architecture",
+  "pptxSha256": "300042aa04923bbdc21580f21c28f866096b98bf749f25fb7e36c9f1eef662c9",
+  "status": "needs_review",
+  "critic": {
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "architecture-1",
+      "architecture-2",
+      "architecture-3",
+      "architecture-4"
+    ]
+  },
+  "pages": [
+    {
+      "slideId": "architecture-1",
+      "png": "slide-1.png",
+      "sha256": "58d67ce3b2d84cd737add42857afe5b7e1c53918091a928b7e921db387e15056"
+    },
+    {
+      "slideId": "architecture-2",
+      "png": "slide-2.png",
+      "sha256": "416637cb8a803f26dfc58a407912f04dbe83c2c3ccfdf163740164e5654413d2"
+    },
+    {
+      "slideId": "architecture-3",
+      "png": "slide-3.png",
+      "sha256": "6392832f5fa2b006cf0d33aec26a13bdac6e958a2e9275cc579dc335c57476ec"
+    },
+    {
+      "slideId": "architecture-4",
+      "png": "slide-4.png",
+      "sha256": "4858aab609c4dd62d1e7ff0802e3db4e40acf8806c86644cce86f0efb02b75c0"
+    }
+  ],
+  "issues": [
+    {
+      "slideId": "architecture-1",
+      "elementIds": [
+        "text-0"
+      ],
+      "kind": "low-contrast",
+      "severity": "minor",
+      "confidence": 0.55,
+      "evidence": "正文“编辑文件与逐页预览分别保存。”使用 #B5CBD8，背景近似 #101D27，估算对比度约为 10:1；在深色底上视觉尚可，但与约 #EFF8FD 的 title-0 相差明显，层级偏弱。",
+      "suggestedChange": "如需强化正文可读性，可提高 text-0 到约 #D5E4EC 或提亮字重。",
+      "source": "vision-model",
+      "issueId": "vision:architecture-1:1"
+    },
+    {
+      "slideId": "architecture-2",
+      "elementIds": [
+        "title"
+      ],
+      "kind": "overflow",
+      "severity": "major",
+      "confidence": 0.95,
+      "evidence": "The title \"从草稿到预览的处理流程\" wraps after \"处理流\", with the single character \"程\" extending below the text frame's expected title area toward the left content column's lower region (y≈290–360), crossing the vertical boundary of the title block.",
+      "suggestedChange": "Reduce the title font size or widen the title frame so all five characters fit without a single-character orphan line.",
+      "source": "vision-model",
+      "issueId": "vision:architecture-2:1"
+    },
+    {
+      "slideId": "architecture-2",
+      "elementIds": [
+        "text-0",
+        "text-1",
+        "text-2"
+      ],
+      "kind": "weak-hierarchy",
+      "severity": "minor",
+      "confidence": 0.75,
+      "evidence": "The step descriptions (20pt, #B5CBD8) have low visual weight and large unused vertical space in each 138px-high row; the label and description share nearly the same baseline without separation.",
+      "suggestedChange": "Increase description size or contrast, and vertically align labels and descriptions closer to the top of each row to reduce dead space.",
+      "source": "vision-model",
+      "issueId": "vision:architecture-2:2"
+    },
+    {
+      "slideId": "architecture-2",
+      "elementIds": [],
+      "kind": "source-missing",
+      "severity": "suggestion",
+      "confidence": 0.6,
+      "evidence": "No source or attribution is visible for the process flow described in the slide.",
+      "suggestedChange": "Add a small source or reference note if the flow is derived from an external document.",
+      "source": "vision-model",
+      "issueId": "vision:architecture-2:3"
+    },
+    {
+      "slideId": "architecture-3",
+      "elementIds": [
+        "text-0",
+        "text-1"
+      ],
+      "kind": "crowded",
+      "severity": "suggestion",
+      "confidence": 0.55,
+      "evidence": "Both 400px-wide body frames at y≈223 extend to h≈240 while holding a single short line near y≈230, leaving a large unused area; the two columns read as sparse rather than balanced.",
+      "suggestedChange": "Reduce the body text frame heights to fit the single line (or add a short secondary line), keeping the two columns visually parallel.",
+      "source": "vision-model",
+      "issueId": "vision:architecture-3:1"
+    },
+    {
+      "slideId": "architecture-4",
+      "elementIds": [
+        "title",
+        "text-0",
+        "rect-6"
+      ],
+      "kind": "weak-hierarchy",
+      "severity": "minor",
+      "confidence": 0.8,
+      "evidence": "The giant 50pt bold title '只在渲染成功后发布预览' occupies the left pane while the conclusion's actual content—'必须得到与文稿页数一致的完整图片序列。'—is set at 20pt regular and only one line inside a 474×369 subtitle frame, so the takeaway reads as fine print and the slide's dominant element is an imperative headline.",
+      "suggestedChange": "Promote the delivery condition to a visually lead position: a 2–3 line strengthened statement (e.g., 30–36pt medium weight in EFF8FD) pairing '摘要图/预览图 must match 文稿页数' with the '渲染成功后发布预览' check.",
+      "source": "vision-model",
+      "issueId": "vision:architecture-4:1"
+    },
+    {
+      "slideId": "architecture-4",
+      "elementIds": [
+        "text-0",
+        "rect-6"
+      ],
+      "kind": "crowded",
+      "severity": "suggestion",
+      "confidence": 0.7,
+      "evidence": "The conclusion is reduced to a single clause, leaving roughly 90% of rect-6 (504×428 from x=388–892, y=46–474) empty while the only substantive supporting detail—e.g., the '最后一次有效写入' wording used on slide 03—is absent; the title and box are visually unbalanced.",
+      "suggestedChange": "Add 2–3 short condition bullets in text-0 (e.g., 输出页数与文稿页数一致；缺失页不发布旧预览；渲染失败时显示上次有效预览与错误) to fill the panel and match the failure-handling thread from slides 02–03.",
+      "source": "vision-model",
+      "issueId": "vision:architecture-4:2"
+    }
+  ],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "01879f5c417ace75f2c045a50a48fc07f87d0761a23818ff1a7edcc28cb46b42",
+  "fonts": [
+    "BAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes    108  0",
+    "CAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes    113  0",
+    "DAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes    118  0",
+    "EAAAAA+CourierNew                    TrueType          WinAnsi          yes yes yes    123  0",
+    "FAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     98  0",
+    "GAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     93  0",
+    "HAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes    103  0"
+  ],
+  "contactSheet": "contact.png",
+  "durationMs": 17940
+}

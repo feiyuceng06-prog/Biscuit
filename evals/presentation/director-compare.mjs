@@ -7,8 +7,10 @@ import { powerPoint } from '../../desktop/electron/office/pptx.mjs';
 import { reviewExport, reviewManifest } from '../../desktop/electron/office/review.mjs';
 
 const [out, version, caseId, direction] = process.argv.slice(2);
-assert.ok(out && ['before', 'after'].includes(version), 'Usage: node director-compare.mjs OUTPUT before|after');
-const fixtures = JSON.parse(await fs.readFile(new URL('./director-cases.json', import.meta.url)));
+const plannerCase = ['phase2', 'phase3'].includes(version);
+assert.ok(out && (plannerCase || ['before', 'after'].includes(version)),
+  'Usage: node director-compare.mjs OUTPUT before|after|phase2|phase3 [case] [direction]');
+const fixtures = JSON.parse(await fs.readFile(new URL(plannerCase ? './planner-cases.json' : './director-cases.json', import.meta.url)));
 const cases = fixtures.filter(c => !caseId || c.id === caseId);
 assert.ok(cases.length, 'Unknown case');
 if (direction) assert.ok(version === 'after' && ['editorial', 'minimal', 'corporate', 'technology'].includes(direction));
@@ -24,10 +26,11 @@ await Promise.all(cases.map(async ({id, title, brief, audience, setting, slides}
       notes: '设计对照样例。' + headline + '。材料来自固定输入 ' + id + '。',
       items: items.map(([label, text, value = 0], i) => ({id: id + '-' + n + '-' + i, label, text, value})),
     }))};
-  if (version === 'after') {
+  if (plannerCase || version === 'after') {
     const { planDesign } = await import('../../desktop/electron/office/director.mjs');
     const frozen = structuredClone(deck);
-    deck.design = planDesign(deck, {direction: direction || 'auto', audience, setting});
+    deck.design = planDesign(deck, {direction: direction || 'auto', audience, setting}, {visualPlanner: version === 'phase3'});
+    if (plannerCase) assert.equal(deck.design.version, version === 'phase3' ? 2 : 1);
     assert.deepEqual(deck.slides, frozen.slides);
     await fs.writeFile(path.join(dir, 'design.json'), JSON.stringify(deck.design, null, 2) + '\n');
   }

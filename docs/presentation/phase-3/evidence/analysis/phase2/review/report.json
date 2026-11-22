@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "deckId": "analysis",
+  "pptxSha256": "dda9b78fae7f8fd4434c5e0e087d622977a4e6b57ecdb37a8a18dd3ec5f811b5",
+  "status": "needs_review",
+  "critic": {
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "analysis-1",
+      "analysis-2",
+      "analysis-3",
+      "analysis-4"
+    ]
+  },
+  "pages": [
+    {
+      "slideId": "analysis-1",
+      "png": "slide-1.png",
+      "sha256": "15a328544dc20dde30ec7b4cdeb34f765429e72b2aac26d52ab13ad9b2cc6db8"
+    },
+    {
+      "slideId": "analysis-2",
+      "png": "slide-2.png",
+      "sha256": "2624c8e68310179aec7470862434b91894fb225b37d959ca3fad1b2bfcf12a32"
+    },
+    {
+      "slideId": "analysis-3",
+      "png": "slide-3.png",
+      "sha256": "8db4bb6338441849813f97bf00db2d81136bb7ae4ce7334315df2f191fa20c99"
+    },
+    {
+      "slideId": "analysis-4",
+      "png": "slide-4.png",
+      "sha256": "a5bc9f1b15ea106ae259941d50d157c69544137d23a655430401674ad15c8a78"
+    }
+  ],
+  "issues": [
+    {
+      "slideId": "analysis-1",
+      "elementIds": [
+        "title",
+        "text-0"
+      ],
+      "kind": "weak-hierarchy",
+      "severity": "minor",
+      "confidence": 0.7,
+      "evidence": "标题（y=128,h=170,size=58）与副文（y=330,h=148,size=20）之间大块空白（y≈298–310 分隔线，且正文上方无其他视觉层次），封面下方 60% 区域为空白。",
+      "suggestedChange": "缩小 title 文本帧高度以贴合字形，并把 text-0 上移，减少中部空白。",
+      "source": "vision-model",
+      "issueId": "vision:analysis-1:1"
+    },
+    {
+      "slideId": "analysis-1",
+      "elementIds": [
+        "text-0"
+      ],
+      "kind": "weak-hierarchy",
+      "severity": "suggestion",
+      "confidence": 0.6,
+      "evidence": "副文只有一行“四周试点，所有指标均为示例数据。”，但 text-0 帧高 148，留下大量未用空间（y=330–478）。",
+      "suggestedChange": "将 text-0 高度缩减至单行高度，或补充一行范围说明。",
+      "source": "vision-model",
+      "issueId": "vision:analysis-1:2"
+    },
+    {
+      "slideId": "analysis-1",
+      "elementIds": [],
+      "kind": "source-missing",
+      "severity": "suggestion",
+      "confidence": 0.55,
+      "evidence": "页面仅称“所有指标均为示例数据”，未给出数据来源或出处标识。",
+      "suggestedChange": "在副文或页脚补充数据来源或说明其为演示用示例数据。",
+      "source": "vision-model",
+      "issueId": "vision:analysis-1:3"
+    },
+    {
+      "slideId": "analysis-2",
+      "elementIds": [
+        "chart-5"
+      ],
+      "kind": "chart-misleading",
+      "severity": "major",
+      "confidence": 0.7,
+      "evidence": "柱状图从零基线开始，但未画出明确的 y=0 轴线/刻度，且未显示数值标签之间的刻度线；不过柱高与数值成比例，未截断坐标轴。主要问题：brief 要求保留零值和负值，本图仅正值，未展示零/负值处理；且分组数据（不同服务区）在后续页，本页单一时序，未对比。",
+      "suggestedChange": "若本页仅展示中位等待时间时序，补充 y 轴零基线标注；若需体现零/负值保留，增加对应数据点或说明。",
+      "source": "vision-model",
+      "issueId": "vision:analysis-2:1"
+    },
+    {
+      "slideId": "analysis-3",
+      "elementIds": [
+        "chart-5"
+      ],
+      "kind": "weak-hierarchy",
+      "severity": "minor",
+      "confidence": 0.85,
+      "evidence": "All four bars share the same blue (#244F96), so declines (-3, -1) and gains (2) are not visually distinguished; the chart's message is comparison of direction.",
+      "suggestedChange": "Use distinct colors or add +/- sign emphasis so negative and positive changes are instantly separable.",
+      "source": "vision-model",
+      "issueId": "vision:analysis-3:1"
+    },
+    {
+      "slideId": "analysis-3",
+      "elementIds": [
+        "chart-5"
+      ],
+      "kind": "poor-alignment",
+      "severity": "suggestion",
+      "confidence": 0.7,
+      "evidence": "Value labels sit inconsistently relative to bars: '2' appears above the positive bar, '-3' and '-1' below negative bars, while '0' floats just above the axis line with no bar.",
+      "suggestedChange": "Place value labels consistently outside each bar end with equal gap, and align the zero label to the axis baseline.",
+      "source": "vision-model",
+      "issueId": "vision:analysis-3:2"
+    },
+    {
+      "slideId": "analysis-3",
+      "elementIds": [
+        "chart-5"
+      ],
+      "kind": "crowded",
+      "severity": "suggestion",
+      "confidence": 0.6,
+      "evidence": "Chart uses roughly full width (836px) with only four categories having one short label each, leaving large empty plot space between bars; labels are far below the axis.",
+      "suggestedChange": "Reduce plot width or bring category labels closer to the axis to tighten the composition.",
+      "source": "vision-model",
+      "issueId": "vision:analysis-3:3"
+    },
+    {
+      "slideId": "analysis-4",
+      "elementIds": [
+        "title"
+      ],
+      "kind": "crowded",
+      "severity": "minor",
+      "confidence": 0.6,
+      "evidence": "标题“优先跟踪跨馆借还”在 300px 宽的文本框内换行，46–98px 处的“馆”与上一行“跨”之间间距过紧，视觉上像标题被强行折断，且与右侧面板的大面积留白不平衡。",
+      "suggestedChange": "增大标题文本框宽度，或调整字号/字距，使标题在单行或更自然的断点处换行。",
+      "source": "vision-model",
+      "issueId": "vision:analysis-4:1"
+    },
+    {
+      "slideId": "analysis-4",
+      "elementIds": [
+        "text-0",
+        "text-1",
+        "rect-4",
+        "rect-8"
+      ],
+      "kind": "poor-alignment",
+      "severity": "suggestion",
+      "confidence": 0.55,
+      "evidence": "观察与下一步两个面板内的正文文本框高度均为 149px，但实际文字仅占顶部约一行，底部约 100px 的空白区域未被利用，面板内文字与面板下边界之间留白过大，正文与面板高度不匹配。",
+      "suggestedChange": "将正文文本框高度缩减为内容实际高度，或垂直居中放置正文，使面板内留白更均衡。",
+      "source": "vision-model",
+      "issueId": "vision:analysis-4:2"
+    }
+  ],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "3b849c28f73e49703d4385109c6c3258ddf20a75e3be745fbeaae46b10879d1d",
+  "fonts": [
+    "BAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes    102  0",
+    "CAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     92  0",
+    "DAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes    117  0",
+    "EAAAAA+InterVariable                 TrueType          WinAnsi          yes yes yes    127  0",
+    "FAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     87  0",
+    "GAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes    112  0",
+    "HAAAAA+SourceHanSansCN-Bold          Type 1            Builtin          yes yes yes    132  0",
+    "IAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes    107  0",
+    "JAAAAA+InterVariable                 TrueType          WinAnsi          yes yes yes    122  0",
+    "KAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     97  0",
+    "LAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     82  0"
+  ],
+  "contactSheet": "contact.png",
+  "durationMs": 19505
+}

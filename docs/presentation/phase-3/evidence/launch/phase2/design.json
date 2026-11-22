@@ -1,0 +1,217 @@
+{
+  "version": 1,
+  "direction": "editorial",
+  "rationale": "叙事、教学或配图内容适合用有节奏的标题与留白串联。用衬线大标题、细分隔线和有节制的图像建立叙事层次。",
+  "rhythm": [
+    {
+      "slideId": "launch-1",
+      "layout": "cover",
+      "role": "opening",
+      "emphasis": "image",
+      "density": "sparse",
+      "referenceId": "editorial-opening",
+      "rationale": "用大标题和细线建立叙事层级。"
+    },
+    {
+      "slideId": "launch-2",
+      "layout": "image",
+      "role": "context",
+      "emphasis": "image",
+      "density": "sparse",
+      "referenceId": "editorial-feature",
+      "rationale": "用留白将图片和图旁说明分开。"
+    },
+    {
+      "slideId": "launch-3",
+      "layout": "conclusion",
+      "role": "thesis",
+      "emphasis": "text",
+      "density": "sparse",
+      "referenceId": "editorial-opening",
+      "rationale": "用大标题和细线建立叙事层级。"
+    },
+    {
+      "slideId": "launch-4",
+      "layout": "comparison",
+      "role": "contrast",
+      "emphasis": "text",
+      "density": "sparse",
+      "referenceId": "editorial-evidence",
+      "rationale": "给事实标签留出空间，用细线组织证据。"
+    }
+  ],
+  "tokens": {
+    "palette": {
+      "bg": "FAF6F0",
+      "ink": "2F2421",
+      "soft": "61524B",
+      "tint": "F0E4DA",
+      "rule": "C7AA9D",
+      "accent": "893C43",
+      "mutedBar": "997F79"
+    },
+    "fonts": {
+      "title": {
+        "latin": "Georgia",
+        "cjk": "Noto Serif CJK SC",
+        "fallback": [
+          "Songti SC",
+          "SimSun",
+          "serif"
+        ]
+      },
+      "body": {
+        "latin": "Arial",
+        "cjk": "Noto Sans CJK SC",
+        "fallback": [
+          "Microsoft YaHei",
+          "PingFang SC",
+          "sans-serif"
+        ]
+      },
+      "data": {
+        "latin": "Arial",
+        "cjk": "Noto Sans CJK SC",
+        "fallback": [
+          "Microsoft YaHei",
+          "PingFang SC",
+          "sans-serif"
+        ]
+      }
+    },
+    "typography": {
+      "cover": 66,
+      "title": 49,
+      "label": 24,
+      "body": 22,
+      "lineHeight": 1.25,
+      "boldTitle": false,
+      "display": 58,
+      "caption": 13,
+      "category": 14,
+      "value": 15
+    },
+    "spacing": {
+      "margin": 60,
+      "top": 45,
+      "gap": 25,
+      "gutter": 28,
+      "inset": 13,
+      "footer": 501
+    },
+    "graphics": {
+      "motif": "rule",
+      "rule": 1,
+      "marker": "circle",
+      "cover": "tint",
+      "imageSide": "left",
+      "imageShare": 0.49,
+      "chartSide": "right",
+      "panelFill": false
+    },
+    "titleAlignment": "left",
+    "density": "balanced"
+  },
+  "preferences": {
+    "direction": "auto",
+    "audience": "青年读者与编辑",
+    "setting": "产品故事发布会"
+  },
+  "visualThesis": "用衬线大标题、细分隔线和有节制的图像建立叙事层次。",
+  "imageryPolicy": "existing-slide-images",
+  "constraints": {
+    "aspectRatio": "16:9",
+    "preserveContent": true,
+    "nativeCharts": true
+  },
+  "negativeRules": [
+    "no-reference-content-or-assets",
+    "no-meaning-by-color-alone"
+  ],
+  "references": [
+    {
+      "id": "editorial-opening",
+      "direction": "editorial",
+      "title": "长文叙事开篇",
+      "layouts": [
+        "cover",
+        "conclusion"
+      ],
+      "topics": [
+        "story",
+        "teaching"
+      ],
+      "density": "sparse",
+      "source": "builtin",
+      "owner": "Biscuit project",
+      "rights": "Original text-only design study authored for Biscuit.",
+      "allowedLessons": [
+        "用大标题和细线建立叙事层级。"
+      ],
+      "prohibitedReuse": [
+        "slide text",
+        "imagery",
+        "logos",
+        "template or geometry"
+      ],
+      "legibility": 3,
+      "editability": 3
+    },
+    {
+      "id": "editorial-feature",
+      "direction": "editorial",
+      "title": "图文专题",
+      "layouts": [
+        "image",
+        "timeline"
+      ],
+      "topics": [
+        "story",
+        "teaching"
+      ],
+      "density": "balanced",
+      "source": "builtin",
+      "owner": "Biscuit project",
+      "rights": "Original text-only design study authored for Biscuit.",
+      "allowedLessons": [
+        "用留白将图片和图旁说明分开。"
+      ],
+      "prohibitedReuse": [
+        "slide text",
+        "imagery",
+        "logos",
+        "template or geometry"
+      ],
+      "legibility": 3,
+      "editability": 3
+    },
+    {
+      "id": "editorial-evidence",
+      "direction": "editorial",
+      "title": "叙事中的证据",
+      "layouts": [
+        "chart",
+        "comparison"
+      ],
+      "topics": [
+        "report",
+        "story"
+      ],
+      "density": "balanced",
+      "source": "builtin",
+      "owner": "Biscuit project",
+      "rights": "Original text-only design study authored for Biscuit.",
+      "allowedLessons": [
+        "给事实标签留出空间，用细线组织证据。"
+      ],
+      "prohibitedReuse": [
+        "slide text",
+        "imagery",
+        "logos",
+        "template or geometry"
+      ],
+      "legibility": 3,
+      "editability": 3
+    }
+  ]
+}

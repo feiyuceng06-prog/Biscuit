@@ -14,6 +14,7 @@ export function reviewManifest(raw) {
     ...(deck.design && { design: {
       direction: deck.design.direction,
       rhythm: deck.design.rhythm,
+      ...(deck.design.version === 2 && { version: 2, slidePlans: deck.design.slidePlans }),
     } }),
     slides: deck.slides.map((slide, i) => ({
       slideId: slide.id, layout: slide.layout,

@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "deckId": "launch",
+  "pptxSha256": "5bbfc6cdaa0b47003dd0996c262545bdae6b01d4544e3e40521c1c0bdeb96aad",
+  "status": "needs_review",
+  "critic": {
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "launch-1",
+      "launch-2",
+      "launch-3",
+      "launch-4"
+    ]
+  },
+  "pages": [
+    {
+      "slideId": "launch-1",
+      "png": "slide-1.png",
+      "sha256": "b60cc3072b2ff72c5cc1d44f84d4ed36d153e387e0623db13c25ed43e2971917"
+    },
+    {
+      "slideId": "launch-2",
+      "png": "slide-2.png",
+      "sha256": "c5f426037c1189358559c4361c1e589c316bec46517e2de24d9f4bfb0b971585"
+    },
+    {
+      "slideId": "launch-3",
+      "png": "slide-3.png",
+      "sha256": "7ad6b8f1a2c759aab6837f0e2d6dac131b3521020389487a0f125242bfd8f256"
+    },
+    {
+      "slideId": "launch-4",
+      "png": "slide-4.png",
+      "sha256": "c6ba426550ebb1cb618b3f89b7c7174bde22443d631a629261f08adaea0bd8fe"
+    }
+  ],
+  "issues": [
+    {
+      "slideId": "launch-1",
+      "elementIds": [
+        "label-0",
+        "text-0"
+      ],
+      "kind": "crowded",
+      "severity": "minor",
+      "confidence": 0.72,
+      "evidence": "At the baseline row (y≈330–477), “夜读书签” (label-0, x 485.88, w 132) and “新产品体验会” (text-0, x 632.88, w 267.12) are placed in adjacent frames that share a boundary; the two strings read as one continuous line with no clearly visible gap, so the label and caption run together.",
+      "suggestedChange": "Increase the horizontal gap between label-0 and text-0 (for example, widen the spacing to 24–32 px, or narrow label-0 and shift text-0 right) so that the two strings read as separate elements.",
+      "source": "vision-model",
+      "issueId": "vision:launch-1:1"
+    },
+    {
+      "slideId": "launch-1",
+      "elementIds": [
+        "title"
+      ],
+      "kind": "weak-hierarchy",
+      "severity": "suggestion",
+      "confidence": 0.6,
+      "evidence": "The serif title “闭馆以后，阅读继续” (66 px, #2F2421) and the sans label “夜读书签” (24 px, bold, #893C43) are both dark; the title dominates, but the red label competes for attention at the same baseline area.",
+      "suggestedChange": "Make the visual hierarchy between the title and the label more distinct: reduce the label to a smaller size or lighter weight, or move it further from the title’s baseline, so that the title remains the clear first read.",
+      "source": "vision-model",
+      "issueId": "vision:launch-1:2"
+    },
+    {
+      "slideId": "launch-2",
+      "elementIds": [
+        "image-5"
+      ],
+      "kind": "image-mismatch",
+      "severity": "suggestion",
+      "confidence": 0.5,
+      "evidence": "image-5 shows an empty library reading room at dusk; it does not depict the described product behavior (saving a page/quote and returning).",
+      "suggestedChange": "Use an image or inset UI mock that shows the saved page/quote and the return-to-annotation behavior, or add a caption tying the library scene to the product.",
+      "source": "vision-model",
+      "issueId": "vision:launch-2:1"
+    },
+    {
+      "slideId": "launch-2",
+      "elementIds": [
+        "text-0",
+        "text-1"
+      ],
+      "kind": "weak-hierarchy",
+      "severity": "suggestion",
+      "confidence": 0.6,
+      "evidence": "The large heading (49pt) and bold labels (24pt) dominate; body explanations at 22pt in color 61524B sit at nearly the same visual weight as the labels, while the two body lines are short and isolated in large frames.",
+      "suggestedChange": "Increase the size/contrast gap between labels and body, or reduce the body frame height and align it tighter under each label.",
+      "source": "vision-model",
+      "issueId": "vision:launch-2:2"
+    },
+    {
+      "slideId": "launch-2",
+      "elementIds": [
+        "title"
+      ],
+      "kind": "poor-alignment",
+      "severity": "minor",
+      "confidence": 0.55,
+      "evidence": "Title glyphs begin near x=83 while the horizontal rule rect-2 begins at x=60; the title's visual left edge is inset relative to the rule and the body column.",
+      "suggestedChange": "Align the title text box's left edge to the rule at x=60 (adjust the text wrap/padding) so the heading starts on the same vertical line.",
+      "source": "vision-model",
+      "issueId": "vision:launch-2:3"
+    },
+    {
+      "slideId": "launch-3",
+      "elementIds": [
+        "text-0"
+      ],
+      "kind": "overflow",
+      "severity": "minor",
+      "confidence": 0.9,
+      "evidence": "Main question text box x=60,w=840 (right edge 900px); first line ends with “读” at approx x≈905px crossing the defined frame edge.",
+      "suggestedChange": "Reduce font size slightly or increase text-0 frame width/wrap to keep the line within 900px.",
+      "source": "vision-model",
+      "issueId": "vision:launch-3:1"
+    },
+    {
+      "slideId": "launch-3",
+      "elementIds": [],
+      "kind": "weak-hierarchy",
+      "severity": "suggestion",
+      "confidence": 0.6,
+      "evidence": "Large empty lower-left area below the question; visual weight concentrated in upper half.",
+      "suggestedChange": "Rebalance vertical placement or add a subtle supporting element to fill the empty region.",
+      "source": "vision-model",
+      "issueId": "vision:launch-3:2"
+    },
+    {
+      "slideId": "launch-4",
+      "elementIds": [
+        "text-1",
+        "rect-3"
+      ],
+      "kind": "overflow",
+      "severity": "minor",
+      "confidence": 0.72,
+      "evidence": "In the right column, the 22px description text-1 overflows its 406px-wide/67.84px-high frame and wraps to a third line; the final characters '录。' sit below the box's lower edge at y≈344, while the vertical divider rect-3 ends at y≈343, so the last line extends past the divider's baseline.",
+      "suggestedChange": "Widen the right column frame or reduce text-1 copy to fit on two lines, or extend rect-3 to cover the third line.",
+      "source": "vision-model",
+      "issueId": "vision:launch-4:1"
+    },
+    {
+      "slideId": "launch-4",
+      "elementIds": [
+        "text-0",
+        "text-1"
+      ],
+      "kind": "poor-alignment",
+      "severity": "suggestion",
+      "confidence": 0.62,
+      "evidence": "The left description text-0 is a single line ending at y≈298, while the right description text-1 wraps to two lines reaching y≈344; the two column descriptions have visibly unequal bottom baselines against the shared rule at y≈212.",
+      "suggestedChange": "Equalize description copy lengths or set both text frames to the same fixed height so the columns align.",
+      "source": "vision-model",
+      "issueId": "vision:launch-4:2"
+    }
+  ],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "29a426f6009d2c514cca64b97e79f9fc4652f0045f726f57b44257f72171506e",
+  "fonts": [
+    "BAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     92  0",
+    "CAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     77  0",
+    "DAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes     82  0",
+    "EAAAAA+Arial                         TrueType          WinAnsi          yes yes yes     87  0",
+    "FAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes    107  0",
+    "GAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes    102  0",
+    "HAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     97  0"
+  ],
+  "contactSheet": "contact.png",
+  "durationMs": 22138
+}

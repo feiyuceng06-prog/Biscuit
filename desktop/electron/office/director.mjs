@@ -1,5 +1,8 @@
 import { directions } from './directions.mjs';
 import { selectReference } from './references.mjs';
+import { planSlides, textUnits } from './planner.mjs';
+
+export { textUnits };
 
 const densityRank = { sparse: 0, balanced: 1, dense: 2 };
 const topicPatterns = {
@@ -56,10 +59,6 @@ function readPreferences(input) {
     };
   }
   return preferences;
-}
-
-export function textUnits(value) {
-  return Array.from(value).reduce((total, char) => total + (char.charCodeAt(0) < 128 ? 0.6 : 1.05), 0);
 }
 
 function slideDensity(slide) {
@@ -152,7 +151,7 @@ function designTokens(direction, preferences) {
   };
 }
 
-export function planDesign(deck, preferences = {}) {
+export function planDesign(deck, preferences = {}, { visualPlanner = false } = {}) {
   preferences = readPreferences(preferences);
   const densities = deck.slides.map(slideDensity);
   const [direction, reason] = chooseDirection(deck, preferences, densities);
@@ -181,7 +180,8 @@ export function planDesign(deck, preferences = {}) {
   const thesis = directions[direction].thesis;
   const referenceReason = reference ? '参考文稿提供明暗、标题对齐和密度偏好，页面布局仍以当前内容为准。' : '';
   return {
-    version: 1,
+    version: visualPlanner === true ? 2 : 1,
+    ...(visualPlanner === true && { slidePlans: planSlides(deck, rhythm, tokens) }),
     direction,
     rationale: reason + thesis + referenceReason,
     rhythm,
@@ -200,9 +200,10 @@ export function planDesign(deck, preferences = {}) {
 }
 
 export function restoreDesign(deck, design) {
-  if (!record(design) || (design.version !== undefined && design.version !== 1)) invalid();
+  if (!record(design) || ![undefined, 1, 2].includes(design.version)
+    || (design.version === 2 && !record(design.preferences))) invalid();
   // Preferences are the only persisted input. Rebuild all derived data for the current
   // slide order/content, even if a saved plan claims to be current.
   const { preferences = {} } = design;
-  return planDesign(deck, preferences);
+  return planDesign(deck, preferences, { visualPlanner: design.version === 2 });
 }
