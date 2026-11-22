@@ -33,6 +33,7 @@ def verify(run):
     assert deck["slides"][0]["title"] == case["title"]
     if "copy" in case:
         assert case["copy"] in [i["text"] for i in deck["slides"][-1]["items"]]
+    final_editions = {"river-3", "pair-3", "reading-7", "reading-8"}
     ids = []
     pages = []
     with zipfile.ZipFile(pptx) as pkg:
@@ -58,6 +59,15 @@ def verify(run):
                 assert embedded == base64.b64decode(photo["data"].split(",")[1])
                 if sources[ident]["objectURL"] not in notes:
                     missing.append(ident)
+            if run.name in final_editions:
+                assert not missing, f"Missing original references on page {n}"
+            if run.name in {"reading-7", "reading-8"} and n == 2:
+                assert slide["layout"] == "comparison" and len(original) == len(slide["items"]) == 2
+                for photo, item in zip(original, slide["items"]):
+                    record = sources[int(Path(photo["name"]).stem)]
+                    width, height = record["dimensions"]
+                    assert item["label"] == ("竖幅" if height > width else "横幅")
+                    assert item["text"] == record["title"]
             pages.append(dict(png=str(png.relative_to(EVIDENCE)), sha256=page["sha256"],
                               photoIDs=[p["name"] for p in original], missingURLs=missing))
     assert ids == case["photos"]
