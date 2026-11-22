@@ -178,3 +178,28 @@ export function galleryFrames(photos, { x, y, w, h }, strip = false) {
       y: top, w: width, h: height, captionY: top + height + captionGap, captionHeight };
   });
 }
+
+// Reserve explicit page counts before distributing the remaining pictures in import order.
+export function distributePhotos(slides, photos, brief) {
+  if (!photos.length) return slides;
+  const requested = photoCounts(brief);
+  const counts = slides.map(s => ['cover', 'image', 'conclusion'].includes(s.layout)
+    ? requested[s.layout] : 0);
+  for (const role of Object.keys(requested)) {
+    if (requested[role] && !slides.some(s => s.layout === role))
+      throw Error('大纲缺少指定的摄影页面，请重新生成大纲或调整制作要求');
+  }
+  let remaining = photos.length - counts.reduce((sum, n) => sum + (n ?? 0), 0);
+  const free = counts.flatMap((count, i) => count === undefined ? [i] : []);
+  if (remaining < 0 || (remaining && !free.length))
+    throw Error('照片总数与各页要求不一致，请调整照片或制作要求');
+  for (const i of free) counts[i] = 0;
+  // Give each open page a picture before filling a second row.
+  for (let n = 0; n < remaining; n++) counts[free[n % free.length]]++;
+  let offset = 0;
+  return slides.map((slide, i) => {
+    const page = photos.slice(offset, offset + counts[i]);
+    offset += page.length;
+    return page.length ? { ...slide, photos: page } : slide;
+  });
+}

@@ -18,6 +18,7 @@ import readingRoom from './reading-room.jpg';
 import { planDesign } from '../../electron/office/director.mjs';
 import { hasPhotos, maxDeckPictureData, maxPhotos, photographyIntent, pictureDataSize } from '../../electron/office/photos.mjs';
 import { DesignBrief } from './DesignBrief.jsx';
+import { loadPhoto } from './Inspector.jsx';
 import { Studio } from './Studio.jsx';
 
 import './office.css';
@@ -132,6 +133,20 @@ export function Office({ workspace }) {
     setError('');
     editSlide(slideId, { photos: ordered });
   }
+  function importPool(files) {
+    if (!files.length) return;
+    const snapshot = current.current;
+    void run('正在读取待排版照片', async (signal) => {
+      const pool = [...(snapshot.pendingPhotos ?? [])];
+      if (pool.length + files.length > maxPhotos) throw Error('一次排版最多支持 12 张照片');
+      for (const file of files) pool.push(await loadPhoto(file));
+      signal.throwIfAborted();
+      if (current.current !== snapshot) throw Error('材料已改变，请重新导入照片');
+      if (pictureDataSize(snapshot.slides) + pool.reduce((sum, p) => sum + p.data.length, 0) > maxDeckPictureData)
+        throw Error('文稿图片总量已达上限');
+      commit({ ...snapshot, pendingPhotos: pool, photoInput: snapshot.photoInput ?? { title: '', copy: '' } });
+    });
+  }
   function enter(next) {
     setStage(next);
     setError('');
@@ -227,7 +242,8 @@ export function Office({ workspace }) {
     void run('正在生成大纲', async (signal) => {
       const result = await requestPage(
         { action: 'outline', source: original.source, brief: original.brief, count,
-          direction: original.design?.direction },
+          direction: original.design?.preferences?.direction && original.design.preferences.direction !== 'auto'
+            ? original.design.direction : original.photoInput ? 'photography' : original.design?.direction },
         signal,
       );
       signal.throwIfAborted();
@@ -448,11 +464,25 @@ export function Office({ workspace }) {
                     </select>
                   </label>
                 </div>
+                <details className="office-photo-intake">
+                  <summary>摄影素材与指定原文</summary>
+                  <label>待排版照片
+                    <input type="file" multiple accept="image/png,image/jpeg" onChange={e => {
+                      importPool(Array.from(e.target.files)); e.target.value = '';
+                    }} />
+                  </label>
+                  {!!deck.pendingPhotos?.length && <p>待排版 {deck.pendingPhotos.length} 张
+                    <button type="button" onClick={() => commit({ ...deck, pendingPhotos: [] })}>清空待排版照片</button></p>}
+                  <label>首页标题（原样保留）<input maxLength={120} value={deck.photoInput?.title ?? ''}
+                    onChange={e => commit({ ...deck, photoInput: { copy: '', ...deck.photoInput, title: e.target.value } })} /></label>
+                  <label>末页正文（原样保留）<textarea maxLength={220} value={deck.photoInput?.copy ?? ''}
+                    onChange={e => commit({ ...deck, photoInput: { title: '', ...deck.photoInput, copy: e.target.value } })} /></label>
+                </details>
                 <DesignBrief key={deck.id} deck={deck} commit={commit} onError={setError} disabled={!!busy} />
                 <div className="office-actions office-submit">
                   <button
                     className="office-primary"
-                    disabled={!deck.brief.trim() && !deck.source.trim()}
+                    disabled={!deck.brief.trim() && !deck.source.trim() && !deck.photoInput?.title.trim()}
                     onClick={outline}
                   >
                     生成大纲
