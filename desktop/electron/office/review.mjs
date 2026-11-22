@@ -26,21 +26,32 @@ export async function reviewExport(destination, bytes, deck, backend) {
     await fs.writeFile(path.join(work, 'deck.pptx'), bytes);
     await fs.writeFile(path.join(work, 'manifest.json'), JSON.stringify(reviewManifest(deck)));
     const reportPath = path.join(output, 'report.json');
+    const pptxSha256 = createHash('sha256').update(bytes).digest('hex');
+    let processFailure;
     try {
       await promisify(execFile)(backend.command, [...backend.args, '--presentation-review', work, output],
         { windowsHide: true, timeout: 600000, env: { ...process.env, PYTHONUTF8: '1' } });
     } catch (error) {
-      // A timeout during model review may already have a complete local preflight report.
-      const fallback = { schemaVersion: 1, deckId: deck.id, status: 'preview_unavailable',
-        pptxSha256: createHash('sha256').update(bytes).digest('hex'), pages: [], issues: [],
-        critic: { status: 'unavailable' }, error: 'Review process failed: ' + (error.code || error.signal || 'unknown') };
-      try {
-        await fs.writeFile(reportPath, JSON.stringify(fallback, null, 2), { flag: 'wx' });
-      } catch (writeError) {
-        if (writeError.code !== 'EEXIST') throw writeError;
-      }
+      processFailure = 'Review process failed: ' + (error.code || error.signal || 'unknown');
     }
-    const report = JSON.parse(await fs.readFile(reportPath, 'utf8'));
+    let report;
+    try {
+      // A timeout during model review may leave a complete local preflight report.
+      report = JSON.parse(await fs.readFile(reportPath, 'utf8'));
+      if (report?.schemaVersion !== 1 || report.deckId !== deck.id || report.pptxSha256 !== pptxSha256
+        || !['preview_unavailable', 'checked', 'needs_review', 'blocked'].includes(report.status)
+        || !['not_requested', 'unavailable', 'checked'].includes(report.critic?.status)
+        || !Array.isArray(report.pages) || !Array.isArray(report.issues)
+        || (report.status !== 'preview_unavailable' && (report.pages.length !== deck.slides.length
+          || report.pages.some((page, index) => page?.slideId !== deck.slides[index].id)))) {
+        throw new Error('Invalid review report');
+      }
+    } catch {
+      report = { schemaVersion: 1, deckId: deck.id, status: 'preview_unavailable',
+        pptxSha256, pages: [], issues: [], critic: { status: 'unavailable' },
+        error: processFailure || 'Review process did not produce a valid report.' };
+      await fs.writeFile(reportPath, JSON.stringify(report, null, 2));
+    }
     return { destination, status: report.status, critic: report.critic.status, report: reportPath };
   } finally {
     await fs.rm(work, { recursive: true, force: true });

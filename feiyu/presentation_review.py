@@ -37,9 +37,9 @@ def luminance(rgb):
 
 def issue(page, element, kind, evidence, suggestion, severity="blocker"):
     return {
-        "issueId": f"{page}:{element}:{kind}",
+        "issueId": f"{page}:{element or 'page'}:{kind}",
         "slideId": page,
-        "elementIds": [element],
+        "elementIds": [element] if element else [],
         "kind": kind,
         "severity": severity,
         "confidence": 1,
@@ -64,6 +64,24 @@ def contains(outer, inner, tolerance=0):
     )
 
 
+def matching_words(words, text, bounds):
+    if not text:
+        return []
+    x, y, right, bottom = bounds
+    for start, (_, (left, top, word_right, word_bottom)) in enumerate(words):
+        if word_right < x - 2 or left > right + 2 or word_bottom < y - 2 or top > bottom + 2:
+            continue
+        remaining = text
+        for stop in range(start, len(words)):
+            value = normalized(words[stop][0])
+            if not remaining.startswith(value):
+                break
+            remaining = remaining[len(value) :]
+            if not remaining:
+                return words[start : stop + 1]
+    return []
+
+
 def inspect_page(slide, words, native, archive, relationships, image):
     page = slide["slideId"]
     issues, layers, text_frames = [], [], []
@@ -72,7 +90,7 @@ def inspect_page(slide, words, native, archive, relationships, image):
         issues.append(
             issue(
                 page,
-                "page",
+                None,
                 "object-count",
                 f"{len(shapes)} PPTX objects, expected {len(slide['objects'])}",
                 "Re-export the complete page.",
@@ -80,7 +98,7 @@ def inspect_page(slide, words, native, archive, relationships, image):
         )
     if image.convert("RGB").getcolors(1) is not None:
         issues.append(
-            issue(page, "page", "blank", "The raster has one unique colour.", "Inspect slide visibility.")
+            issue(page, None, "blank", "The raster has one unique colour.", "Inspect slide visibility.")
         )
     for expected, shape in zip(slide["objects"], shapes):
         element = expected["id"]
@@ -133,8 +151,8 @@ def inspect_page(slide, words, native, archive, relationships, image):
         elif kind in ("text", "chart"):
             # Match word centres, since Poppler ascent/descent includes space outside the ink.
             local = [(v, b) for v, b in words if contains(bounds, word_center(b), 2)]
-            content = normalized("".join(v for v, _ in local))
             if kind == "chart":
+                content = normalized("".join(v for v, _ in local))
                 ref = shape.find(".//{*}chart")
                 rid = next(iter(ref.attrib.values()), "") if ref is not None else ""
                 target = posixpath.normpath(posixpath.join("ppt/slides", relationships.get(rid, ""))).lstrip(
@@ -185,22 +203,27 @@ def inspect_page(slide, words, native, archive, relationships, image):
                     "Native text differs from the source composition.",
                     "Restore the original characters before export.",
                 )
-            if text and text not in content:
+            # An unwrapped word may start inside the frame with its centre well outside it.
+            rendered = matching_words(local, stored, bounds) or matching_words(words, stored, bounds)
+            content = "".join(v for v, _ in (rendered or local))
+            bad_glyph = "\ufffd" in content
+            if stored and not rendered and not bad_glyph:
                 add(
                     "clipping",
-                    "Expected text is incomplete in PDF words inside the PPTX text box.",
-                    "Inspect the PNG and enlarge or reposition the text box.",
+                    "PDF words associated with the PPTX text box do not reconstruct the native text.",
+                    "Check the PNG for cropped or missing characters and verify the extraction order.",
                     "major",
                 )
-            if "\ufffd" in content or any(ord(c) < 32 for c in content):
+            if bad_glyph:
                 add(
                     "missing-glyph",
-                    "Rendered text contains a replacement or control character.",
+                    "PDF text contains a Unicode replacement character.",
                     "Check the original character and font coverage.",
                 )
-            excess = max(
-                (max(x - b[0], b[2] - x - w, (b[1] + b[3]) / 2 - y - h) for _, b in local), default=0
-            )
+            excess = 0
+            for _, (left, top, right, bottom) in rendered:
+                mid_y = (top + bottom) / 2
+                excess = max(excess, x - left, right - (x + w), y - mid_y, mid_y - (y + h))
             if excess > 2:
                 add(
                     "overflow",
@@ -208,12 +231,15 @@ def inspect_page(slide, words, native, archive, relationships, image):
                     "Check surrounding content in the PNG and increase the text frame.",
                     "major",
                 )
-            color = shape.find(".//{*}rPr/{*}solidFill/{*}srgbClr")
+            run = shape.find(".//{*}rPr")
+            color = run.find("{*}solidFill/{*}srgbClr") if run is not None else None
             background = next((c for b, c in reversed(layers) if contains(b, bounds, 0.05)), None)
             if color is not None and background:
                 a, b = sorted((luminance(color.get("val")), luminance(background)))
                 ratio = (b + 0.05) / (a + 0.05)
-                limit = 3 if expected["size"] >= 18 or expected["bold"] and expected["size"] >= 14 else 4.5
+                size = int(run.get("sz", "0")) / 100
+                bold = run.get("b") in ("1", "true")
+                limit = 3 if size >= 18 or bold and size >= 14 else 4.5
                 if ratio < limit:
                     add(
                         "low-contrast",
@@ -221,6 +247,34 @@ def inspect_page(slide, words, native, archive, relationships, image):
                         "Choose a higher-contrast foreground or solid background.",
                     )
     return issues
+
+
+def pdf_pages(pdf):
+    # Poppler can emit invalid UTF-8 in XHTML metadata for supplementary characters.
+    # The body is an independent XML document and contains all page/word geometry.
+    xhtml = command("pdftotext", "-bbox", pdf, "-").stdout
+    _, start, tail = xhtml.partition(b"<body>")
+    body, end, _ = tail.rpartition(b"</body>")
+    if not start or not end:
+        raise ValueError("Missing PDF word geometry")
+    return ET.fromstring(body).findall("{*}page")
+
+
+def pdf_fonts(*args):
+    return command("pdffonts", *args).stdout.decode(errors="replace").splitlines()[2:]
+
+
+def placeholder_fonts(rows):
+    names = [row.split()[0].rsplit("+", 1)[-1] for row in rows if row.strip()]
+    return sorted({name for name in names if name.split("-")[0] in ("LastResort", "LastResortHE")})
+
+
+def review_status(report):
+    if any(i["severity"] == "blocker" and i["source"] == "deterministic" for i in report["issues"]):
+        return "blocked"
+    if report["issues"] or report.get("renderWarning") or report["critic"]["status"] == "unavailable":
+        return "needs_review"
+    return "checked"
 
 
 def review(work, output):
@@ -259,16 +313,20 @@ def review(work, output):
             if result.stderr.strip():
                 report["renderWarning"] = result.stderr.decode(errors="replace")[:1000]
         pdf = output / "deck.pdf"
+        if not pdf.is_file() or not pdf.stat().st_size:
+            raise ValueError("LibreOffice did not produce a PDF")
         report["pdfSha256"] = digest(pdf)
-        pages = ET.fromstring(command("pdftotext", "-bbox", pdf, "-").stdout).findall(".//{*}page")
+        pages = pdf_pages(pdf)
         with zipfile.ZipFile(pptx) as archive:
             count = len(ET.fromstring(archive.read("ppt/presentation.xml")).findall(".//{*}sldId"))
             if len(pages) != len(slides) or count != len(pages):
                 raise ValueError(f"Source/PPTX/PDF page counts: {len(slides)}/{count}/{len(pages)}")
             command("pdftoppm", "-png", "-scale-to", "1600", pdf, output / "slide")
             pngs = sorted(output.glob("slide-*.png"), key=lambda p: int(p.stem.split("-")[-1]))
-            if len(pngs) != count:
-                raise ValueError("Incomplete PNG output")
+            if [int(p.stem.split("-")[-1]) for p in pngs] != list(range(1, count + 1)):
+                raise ValueError("Incomplete or misnumbered PNG output")
+            report["fonts"] = pdf_fonts(pdf)
+            has_placeholders = bool(placeholder_fonts(report["fonts"]))
             sheet = Image.new("RGB", (320 * min(count, 3), 180 * ((count + 2) // 3)), "white")
             for i, (slide, page, png) in enumerate(zip(slides, pages, pngs)):
                 words = [
@@ -283,6 +341,19 @@ def review(work, output):
                     issues = inspect_page(
                         slide, words, native, archive, {r.get("Id"): r.get("Target") for r in rels}, image
                     )
+                    if has_placeholders and not any(item["kind"] == "missing-glyph" for item in issues):
+                        number = str(i + 1)
+                        fonts = placeholder_fonts(pdf_fonts("-f", number, "-l", number, pdf))
+                        if fonts:
+                            issues.append(
+                                issue(
+                                    slide["slideId"],
+                                    None,
+                                    "missing-glyph",
+                                    "PDF page uses a placeholder font: " + ", ".join(fonts) + ".",
+                                    "Inspect the PNG and use a font that covers the original characters.",
+                                )
+                            )
                     sheet.paste(
                         image.resize((320, 180), getattr(Image, "Resampling", Image).LANCZOS),
                         (320 * (i % 3), 180 * (i // 3)),
@@ -291,25 +362,16 @@ def review(work, output):
                 report["issues"].extend(issues)
             sheet.save(output / "contact.png")
         report["contactSheet"] = "contact.png"
-        report["fonts"] = command("pdffonts", pdf).stdout.decode(errors="replace").splitlines()[2:]
-        if any(i["severity"] == "blocker" for i in report["issues"]):
-            report["status"] = "blocked"
-        elif report["issues"] or report.get("renderWarning"):
-            report["status"] = "needs_review"
-        else:
-            report["status"] = "checked"
         alias = os.getenv("BISCUIT_PRESENTATION_CRITIC")
         if alias:
+            # Preserve completed local results if a provider hangs and the worker is stopped.
+            report["critic"] = {"status": "unavailable", "modelAlias": alias, "checkedSlides": []}
+            report["status"] = review_status(report)
+            save_report(output, report, start)
             from .presentation_critic import inspect_render
 
-            # Preserve completed local results if a provider hangs and the worker is stopped.
-            report["critic"] = {"status": "unavailable", "modelAlias": alias}
-            save_report(output, report, start)
             inspect_render(report, manifest, output, alias)
-            if report["status"] == "checked" and (
-                report["issues"] or report["critic"]["status"] != "checked"
-            ):
-                report["status"] = "needs_review"
+        report["status"] = review_status(report)
     except (
         OSError,
         ValueError,

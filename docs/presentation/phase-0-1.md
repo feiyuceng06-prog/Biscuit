@@ -69,3 +69,11 @@ FAILED (failures=1, skipped=15)
 ## 已知边界
 
 当前仅检查 Biscuit 原生 16:9 导出。跨平台字体替换会改变断行；同环境哈希用于复现，跨系统应核对截图。PDF 字词边界包含字体度量留白，越过文本框不一定代表文字被裁掉；报告保留这一区别。带图片或透明层的背景、复杂矢量遮挡，以及能正确抽取文字但屏幕上显示方框的字形，仍需核对实际图片。PowerPoint、Keynote 原生应用及多人盲评未在此次实测中覆盖。Phase 0/1 建立观察能力，暂不改动布局或自动修复内容。
+
+## Phase 1 后端复核
+
+用同一份含占位字形的真实 PPTX 复核：PDF 可抽取原字符，但 PNG 的标题中显示占位框。旧报告为 `checked`；更新后按页检测到 PDF 使用 LastResortHE-Regular 并返回 `blocked`。仍需人工检查没有特征字体名的方框字形。[实际 PPTX](evidence/placeholder-font/deck.pptx) · [整页 PNG](evidence/placeholder-font/slide-1.png) · [按页证据](evidence/placeholder-font/report.json)
+
+窄框样例中的文字完整显示，PDF 实测超框 161.6 pt，报告归为溢出。另一份样例的导出字号为 8 pt，实测对比度 3.38:1，低于适用的 4.5:1 阈值。回归用例还覆盖含扩展汉字和 emoji 的文稿标题、缺失 PDF、错号 PNG、无有效报告以及视觉模型中断。预检完成后模型中断会保留逐页结果并提示复核。
+
+本轮验收通过 12 项 Python PPT 测试、35 项桌面 Node 测试和前端构建。通过导出评审入口复跑 12 份固定输入，16 页 PNG 哈希均与 Phase 0 一致。验证使用 Linux 上的 LibreOffice 与 Poppler。

@@ -6,34 +6,41 @@ import unittest
 import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
+from feiyu import presentation_review
 from feiyu.presentation_critic import inspect_render, validate
 from feiyu.presentation_review import review
 
 SAMPLE = Path(__file__).resolve().parents[1] / "docs/presentation/evidence/before"
+requires_renderer = unittest.skipUnless(
+    (shutil.which("soffice") or shutil.which("libreoffice"))
+    and all(shutil.which(x) for x in ("pdftoppm", "pdftotext", "pdffonts")),
+    "requires Impress and Poppler",
+)
 
 
-def damage_export(destination):
-    """Mutate native objects so the real renderer sees defects absent in the manifest."""
+def rewrite_export(destination, edit, *, title=None):
     with zipfile.ZipFile(SAMPLE / "monthly.pptx") as src, zipfile.ZipFile(destination, "w") as dst:
         for entry in src.infolist():
             data = src.read(entry)
             if entry.filename == "ppt/slides/slide1.xml":
                 page = ET.fromstring(data)
-                label, title, body, folio = [
-                    s for s in page.findall(".//{*}sp") if s.find("{*}txBody") is not None
-                ]
-                # The label becomes nearly indistinguishable from the sand canvas.
-                label.find(".//{*}rPr/{*}solidFill/{*}srgbClr").set("val", "FBF6EB")
-                title.find(".//{*}t").text = "闭馆"  # two characters removed in the actual file
-                body.find(".//{*}xfrm/{*}ext").set("cx", str(160 * 12700))
-                frame = body.find(".//{*}bodyPr")
-                frame.set("wrap", "none")
-                frame.remove(frame.find("{*}normAutofit"))
-                folio.find(".//{*}xfrm/{*}off").set("x", str(950 * 12700))
+                edit(*(s for s in page.findall(".//{*}sp") if s.find("{*}txBody") is not None))
                 data = ET.tostring(page, encoding="utf-8")
+            if entry.filename == "docProps/core.xml" and title:
+                metadata = ET.fromstring(data)
+                metadata.find("{*}title").text = title
+                data = ET.tostring(metadata, encoding="utf-8")
             dst.writestr(entry, data)
+
+
+def narrow_frame(body, width):
+    body.find(".//{*}xfrm/{*}ext").set("cx", str(width * 12700))
+    frame = body.find(".//{*}bodyPr")
+    frame.set("wrap", "none")
+    frame.remove(frame.find("{*}normAutofit"))
 
 
 class ReviewTests(unittest.TestCase):
@@ -57,12 +64,24 @@ class ReviewTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             review(self.work, self.output)
 
-    @unittest.skipUnless(
-        all(shutil.which(x) for x in ("soffice", "pdftoppm", "pdftotext", "pdffonts")),
-        "requires Impress and Poppler",
-    )
+    def test_successful_conversion_command_without_pdf_is_unavailable(self):
+        shutil.copyfile(SAMPLE / "monthly.pptx", self.deck)
+        result = SimpleNamespace(stdout=b"LibreOffice", stderr=b"renderer diagnostic")
+        with patch("feiyu.presentation_review.command", return_value=result):
+            report = review(self.work, self.output)
+        self.assertEqual(report["status"], "preview_unavailable")
+        self.assertEqual(report["error"], "LibreOffice did not produce a PDF")
+        self.assertEqual(report["renderWarning"], "renderer diagnostic")
+
+    @requires_renderer
     def test_actual_export_corruption(self):
-        damage_export(self.deck)
+        def damage(label, title, body, folio):
+            label.find(".//{*}rPr/{*}solidFill/{*}srgbClr").set("val", "FBF6EB")
+            title.find(".//{*}t").text = "闭馆"
+            narrow_frame(body, 160)
+            folio.find(".//{*}xfrm/{*}off").set("x", str(950 * 12700))
+
+        rewrite_export(self.deck, damage)
         with patch.dict(os.environ, BISCUIT_PRESENTATION_CRITIC=""):
             report = review(self.work, self.output)
         self.assertEqual(report["status"], "blocked", report)
@@ -72,6 +91,78 @@ class ReviewTests(unittest.TestCase):
             {"low-contrast", "missing-text", "out-of-bounds", "clipping", "overflow"} <= defects, defects
         )
         self.assertTrue((self.output / report["contactSheet"]).is_file())
+
+    @requires_renderer
+    def test_supplementary_metadata_does_not_hide_overflow_and_small_text_contrast(self):
+        def damage(label, title, body, folio):
+            narrow_frame(body, 80)
+            style = label.find(".//{*}rPr")
+            style.set("sz", "800")
+            style.find("{*}solidFill/{*}srgbClr").set("val", "8E8576")
+
+        rewrite_export(self.deck, damage, title="案例 𠮷 😀")
+        with patch.dict(os.environ, BISCUIT_PRESENTATION_CRITIC=""):
+            report = review(self.work, self.output)
+        self.assertEqual(report["status"], "blocked", report)
+        self.assertEqual(len(report["pages"]), 5)
+        issues = {
+            (tuple(i["elementIds"]), i["kind"]) for i in report["issues"] if i["slideId"] == "monthly-1"
+        }
+        self.assertIn((("text-0",), "overflow"), issues)
+        self.assertNotIn((("text-0",), "clipping"), issues)
+        self.assertIn((("label-0",), "low-contrast"), issues)
+
+    @requires_renderer
+    def test_placeholder_font_is_reported_on_the_affected_page(self):
+        shutil.copyfile(SAMPLE / "monthly.pptx", self.deck)
+        pdf_fonts = presentation_review.pdf_fonts
+
+        def fonts(*args):
+            if len(args) == 1 or args[1] == "2":
+                return pdf_fonts(*args) + ["AAAAAA+LastResortHE-Regular TrueType WinAnsi yes yes yes 1 0"]
+            return pdf_fonts(*args)
+
+        with (
+            patch("feiyu.presentation_review.pdf_fonts", side_effect=fonts),
+            patch.dict(os.environ, BISCUIT_PRESENTATION_CRITIC=""),
+        ):
+            report = review(self.work, self.output)
+        findings = [i for i in report["issues"] if i["kind"] == "missing-glyph"]
+        self.assertEqual([(i["slideId"], i["elementIds"]) for i in findings], [("monthly-2", [])])
+        self.assertIn("LastResortHE-Regular", findings[0]["evidence"])
+        self.assertEqual(report["status"], "blocked")
+
+    @requires_renderer
+    def test_misnumbered_pngs_never_bind_to_slide_ids(self):
+        shutil.copyfile(SAMPLE / "monthly.pptx", self.deck)
+        command = presentation_review.command
+
+        def misnumber(*args):
+            result = command(*args)
+            if args[:2] == ("pdftoppm", "-png"):
+                (self.output / "slide-2.png").rename(self.output / "slide-6.png")
+            return result
+
+        with patch("feiyu.presentation_review.command", side_effect=misnumber):
+            report = review(self.work, self.output)
+        self.assertEqual(report["status"], "preview_unavailable")
+        self.assertIn("misnumbered PNG", report["error"])
+        self.assertEqual(report["pages"], [])
+
+    @requires_renderer
+    def test_interrupted_critic_leaves_preflight_marked_for_review(self):
+        shutil.copyfile(SAMPLE / "monthly.pptx", self.deck)
+        with (
+            patch.dict(os.environ, BISCUIT_PRESENTATION_CRITIC="offline"),
+            patch("feiyu.presentation_review.inspect_page", return_value=[]),
+            patch("feiyu.presentation_critic.inspect_render", side_effect=SystemExit(124)),
+            self.assertRaises(SystemExit),
+        ):
+            review(self.work, self.output)
+        report = json.loads((self.output / "report.json").read_text(encoding="utf-8"))
+        self.assertEqual(report["status"], "needs_review")
+        self.assertEqual(report["critic"]["status"], "unavailable")
+        self.assertEqual(len(report["pages"]), 5)
 
     def test_critic_sends_page_and_sheet_through_configured_sdks(self):
         from tests.test_sdk_worker import SDKWorkerTests
