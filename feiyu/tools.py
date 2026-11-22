@@ -23,6 +23,7 @@ from pathlib import Path
 
 from . import (enabled, files, images, jobs as jobs_mod, lsp, mcp, memory, net, permissions, sandbox,
                skills as skills_mod, todo)
+from .presentation_content import PresentationError, inspect_content
 
 
 # read_file 不给 limit 时最多读这么多行 原来是"整份读进来"，
@@ -105,8 +106,8 @@ TOOL_SCHEMAS = [
         "name": "read_file",
         "description": (
             "读取工作区内的文件 文本文件返回带 1 起始行号的内容，方便你在编辑时引用行 "
-            "docx / xlsx / pptx / odt / ods / odp / pdf 会自动抽成纯文本（只有文字，"
-            "排版和图片不保留，也无法用 edit_file 改回去） "
+            "docx / xlsx / odt / ods / odp / pdf 会自动抽成纯文本，无法用 edit_file 改回去 "
+            "pptx 按页提取正文、表格、图表缓存、演讲者备注和图片替代文字，并检查相关部件关系 "
             "png / jpg / gif / webp 会直接把图交给你看（需要模型支持视觉，不支持时会明说） "
             "其他二进制格式会明确报错，不会返回乱码 "
         ),
@@ -114,9 +115,9 @@ TOOL_SCHEMAS = [
             "type": "object",
             "properties": {
                 "path": {"type": "string", "description": "相对工作区根目录的文件路径 "},
-                "offset": {"type": "integer", "description": "从第几行开始读，1 起始（可选） "},
+                "offset": {"type": "integer", "description": "从第几行开始读，PPTX 用页码，均从 1 起始（可选） "},
                 "limit": {"type": "integer",
-                          "description": "最多读多少行 不填默认 %d 行，不够会告诉你怎么接着读 " % READ_CAP},
+                          "description": "最多读多少行（默认 %d 行），PPTX 则限制页数（默认从 offset 读到末页） " % READ_CAP},
             },
             "required": ["path"],
         },
@@ -864,17 +865,6 @@ def _from_docx(zf) -> str:
     return "\n".join(lines)
 
 
-def _from_pptx(zf) -> str:
-    names = sorted(n for n in zf.namelist()
-                   if n.startswith("ppt/slides/slide") and n.endswith(".xml"))
-    out = []
-    for i, name in enumerate(names, 1):
-        root = ET.fromstring(zf.read(name))
-        body = [t.strip() for t in _texts(root, "t") if t and t.strip()]
-        out.append("== 第 %d 页 ==\n%s" % (i, "\n".join(body)))
-    return "\n\n".join(out)
-
-
 def _from_xlsx(zf) -> str:
     shared = []
     if "xl/sharedStrings.xml" in zf.namelist():
@@ -936,14 +926,16 @@ def _from_ods(zf) -> str:
 
 
 _ZIP_READERS = {
-    ".docx": _from_docx, ".xlsx": _from_xlsx, ".pptx": _from_pptx,
+    ".docx": _from_docx, ".xlsx": _from_xlsx,
     ".odt": _from_opendocument, ".ods": _from_ods, ".odp": _from_opendocument,
 }
 
 
-def read_document(target: Path) -> str | None:
+def read_document(target: Path, *, watcher=None) -> str | None:
     """能认的二进制格式抽成文本，认不出返回 None """
     suffix = target.suffix.lower()
+    if suffix == ".pptx":
+        return inspect_content(target, watcher=watcher).text
     if suffix == ".pdf":
         if not _shutil.which("pdftotext"):
             return None
@@ -1887,6 +1879,16 @@ class Toolbox:
 
         if images.kind(target):
             return self._read_image(target, args["path"])
+
+        if target.suffix.lower() == ".pptx":
+            try:
+                presentation = inspect_content(target, offset=args.get("offset", 1),
+                                               limit=args.get("limit"), watcher=self.files,
+                                               control=self.execution.control)
+            except PresentationError as exc:
+                return ToolResult(str(exc), is_error=True, summary=str(exc), error_code=exc.code)
+            return ToolResult(presentation.text, summary="读取 PPTX 文本与结构",
+                              truncated=presentation.truncated)
 
         extracted = read_document(target)
         if extracted is not None:

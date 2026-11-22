@@ -21,6 +21,10 @@ if sys.argv[1:] == ['--_mcp-http-worker']:
     from feiyu.mcp import http_worker_main
     raise SystemExit(http_worker_main())
 
+if len(sys.argv) == 5 and sys.argv[1] == '--_presentation-content-worker':
+    from feiyu.presentation_content import worker_main
+    raise SystemExit(worker_main(sys.argv[2:]))
+
 from feiyu.__main__ import main
 
 if __name__ == "__main__":

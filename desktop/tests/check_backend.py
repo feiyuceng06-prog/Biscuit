@@ -2,6 +2,7 @@
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -27,11 +28,25 @@ with tempfile.TemporaryDirectory(prefix="feiyu-payload-test-") as temporary:
         assert any(event.get("kind") == "status" for event in events), f"{kind}: no status received"
         print(f"PASS: frozen {kind} backend initializes without system Python")
 
+    sample = (Path(__file__).resolve().parents[2] /
+              'docs/presentation/phase-2/evidence/business/after/deck.pptx')
+    deck = root / '商业样例.pptx'
+    shutil.copyfile(sample, deck)
+    command = [sys.argv[1], '--presentation-content', str(deck)]
+    result = subprocess.run(command, capture_output=True, env=env, timeout=15, check=True)
+    payload = json.loads(result.stdout)
+    assert set(payload) == {'text'}, payload
+    assert '夜读试点月报' in payload['text'] and '演讲者备注' in payload['text'], payload
+    assert '["26", "35", "48"]' in payload['text'], payload
+    deck.write_bytes(b'invalid presentation')
+    result = subprocess.run(command, capture_output=True, env=env, timeout=15)
+    assert result.returncode != 0 and not result.stdout and 'PPTX' in result.stderr.decode('utf-8'), result
+    print('PASS: frozen PPTX content worker returns a single JSON object and reports invalid files')
+
 # Exercise the frozen entry point, not imports from the development interpreter.
 if sys.platform.startswith('linux'):
     import http.server
     import queue
-    import shutil
     import ssl
     import threading
 

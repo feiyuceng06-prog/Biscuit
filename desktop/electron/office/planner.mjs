@@ -179,7 +179,12 @@ function candidatesForContent(slide, content, rhythm, tokens) {
   else if (count > 1 && (timeIntervals(slide.items).dated
       || /流程|工序|处理步骤|工作步骤|流水线|\b(?:workflow|pipeline|procedure|steps)\b/i.test(title))) inferred = 'timeline';
   else if (count === 2 && /对比|两种|两类|差异|\b(?:compare|comparison|versus|vs)\b/i.test(title)) inferred = 'comparison';
-  if (!inferred) return original;
+  if (!inferred) {
+    if (tokens.readingCopy && !content.data.length && count && slide.items.some(item => item.text.trim()))
+      return [...original, { layout: 'statement', variant: 'statement-reading', score: 77,
+        reason: '会前阅读使用连续的文字层级，保留原文并按段落分配空间。' }];
+    return original;
+  }
   const alternatives = candidateSet({ ...slide, layout: inferred }, content, rhythm, tokens);
   return [...alternatives, ...original];
 }
@@ -499,6 +504,30 @@ export function resolveSlideLayout(slide, tokens, plan, content = slideContent(s
     title(region.x, titleY, region.w, detailY - titleY - 13, brief ? type.title + 5 : type.cover);
     field(box(region.x, detailY, region.w, unitHeight), units, 'chart-unit', 'unit', 'caption');
     rows(indices, region.x, detailY + unitHeight, region.w, bottom - detailY - unitHeight, 'opening-detail');
+  } else if (variant === 'statement-reading') {
+    title(left, top, width, header);
+    field(box(left, start, width, unitHeight), units, 'chart-unit', 'unit', 'caption');
+    const readWidth = Math.floor(width * 0.88);
+    const x = alignment === 'center' ? left + (width - readWidth) / 2 : left;
+    let y = start + unitHeight;
+    const heights = indices.map(i => {
+      const { label, text: body } = items[i];
+      const lines = (copy, size) => copy ? textHeight(copy, size, readWidth, type.lineHeight + 0.09, 1) : 0;
+      return Math.max(1, lines(label, type.label) + lines(body, type.body) + 8);
+    });
+    const blockGap = Math.min(spacing.gap, 20);
+    const available = bottom - y - blockGap * (indices.length - 1);
+    const totalHeight = heights.reduce((a, b) => a + b, 0);
+    // Reserve a label and body line before sharing space with multi-paragraph items.
+    const floor = Math.min(available / indices.length, (type.label + type.body) * type.lineHeight + 8);
+    const reserved = heights.map(h => Math.min(h, floor));
+    const baseHeight = reserved.reduce((a, b) => a + b, 0);
+    const scale = totalHeight <= available ? 1 : (available - baseHeight) / (totalHeight - baseHeight);
+    indices.forEach((i, n) => {
+      const h = reserved[n] + (heights[n] - reserved[n]) * scale;
+      entry(i, x, y, readWidth, h, 'reading-' + n);
+      y += h + blockGap;
+    });
   } else if (variant === 'statement-takeaway' || variant === 'statement-wide') {
     const takeaway = variant === 'statement-takeaway';
     const labelY = takeaway ? top + 110 : bottom - 138;

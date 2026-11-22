@@ -15,6 +15,7 @@ const topicPatterns = {
   launch: /\b(?:launch\w*|product|keynote|customers?|clients?|showcase|introduc\w*|portfolio)\b|发布|新品|产品|客户|介绍|作品集/i,
 };
 const stagePattern = /\b(?:stage|project\w*|large[ -]screen|auditorium|keynote)\b|大屏|投影|现场演讲|会场/i;
+const preReadPattern = /会前(?:预读|阅读)|书面简报|\bpre[- ]?read\b|\breading memo\b/i;
 const printPattern = /\b(?:print\w*|handout\w*)\b|打印|印刷/i;
 const topicWeights = {
   technology: { technology: 5 },
@@ -44,6 +45,12 @@ function readPreferences(input) {
   if (input.brandAccent !== undefined && input.brandAccent !== '') {
     if (typeof input.brandAccent !== 'string' || !/^#?[0-9a-f]{6}$/i.test(input.brandAccent)) invalid();
     preferences.brandAccent = input.brandAccent.replace('#', '').toUpperCase();
+  }
+  if (input.background) preferences.background = choice(input.background, ['light', 'dark']);
+  if (input.brandFont) {
+    const font = preferenceText(input.brandFont, 64);
+    if (!/^[\p{L}\p{N}][\p{L}\p{M}\p{N} ._-]*$/u.test(font)) invalid();
+    preferences.brandFont = font;
   }
   if (reference !== undefined) {
     if (!record(reference)) invalid();
@@ -127,16 +134,18 @@ function slideRole(slide, index, total) {
   return slide.layout === 'image' && (slide.image || slide.photos?.length) ? 'evidence' : 'thesis';
 }
 
-function designTokens(direction, preferences) {
+function designTokens(direction, preferences, brief) {
   const style = directions[direction];
   const { reference, setting } = preferences;
   const stage = stagePattern.test(setting);
-  const paletteMode = reference?.palette ?? (style.preferDark && !printPattern.test(setting) ? 'dark' : 'light');
+  const paletteMode = preferences.background ?? reference?.palette ?? (style.preferDark && !printPattern.test(setting) ? 'dark' : 'light');
   return {
-    palette: { ...(paletteMode === 'dark' && style.dark ? style.dark : style.light) },
+    palette: { ...(paletteMode === 'dark' ? (style.dark ?? directions.editorial.dark) : style.light) },
     ...(paletteMode === 'mixed' && style.dark && { openingPalette: { ...style.dark } }),
     fonts: Object.fromEntries(Object.entries(style.fonts).map(([role, font]) => [
-      role, { ...font, fallback: [...font.fallback] },
+      role, preferences.brandFont
+        ? { latin: preferences.brandFont, cjk: preferences.brandFont, fallback: [font.latin, font.cjk, ...font.fallback] }
+        : { ...font, fallback: [...font.fallback] },
     ])),
     typography: {
       ...style.typography,
@@ -150,6 +159,7 @@ function designTokens(direction, preferences) {
       imageShare: style.graphics.imageShare + (reference?.hasImages ? 0.04 : 0),
     },
     titleAlignment: reference?.titleAlignment ?? style.alignment,
+    ...(!reference && preReadPattern.test(setting || brief) && { readingCopy: true }),
     density: reference?.textDensity ?? 'balanced',
   };
 }
@@ -158,7 +168,7 @@ export function planDesign(deck, preferences = {}, { visualPlanner = false } = {
   preferences = readPreferences(preferences);
   const densities = deck.slides.map(slideDensity);
   const [direction, reason] = chooseDirection(deck, preferences, densities, visualPlanner);
-  const tokens = designTokens(direction, preferences);
+  const tokens = designTokens(direction, preferences, deck.brief);
   const photoPlanning = direction === 'photography' || hasPhotos(deck);
   const counts = photoPlanning ? photoCounts(deck.brief) : {};
   visualPlanner ||= photoPlanning;

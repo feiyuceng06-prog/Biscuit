@@ -3,6 +3,7 @@ import {
   ArrowDownToLine,
   ChevronDown,
   CircleCheck,
+  Copy,
   LoaderCircle,
   Circle,
   ChevronLeft,
@@ -20,7 +21,7 @@ import {
   Undo2,
   X,
 } from 'lucide-react';
-import { themes, layouts } from '../../electron/office/deck.mjs';
+import { themes, layouts, duplicateSlide } from '../../electron/office/deck.mjs';
 import { hasPhotos } from '../../electron/office/photos.mjs';
 import { DesignBrief } from './DesignBrief.jsx';
 import { Canvas } from './Canvas.jsx';
@@ -211,6 +212,20 @@ export function Studio({
                   label="后移"
                   disabled={busy || index === total - 1}
                   onClick={() => move(1)}
+                />
+                <Tool
+                  icon={Copy}
+                  label="复制本页"
+                  disabled={busy || total >= 20}
+                  onClick={() => {
+                    try {
+                      const next = duplicateSlide(deck, index);
+                      commit(next);
+                      select(next.slides[index + 1].id);
+                    } catch (e) {
+                      onError(e.message);
+                    }
+                  }}
                 />
                 <Tool
                   icon={Trash2}

@@ -1,0 +1,80 @@
+{
+  "files": {
+    "before": {
+      "pptxSha256": "c998183dd97809486e153f9deacf536c07fc76c911e06749c594a90acc8fd23a",
+      "status": "checked",
+      "chartData": [
+        [
+          "阅览室",
+          "48"
+        ],
+        [
+          "少儿借阅区",
+          "26"
+        ],
+        [
+          "地方文献查询台",
+          "11"
+        ],
+        [
+          "数字资源体验区",
+          "7"
+        ]
+      ]
+    },
+    "after": {
+      "pptxSha256": "b0783811e03f0206398d6fa182300dad88237bfeaa16256445a6ff84ade1ad71",
+      "status": "checked",
+      "chartData": [
+        [
+          "阅览室",
+          "48"
+        ],
+        [
+          "少儿借阅区",
+          "26"
+        ],
+        [
+          "地方文献查询台",
+          "11"
+        ],
+        [
+          "数字资源体验区",
+          "7"
+        ]
+      ]
+    }
+  },
+  "pages": [
+    {
+      "page": 1,
+      "identicalSlideXml": true,
+      "changedPixelBounds": [
+        1442,
+        840,
+        1510,
+        860
+      ]
+    },
+    {
+      "page": 2,
+      "identicalSlideXml": true,
+      "changedPixelBounds": [
+        1438,
+        840,
+        1510,
+        860
+      ]
+    },
+    {
+      "page": 3,
+      "identicalSlideXml": false,
+      "changedPixelBounds": [
+        89,
+        66,
+        1510,
+        860
+      ]
+    }
+  ]
+}

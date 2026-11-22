@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import {
-  newDeck, newSlide, blankItem, composition, readDeck, preserveLayoutContent, generatedBody, applyBody,
+  newDeck, newSlide, blankItem, duplicateSlide, composition, readDeck, preserveLayoutContent, generatedBody, applyBody,
 } from '../electron/office/deck.mjs';
+import { resolveSlideLayout } from '../electron/office/planner.mjs';
 import { planDesign } from '../electron/office/director.mjs';
 import { powerPoint } from '../electron/office/pptx.mjs';
 import { reviewManifest } from '../electron/office/review.mjs';
@@ -186,4 +187,55 @@ test('the model-provided zero stays typed when its category is blank and its ann
   assert.deepEqual(changed.slides[0].items.map(row => row.valueKind), ['chart-data', 'chart-data']);
   const rendered = objects(changed, plan(changed)).find(o => o.type === 'chart');
   assert.deepEqual(rendered.items.map(item => item.value), [0, -2]);
+});
+
+test('pre-read copy follows its literal reading order and yields to reference and chart semantics', () => {
+  const deck = deckFor(slide('conclusion', '试点排班建议', [
+    row('开放范围', '仅开放阅览室。'), row('引用', '排班记录，第 3 页。'),
+  ]), chart('到访人次', ['一组', '二组'], [48, 26]));
+  const prefs = { direction: 'corporate', setting: '董事会会前阅读', brandFont: 'Noto Sans CJK SC', background: 'dark' };
+  const design = plan(deck, prefs);
+  assert.equal(design.slidePlans[0].variant, 'statement-reading');
+  assert.equal(design.slidePlans[1].layout, 'chart');
+  assert.equal(design.tokens.palette.bg, '141E30');
+  const fields = objects(deck, design).filter(o => o.field && o.type === 'text');
+  assert.deepEqual(fields.slice(0, 5).map(o => o.value), ['试点排班建议', '开放范围', '仅开放阅览室。', '引用', '排班记录，第 3 页。']);
+  assert.ok(fields.every(o => o.fontFace === prefs.brandFont));
+  assert.notEqual(plan(deck).slidePlans[0].variant, 'statement-reading');
+  const reference = { id: 'pptx-' + 'a'.repeat(64), name: 'Example', slideCount: 1,
+    textDensity: 'balanced', hasCharts: false, hasImages: false, titleAlignment: 'center', palette: 'light' };
+  assert.equal(plan({ ...deck, brief: '请为会前阅读排版' }).slidePlans[0].variant, 'statement-reading');
+  assert.notEqual(plan({ ...deck, brief: '会前阅读' }, { setting: '投影' }).slidePlans[0].variant, 'statement-reading');
+  const referenced = plan(deck, { ...prefs, reference });
+  assert.equal(referenced.tokens.titleAlignment, 'center');
+  assert.equal(referenced.tokens.palette.bg, '141E30');
+  assert.notEqual(referenced.slidePlans[0].variant, 'statement-reading');
+  assert.throws(() => plan(deck, { brandFont: 'bad; font' }));
+});
+
+test('duplicating and removing a chart page creates independent native charts and saves only live objects', async () => {
+  const deck = deckFor(chart('订单', ['本月', '上月'], [10, 0]));
+  const copy = duplicateSlide(deck, 0);
+  copy.slides[1].items[0].value = 20;
+  assert.equal(deck.slides[0].items[0].value, 10);
+  assert.notEqual(copy.slides[1].items[0].id, deck.slides[0].items[0].id);
+  const native = async doc => zip.loadAsync(await powerPoint({ ...doc, design: plan(doc) }));
+  const doubled = await native(copy);
+  assert.equal(doubled.file(/^ppt\/embeddings\/.*\.xlsx$/).length, 2);
+  assert.equal(doubled.file(/^ppt\/charts\/chart\d+\.xml$/).length, 2);
+  const trimmed = await native({ ...copy, slides: [copy.slides[1]] });
+  assert.equal(trimmed.file(/^ppt\/embeddings\/.*\.xlsx$/).length, 1);
+  assert.match(await trimmed.file(/^ppt\/charts\/chart\d+\.xml$/)[0].async('string'), /<c:v>20<\/c:v>/);
+  assert.throws(() => duplicateSlide({ ...deck, slides: Array(20).fill(deck.slides[0]) }, 0));
+});
+
+test('a long pre-read paragraph leaves positive space for adjacent label and body pairs', () => {
+  const deck = deckFor(slide('conclusion', '会前材料', [
+    row('依据', '长\n'.repeat(85)), row('范围', '短'), row('出处', '见附件'),
+  ]));
+  const design = plan(deck, { direction: 'corporate', setting: '会前阅读' });
+  const page = resolveSlideLayout(deck.slides[0], design.tokens, { layout: 'statement', variant: 'statement-reading' });
+  assert.ok(page.text.every(box => box.h > 0 && box.y + box.h <= 540));
+  assert.ok(page.text.some(box => box.value === deck.slides[0].items[0].text));
+  assert.ok(design.slidePlans[0].contentEditProposal);
 });
