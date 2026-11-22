@@ -54,6 +54,30 @@ class TestRoundTrip(Base):
         b.tokens_total, b.tokens_context, b.cost, b.priced = 500, 300, 1.25, True
         return b
 
+    def test_deleted_chat_with_task_journal_stays_out_of_desktop_history(self):
+        from feiyu import serve
+        from unittest.mock import Mock
+
+        keep, deleted = session.new_id(), session.new_id()
+        for sid in (keep, deleted):
+            session.save(self.ws, Agentish(self.make()), sid)
+        interrupted = session.new_id()
+        for sid in (deleted, interrupted):
+            directory = Path(session.folder(self.ws)) / sid
+            directory.mkdir(exist_ok=True)
+            (directory / "active.json").write_text("{}")
+        session.drop(self.ws, deleted)
+        server = serve.Server.__new__(serve.Server)
+        server.workspace, server.agent, server.proto = self.ws, Mock(), Mock()
+        server.push_sessions()
+        rows = server.proto.send.call_args.kwargs["rows"]
+        self.assertEqual([row["id"] for row in rows], [keep])
+        self.assertIsNone(session.load(self.ws, deleted))
+        session.drop(self.ws, keep)
+        self.assertEqual(session.latest_id(self.ws), interrupted)
+        self.assertTrue(session.load(self.ws, interrupted)["journal_only"])
+        self.assertTrue((Path(session.folder(self.ws)) / deleted / "active.json").exists())
+
     def test_清单也一起存(self):
         a = Agentish(self.make())
         a.toolbox.todos.replace([{"text": "改 parser", "status": "doing"}])

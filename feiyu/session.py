@@ -228,6 +228,8 @@ def _journal_stub(workspace, sid):
     directory = os.path.join(folder(workspace), sid)
     if not _ID_OK.fullmatch(sid) or sid == LEGACY or not os.path.isdir(directory):
         return None
+    if os.path.exists(_path(workspace, sid) + '.deleted'):
+        return None
     names = os.listdir(directory)
     if 'active.json' not in names and not any(n.endswith('.task.json') for n in names):
         return None
@@ -236,7 +238,7 @@ def _journal_stub(workspace, sid):
                 saved_at=os.stat(directory).st_mtime)
 
 
-def listing(workspace) -> list[dict]:
+def listing(workspace, *, include_journals=True) -> list[dict]:
     """这个工作目录下的历史对话，**新的在前** 只出摘要，不出正文
 
     正文动辄几十万字，侧边栏用不上；点开某一条的时候再 `load()`。
@@ -254,12 +256,13 @@ def listing(workspace) -> list[dict]:
         data = _card(path) or _read(path)
         if data:
             rows.append(_summary(name[:-5], data))
-    known = {r['id'] for r in rows}
-    for sid in names:
-        if sid not in known:
-            stub = _journal_stub(workspace, sid)
-            if stub:
-                rows.append(_summary(sid, stub))
+    if include_journals:
+        known = {r['id'] for r in rows}
+        for sid in names:
+            if sid not in known:
+                stub = _journal_stub(workspace, sid)
+                if stub:
+                    rows.append(_summary(sid, stub))
     old = _read(_legacy_path(workspace))
     if old:
         rows.append(_summary(LEGACY, old))
@@ -373,6 +376,9 @@ def drop(workspace, sid: str | None = None) -> None:
         return
     # legacy 两个位置都删：新位置那份是 0.55.0 以前的 save 留下的，
     # 只删旧位置的话侧栏上那一行删不掉（用户拿截图来问过）
+    if _journal_stub(workspace, sid):
+        # Keep the durable files for reconciliation, but never rediscover a deleted chat.
+        atomic_json(_path(workspace, sid) + '.deleted', True)
     where = [_path(workspace, sid)]
     if sid == LEGACY:
         where.append(_legacy_path(workspace))

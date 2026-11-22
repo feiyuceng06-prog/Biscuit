@@ -243,7 +243,7 @@ class Server:
 
     def push_sessions(self) -> None:
         """侧边栏那份列表 只出摘要，正文点开才读 """
-        self.proto.send("sessions", rows=session_mod.listing(self.workspace),
+        self.proto.send("sessions", rows=session_mod.listing(self.workspace, include_journals=False),
                         current=self.agent.session_id)
 
     def push_paths(self, prefix: str) -> None:

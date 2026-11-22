@@ -5,7 +5,6 @@ import os
 import pathlib
 import subprocess
 import sys
-import time
 import tempfile
 import unittest
 import unittest.mock
@@ -598,10 +597,9 @@ class TestShellState(Base):
         self.box.run("bash", {"command": 'echo "A=[$A]" > out.txt',
                               "background": True, "reset": True})
         seen = self.root / "out.txt"
-        for _ in range(100):
-            if seen.is_file() and seen.read_text(encoding="utf-8").strip():
-                break
-            time.sleep(0.05)
+        job, = self.box.jobs.all()
+        job.wait()
+        self.assertEqual(job.code, 0)
         self.assertEqual(seen.read_text(encoding="utf-8").strip(), "A=[]")
 
     def test_后台任务继承状态但不写回(self):
@@ -613,10 +611,9 @@ class TestShellState(Base):
             "command": 'echo "$FOO" > seen.txt; export LEAKED=yes',
             "background": True})
         seen = self.root / "seen.txt"
-        for _ in range(100):
-            if seen.is_file() and seen.read_text(encoding="utf-8").strip():
-                break
-            time.sleep(0.05)
+        job, = self.box.jobs.all()
+        job.wait()
+        self.assertEqual(job.code, 0)
         self.assertEqual(seen.read_text(encoding="utf-8").strip(), "bar")
         out = self.box.run("bash", {"command": 'echo "[$LEAKED]"'})
         self.assertIn("[]", out.content)
