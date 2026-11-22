@@ -4,6 +4,12 @@ import path from 'node:path';
 
 export async function checkOffice(application, page, workspace, output, fixture) {
   await page.getByRole('button', { name: '办公', exact: true }).click();
+  const office = page.locator('dialog.office');
+  await expect(office.getByRole('button', { name: '新建演示文稿' })).toBeEnabled();
+  await office.screenshot({ animations: 'disabled', path: path.join(output, 'office-library-light.png') });
+  await page.evaluate(() => setTheme('dark'));
+  await office.screenshot({ animations: 'disabled', path: path.join(output, 'office-library-dark.png') });
+  await page.evaluate(() => setTheme('light'));
   await page.getByRole('button', { name: '打开示例文稿' }).click();
   await expect(page.locator('.office-thumb')).toHaveCount(5);
   await expect(page.locator('.office-canvas svg image')).toBeVisible();
@@ -13,9 +19,31 @@ export async function checkOffice(application, page, workspace, output, fixture)
   await page.getByRole('button', { name: '午夜' }).click();
   await page.getByRole('button', { name: '收起面板' }).click();
   await expect(page.locator('.office-canvas')).toContainText('48 人次');
+  await page.getByRole('button', { name: 'AI 修改' }).click();
+  await page.locator('.office-task summary').press('Enter');
+  await expect(page.locator('.office-task li')).toHaveCount(5);
+  await page.getByRole('button', { name: '收起面板' }).click();
   await page.getByRole('button', { name: '返回办公' }).click();
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: '新建演示文稿' }).click();
+  const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }));
+  try {
+    await page.setViewportSize({ width: 390, height: 740 });
+    await expect(page.getByRole('button', { name: '生成大纲' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: '手动编辑' })).toBeInViewport();
+    await page.getByLabel('制作要求').focus();
+    await office.screenshot({ animations: 'disabled', path: path.join(output, 'office-source-narrow.png') });
+    await page.getByRole('button', { name: '手动编辑' }).click();
+    await expect(page.locator('.studio-rail')).toHaveCount(0);
+    await page.getByRole('button', { name: '页面缩略图' }).click();
+    await expect(page.locator('.studio-rail')).toBeInViewport();
+    await page.locator('.office-thumb').first().click();
+    await expect(page.locator('.studio-rail')).toHaveCount(0);
+    await page.getByRole('button', { name: '文稿选项' }).click();
+    await page.getByRole('button', { name: '参考材料' }).click();
+  } finally {
+    await page.setViewportSize(viewport);
+  }
   await page.getByLabel('制作要求').fill('给管理层做八页汇报，重点讲风险');
   await page
     .getByLabel('参考材料')
@@ -28,13 +56,13 @@ export async function checkOffice(application, page, workspace, output, fixture)
   await page.getByRole('button', { name: '模板与版式' }).click();
   await page.getByRole('button', { name: '陶土', exact: false }).click();
   await page.getByRole('button', { name: '收起面板' }).click();
-  await page.screenshot({ path: path.join(output, 'office-presentation.png') });
+  await page.screenshot({ animations: 'disabled', path: path.join(output, 'office-presentation.png') });
   await page.locator('.office-thumb').first().click();
   await page.getByRole('button', { name: '模板与版式' }).click();
   await page.getByRole('button', { name: '午夜', exact: false }).click();
   await page.getByRole('button', { name: '收起面板' }).click();
   await page.evaluate(() => setTheme('dark'));
-  await page.screenshot({ path: path.join(output, 'office-midnight.png') });
+  await page.screenshot({ animations: 'disabled', path: path.join(output, 'office-midnight.png') });
   await page.evaluate(() => setTheme('light'));
   await page.getByRole('button', { name: '模板与版式' }).click();
   await page.getByRole('button', { name: '陶土', exact: false }).click();
@@ -45,8 +73,11 @@ export async function checkOffice(application, page, workspace, output, fixture)
   await page.keyboard.press('Escape');
   await page.locator('.office-thumb').nth(4).click();
   await page.getByRole('button', { name: 'AI 修改' }).click();
+  await page.locator('.office-task summary').click();
   await page.getByLabel('让 AI 修改本页正文').fill('重点写延期风险');
   await page.getByRole('button', { name: '重新生成本页正文' }).click();
+  await expect(page.locator('.office-task li').nth(4)).toContainText('生成中');
+  await page.screenshot({ animations: 'disabled', path: path.join(output, 'office-task-running.png') });
   await page.getByRole('button', { name: '收起面板' }).click();
   await page.locator('.office-canvas .office-slide-text').filter({ hasText: '交付进度' }).click();
   await page.getByLabel('画布文字').fill('手改标题：项目交付风险');

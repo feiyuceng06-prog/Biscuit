@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   ArrowDownToLine,
   ChevronDown,
+  CircleCheck,
+  LoaderCircle,
+  Circle,
   ChevronLeft,
   ChevronRight,
   FileText,
@@ -38,6 +41,7 @@ export function Studio({
   onError,
   move,
   busy,
+  workingPage,
   canUndo,
   undo,
   save,
@@ -49,7 +53,7 @@ export function Studio({
   change,
   setChange,
 }) {
-  const [pages, setPages] = useState(true),
+  const [pages, setPages] = useState(() => !window.matchMedia('(max-width: 700px)').matches),
     [panel, setPanel] = useState(null),
     [playing, setPlaying] = useState(false);
   const slide = deck.slides[index],
@@ -64,16 +68,21 @@ export function Studio({
   useEffect(() => {
     const host = shell.current?.closest('dialog');
     function cancel(e) {
-      if (playing || panel) {
+      const drawerOpen = pages && window.matchMedia('(max-width: 700px)').matches;
+      if (playing || panel || drawerOpen) {
         e.preventDefault();
         e.stopImmediatePropagation();
+        if (!playing && !panel && drawerOpen) {
+          setPages(false);
+          shell.current.querySelector('button[aria-label="页面缩略图"]')?.focus();
+        }
         setPlaying(false);
         setPanel(null);
       }
     }
     host?.addEventListener('cancel', cancel, true);
     return () => host?.removeEventListener('cancel', cancel, true);
-  }, [playing, panel]);
+  }, [playing, panel, pages]);
   function write(field, row, value) {
     if (field === 'title' || field === 'unit') edit({ [field]: value });
     else
@@ -173,7 +182,10 @@ export function Studio({
                     className="office-thumb"
                     aria-label={'第 ' + (i + 1) + ' 页 ' + s.title}
                     aria-current={s.id === slide.id ? 'page' : undefined}
-                    onClick={() => select(s.id)}
+                    onClick={() => {
+                      select(s.id);
+                      if (window.matchMedia('(max-width: 700px)').matches) setPages(false);
+                    }}
                   >
                     <Canvas slide={s} index={i} total={total} theme={theme} />
                     <span>
@@ -336,6 +348,20 @@ export function Studio({
             )}
             {panel === 'ai' && (
               <>
+                <details className="office-task">
+                  <summary>页面正文 <span>{total - pending} / {total} 页已处理</span></summary>
+                  <ol>{deck.slides.map((page, n) => {
+                    const writing = page.id === workingPage;
+                    const Icon = writing ? LoaderCircle : page.generated ? CircleCheck : Circle;
+                    return (
+                      <li key={page.id}>
+                        <Icon size={16} aria-hidden="true" className={writing ? 'office-loading' : undefined} />
+                        <span>{n + 1}. {page.title || '无标题'}</span>
+                        <small>{writing ? '生成中' : page.generated ? '已处理' : '待生成'}</small>
+                      </li>
+                    );
+                  })}</ol>
+                </details>
                 <label>
                   让 AI 修改本页正文
                   <textarea

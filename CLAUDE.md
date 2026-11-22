@@ -5,6 +5,10 @@
 
 verify: .venv/bin/python -m unittest discover -s tests -t .
 
+## UI 与前端设计
+
+设计、实现或评审 Biscuit 界面时，先阅读仓库根目录的 [DESIGN.md](./DESIGN.md)，按其中的组件选用、交互和前端实现规范执行，并使用文末的 UI 验收清单检查改动。
+
 ## 结构
 
 | 文件 | 职责 |
