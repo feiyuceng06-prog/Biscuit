@@ -1,0 +1,371 @@
+{
+  "deckId": "business",
+  "brief": "向管理层提供企业经营月报，比较试点客流并讨论排班决策。",
+  "slides": [
+    {
+      "slideId": "business-1",
+      "layout": "cover",
+      "objects": [
+        {
+          "type": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "color": "FFFFFF",
+          "id": "rect-1"
+        },
+        {
+          "type": "text",
+          "x": 55,
+          "y": 53,
+          "w": 844,
+          "h": 54,
+          "value": "馆务会",
+          "size": 17,
+          "color": "2449AD",
+          "field": "label-0",
+          "bold": true,
+          "serif": false,
+          "align": "left",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 50,
+          "y": 147,
+          "w": 858,
+          "h": 210,
+          "value": "夜读试点月报",
+          "size": 75,
+          "color": "14181E",
+          "field": "title",
+          "bold": true,
+          "serif": false,
+          "align": "left",
+          "id": "title"
+        },
+        {
+          "type": "rect",
+          "x": 0,
+          "y": 392,
+          "w": 960,
+          "h": 148,
+          "color": "2449AD",
+          "id": "rect-4"
+        },
+        {
+          "type": "text",
+          "x": 56,
+          "y": 420,
+          "w": 770,
+          "h": 92,
+          "value": "讨论是否继续周五延时开放。",
+          "size": 24,
+          "color": "FFFFFF",
+          "field": "text-0",
+          "bold": false,
+          "serif": false,
+          "align": "left",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 808,
+          "y": 504,
+          "w": 99,
+          "h": 23,
+          "value": "01 / 03",
+          "size": 12,
+          "color": "FFFFFF",
+          "field": null,
+          "bold": false,
+          "serif": false,
+          "align": "right",
+          "id": "text-6"
+        }
+      ]
+    },
+    {
+      "slideId": "business-2",
+      "layout": "chart",
+      "objects": [
+        {
+          "type": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "color": "FFFFFF",
+          "id": "rect-1"
+        },
+        {
+          "type": "text",
+          "x": 51,
+          "y": 38,
+          "w": 856,
+          "h": 105,
+          "value": "第三周到访 48 人次",
+          "size": 42,
+          "color": "14181E",
+          "field": "title",
+          "bold": true,
+          "serif": false,
+          "align": "left",
+          "id": "title"
+        },
+        {
+          "type": "chart",
+          "x": 53,
+          "y": 178,
+          "w": 513,
+          "h": 285,
+          "items": [
+            {
+              "id": "business-1-0",
+              "label": "首周",
+              "text": "",
+              "value": 26
+            },
+            {
+              "id": "business-1-1",
+              "label": "第二周",
+              "text": "",
+              "value": 35
+            },
+            {
+              "id": "business-1-2",
+              "label": "第三周",
+              "text": "比首周增加 22 人次。",
+              "value": 48
+            }
+          ],
+          "ink": "14181E",
+          "rule": "CFD6E0",
+          "colors": [
+            "A8B7D4",
+            "A8B7D4",
+            "2449AD"
+          ],
+          "id": "chart-3"
+        },
+        {
+          "type": "text",
+          "x": 63,
+          "y": 149,
+          "w": 493,
+          "h": 26,
+          "value": "人次",
+          "size": 15,
+          "color": "454D5A",
+          "field": "unit",
+          "bold": false,
+          "serif": false,
+          "align": "left",
+          "id": "unit"
+        },
+        {
+          "type": "rect",
+          "x": 610,
+          "y": 166,
+          "w": 299,
+          "h": 2,
+          "color": "2449AD",
+          "id": "rect-5"
+        },
+        {
+          "type": "text",
+          "x": 610,
+          "y": 187,
+          "w": 297,
+          "h": 51,
+          "value": "第三周",
+          "size": 19,
+          "color": "14181E",
+          "field": "label-2",
+          "bold": true,
+          "serif": false,
+          "align": "left",
+          "id": "label-2"
+        },
+        {
+          "type": "text",
+          "x": 608,
+          "y": 246,
+          "w": 301,
+          "h": 93,
+          "value": "48 人次",
+          "size": 63,
+          "color": "2449AD",
+          "field": null,
+          "bold": true,
+          "serif": false,
+          "align": "left",
+          "id": "text-7"
+        },
+        {
+          "type": "text",
+          "x": 610,
+          "y": 350,
+          "w": 298,
+          "h": 116,
+          "value": "比首周增加 22 人次。",
+          "size": 21,
+          "color": "454D5A",
+          "field": "text-2",
+          "bold": false,
+          "serif": false,
+          "align": "left",
+          "id": "text-2"
+        },
+        {
+          "type": "text",
+          "x": 808,
+          "y": 504,
+          "w": 99,
+          "h": 23,
+          "value": "02 / 03",
+          "size": 12,
+          "color": "454D5A",
+          "field": null,
+          "bold": false,
+          "serif": false,
+          "align": "right",
+          "id": "text-9"
+        }
+      ]
+    },
+    {
+      "slideId": "business-3",
+      "layout": "comparison",
+      "objects": [
+        {
+          "type": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "color": "FFFFFF",
+          "id": "rect-1"
+        },
+        {
+          "type": "text",
+          "x": 51,
+          "y": 39,
+          "w": 855,
+          "h": 106,
+          "value": "两种排班方案",
+          "size": 44,
+          "color": "14181E",
+          "field": "title",
+          "bold": true,
+          "serif": false,
+          "align": "left",
+          "id": "title"
+        },
+        {
+          "type": "rect",
+          "x": 53,
+          "y": 166,
+          "w": 415,
+          "h": 2,
+          "color": "CFD6E0",
+          "id": "rect-3"
+        },
+        {
+          "type": "text",
+          "x": 69,
+          "y": 197,
+          "w": 373,
+          "h": 92,
+          "value": "仅开放阅览室",
+          "size": 37,
+          "color": "14181E",
+          "field": "label-0",
+          "bold": true,
+          "serif": false,
+          "align": "left",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 69,
+          "y": 308,
+          "w": 373,
+          "h": 129,
+          "value": "沿用现有班次。",
+          "size": 24,
+          "color": "454D5A",
+          "field": "text-0",
+          "bold": false,
+          "serif": false,
+          "align": "left",
+          "id": "text-0"
+        },
+        {
+          "type": "rect",
+          "x": 480,
+          "y": 168,
+          "w": 415,
+          "h": 288,
+          "color": "EAF0FA",
+          "id": "rect-6"
+        },
+        {
+          "type": "rect",
+          "x": 480,
+          "y": 166,
+          "w": 415,
+          "h": 2,
+          "color": "CFD6E0",
+          "id": "rect-7"
+        },
+        {
+          "type": "text",
+          "x": 496,
+          "y": 197,
+          "w": 373,
+          "h": 92,
+          "value": "同步开放借还",
+          "size": 37,
+          "color": "14181E",
+          "field": "label-1",
+          "bold": true,
+          "serif": false,
+          "align": "left",
+          "id": "label-1"
+        },
+        {
+          "type": "text",
+          "x": 496,
+          "y": 308,
+          "w": 373,
+          "h": 129,
+          "value": "需要服务台另排晚班。",
+          "size": 24,
+          "color": "454D5A",
+          "field": "text-1",
+          "bold": false,
+          "serif": false,
+          "align": "left",
+          "id": "text-1"
+        },
+        {
+          "type": "text",
+          "x": 808,
+          "y": 504,
+          "w": 99,
+          "h": 23,
+          "value": "03 / 03",
+          "size": 12,
+          "color": "454D5A",
+          "field": null,
+          "bold": false,
+          "serif": false,
+          "align": "right",
+          "id": "text-10"
+        }
+      ]
+    }
+  ]
+}

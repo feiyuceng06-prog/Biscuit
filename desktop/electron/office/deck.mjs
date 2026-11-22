@@ -1,3 +1,5 @@
+import { restoreDesign, textUnits } from './director.mjs';
+
 // The canvas and PowerPoint share a 960 × 540 point coordinate system.
 export const layouts = Object.freeze({
   cover: '封面',
@@ -123,7 +125,7 @@ export function readDeck(raw) {
     }
   }
   if (imageBytes > 12_000_000) fail();
-  return raw;
+  return raw.design === undefined ? raw : { ...raw, design: restoreDesign(raw, raw.design) };
 }
 
 export const themes = {
@@ -159,7 +161,9 @@ export const themes = {
   },
 };
 
-export function composition(slide, page, total, theme = 'paper') {
+export function composition(slide, page, total, theme = 'paper', design) {
+  if (design) return designedComposition(slide, page, total, design);
+
   const { bg, ink, soft, tint, rule, accent, mutedBar } = themes[theme] || themes.paper;
   const editorial = theme === 'sand',
     dark = theme === 'midnight';
@@ -177,17 +181,7 @@ export function composition(slide, page, total, theme = 'paper') {
     { bold = false, serif = false, align = 'left' } = {},
   ) {
     if (!value) return;
-    const widths = String(value)
-      .split('\n')
-      .map((line) =>
-        Array.from(line).reduce((sum, c) => sum + (c.charCodeAt(0) < 128 ? 0.6 : 1.05), 0),
-      );
-    while (
-      size > 8 &&
-      widths.reduce((n, units) => n + Math.max(1, Math.ceil((units * size) / w)), 0) * size * 1.35 >
-        h
-    )
-      size--;
+    size = fitText(value, size, w, h, 1.35);
     objects.push({ type: 'text', x, y, w, h, value, size, color, field, bold, serif, align });
   }
   const items = slide.items.slice(0, maxItems(slide.layout));
@@ -345,5 +339,289 @@ export function composition(slide, page, total, theme = 'paper') {
     null,
     { align: 'right' },
   );
+  return objects;
+}
+
+function fitText(value, size, w, h, lineHeight, reserveEm = 0) {
+  const widths = String(value).split('\n').map(textUnits);
+  while (
+    size > 8 &&
+    widths.reduce((n, units) => n + Math.max(1, Math.ceil((units * size) / (w - size * reserveEm))), 0)
+      * size * lineHeight >
+      h
+  ) size--;
+  return size;
+}
+
+const eastAsian = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u;
+function fontFor(font, value) {
+  const faces = eastAsian.test(value) ? [font.cjk, font.latin] : [font.latin, font.cjk];
+  const family = [...faces, ...font.fallback].map((face) => face.includes(' ') ? '"' + face + '"' : face);
+  return { fontFace: faces[0], fontFamily: family.join(', ') };
+}
+
+// Studio uploads are normalized to 1077 × 810. Imported decks can carry other
+// aspect ratios, so read their image headers before placing a native picture.
+function pictureRatio(data) {
+  try {
+    const header = atob(data.slice(data.indexOf(',') + 1, data.indexOf(',') + 1 + 131072));
+    const view = new DataView(Uint8Array.from(header, c => c.charCodeAt(0)).buffer);
+    if (view.getUint32(0) === 0x89504e47 && view.getUint32(12) === 0x49484452)
+      return view.getUint32(16) / view.getUint32(20);
+    if (view.getUint16(0) === 0xffd8) {
+      let pos = 2;
+      while (pos + 9 < view.byteLength && view.getUint8(pos) === 0xff) {
+        const marker = view.getUint8(++pos);
+        if (marker === 0xff) continue;
+        pos++;
+        const length = view.getUint16(pos);
+        if (length < 2 || marker === 0xda) break;
+        if (marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker))
+          return view.getUint16(pos + 5) / view.getUint16(pos + 3);
+        pos += length;
+      }
+    }
+  } catch { /* Short or incomplete header; use the Studio import dimensions. */ }
+  return 1077 / 810;
+}
+
+function designedComposition(slide, page, total, design) {
+  const { tokens } = design;
+  const { fonts, typography: type, spacing, graphics: graphic } = tokens;
+  const { items, image, layout, unit } = slide;
+  const rhythm = design.rhythm.find((entry) => entry.slideId === slide.id && entry.layout === layout);
+  const cover = layout === 'cover';
+  const { bg, ink, soft, tint, rule, accent, mutedBar } =
+    (cover && tokens.openingPalette) || tokens.palette;
+  const alignment = tokens.titleAlignment === 'mixed'
+    ? (cover ? 'center' : 'left') : tokens.titleAlignment;
+  const density = rhythm?.density ?? tokens.density;
+  const dense = density === 'dense';
+  const margin = spacing.margin + (density === 'sparse' ? 8 : dense ? -3 : 0);
+  const gap = spacing.gap + (density === 'sparse' ? 6 : dense ? -7 : tokens.density === 'sparse' ? 4 : 0);
+  const gutter = spacing.gutter + (dense ? -5 : 0);
+  const right = 960 - margin;
+  const width = right - margin;
+  const bottom = spacing.footer - 23;
+  const objects = [];
+  const rect = (x, y, w, h, color) => objects.push({ type: 'rect', x, y, w, h, color });
+  const ruleAt = (x, y, w, color = rule) => rect(x, y, w, graphic.rule, color);
+  function picture(x, y, w, h) {
+    const intrinsic = pictureRatio(image);
+    const ratio = Number.isFinite(intrinsic) && intrinsic > 0 ? intrinsic : 1077 / 810;
+    const width = Math.min(w, h * ratio);
+    const height = width / ratio;
+    objects.push({ type: 'image', x: x + (w - width) / 2, y: y + (h - height) / 2,
+      w: width, h: height, data: image });
+  }
+
+  function text(x, y, w, h, value, size, color, field, { font = 'body', bold = false, align = 'left' } = {}) {
+    if (!value) return;
+    const cjk = eastAsian.test(value);
+    size = fitText(value, size, w, h, type.lineHeight + 0.09, cjk ? 1 : 0);
+    objects.push({
+      type: 'text', x, y, w, h, value, field, color, bold, align,
+      size, ...(cjk && { wrapPadding: size }),
+      lineHeight: type.lineHeight, ...fontFor(fonts[font], value),
+    });
+  }
+  const title = (x, y, w, h, size = type.title) =>
+    text(x, y, w, h, slide.title, size, ink, 'title', { font: 'title', bold: type.boldTitle, align: alignment });
+  const label = (i, x, y, w, h, size = type.label, align = 'left') =>
+    text(x, y, w, h, items[i].label, size, accent, 'label-' + i, { bold: true, align });
+  const body = (i, x, y, w, h, align = 'left') =>
+    text(x, y, w, h, items[i].text, type.body, soft, 'text-' + i, { align });
+
+  function marker(x, y, side) {
+    if (graphic.marker === 'circle')
+      objects.push({ type: 'ellipse', x, y, w: side, h: side, color: accent });
+    else rect(x, y, side, side, accent);
+  }
+  function headingMark(x, y, w) {
+    const markColor = graphic.brandAccent ?? accent;
+    switch (graphic.motif) {
+      case 'rule': ruleAt(x, y, w, graphic.brandAccent ?? rule); break;
+      case 'dash': ruleAt(x + (alignment === 'center' ? (w - 42) / 2 : 0), y, 42, markColor); break;
+      case 'rail': rect(x, y, 54, 4, markColor); break;
+      case 'corner':
+        ruleAt(x, y, 22, markColor);
+        rect(x, y, graphic.rule, 9, markColor);
+        ruleAt(x + w - 12, y, 12, rule);
+        break;
+    }
+  }
+  function entry(i, x, y, w, h, align = 'left') {
+    const { label: heading, text: copy } = items[i];
+    const lines = Math.max(1, Math.ceil(textUnits(heading) * type.label / w));
+    const labelHeight = copy ? Math.min(h * 0.48, Math.max(23, lines * type.label * 1.35)) : h;
+    label(i, x, y, w, labelHeight, type.label, align);
+    const offset = heading ? labelHeight + Math.min(5, h * 0.08) : 0;
+    body(i, x, y + offset, w, h - offset, align);
+  }
+  function rows(indices, x, y, w, h, skipLabel = -1) {
+    const step = h / indices.length;
+    indices.forEach((i, index) => {
+      const top = y + index * step;
+      const pad = Math.min(graphic.panelFill ? spacing.inset : 8, step * 0.15);
+      if (graphic.panelFill) rect(x, top + 2, w, step - 6, tint);
+      ruleAt(x, top, w, graphic.panelFill ? rule : accent);
+      const left = x + (graphic.panelFill ? spacing.inset : 0);
+      const span = x + w - left - (graphic.panelFill ? spacing.inset : 0);
+      if (i === skipLabel) {
+        body(i, left, top + pad, span, step - pad * 2);
+      } else if (indices.length >= 3 && w >= 470 && items[i].label && items[i].text) {
+        const labelWidth = span * 0.29;
+        label(i, left, top + pad, labelWidth, step - pad * 2);
+        body(i, left + labelWidth + gutter, top + pad, span - labelWidth - gutter, step - pad * 2);
+      } else entry(i, left, top + pad, span, step - pad * 2);
+    });
+  }
+  function columns(x, y, w, h) {
+    if (layout === 'comparison' && graphic.motif === 'rail') {
+      const row = h / items.length;
+      items.forEach((item, i) => {
+        const top = y + i * row;
+        const split = item.text && item.label ? w * 0.34 : item.label ? w : 0;
+        ruleAt(x, top, w);
+        label(i, x, top + spacing.inset, split, row - spacing.inset * 2, type.label + 2);
+        const offset = split ? split + gutter : 0;
+        body(i, x + offset, top + spacing.inset, Math.max(1, w - offset), row - spacing.inset * 2);
+      });
+      return;
+    }
+    const filled = graphic.panelFill && layout !== 'comparison';
+    const cell = (w + gutter) / items.length - gutter;
+    items.forEach((_, i) => {
+      const left = x + i * (cell + gutter);
+      const inset = filled ? spacing.inset : 0;
+      if (filled) rect(left, y, cell, h, tint);
+      ruleAt(left, y, cell, accent);
+      entry(i, left + inset, y + spacing.inset, cell - 2 * inset, h - spacing.inset * 2);
+    });
+  }
+
+  rect(0, 0, 960, 540, bg);
+  const indices = items.map((_, i) => i);
+  if (cover) {
+    const titleY = image ? 135 : 128;
+    const detailsY = image ? 285 : 315;
+    if (graphic.cover === 'tint') rect(0, 0, 960, 300, tint);
+    if (graphic.cover === 'rail') rect(0, 0, 13, 540, graphic.brandAccent ?? accent);
+    if (graphic.cover === 'frame') {
+      ruleAt(margin - 17, 27, width + 34);
+      ruleAt(margin - 17, 487, width + 34);
+      rect(margin - 17, 27, graphic.rule, 461, rule);
+      rect(right + 16, 27, graphic.rule, 461, rule);
+    }
+    let x = margin;
+    let w = width;
+    if (image) {
+      const imageWidth = (width - gutter) * (graphic.imageShare - (dense ? 0.08 : 0));
+      const imageLeft = graphic.imageSide === 'left';
+      x = imageLeft ? margin + imageWidth + gutter : margin;
+      w = width - imageWidth - gutter;
+      picture(imageLeft ? margin : right - imageWidth, 86, imageWidth, 373);
+    }
+    headingMark(x, 71, w);
+    label(0, x, 88, w, 44, type.caption + 4, alignment);
+    title(x, titleY, w, detailsY - titleY - 17, type.cover);
+    if (items.length === 1) {
+      ruleAt(x, detailsY - 5, w);
+      body(0, x, detailsY + 15, w, bottom - detailsY - 15, alignment);
+    } else {
+      rows(indices, x, detailsY, w, bottom - detailsY, 0);
+    }
+  } else {
+    const sideTitle = layout === 'conclusion' && alignment === 'left' && !dense
+      && textUnits(slide.title) < 60 && (graphic.motif === 'rail' || graphic.motif === 'corner');
+    const titleHeight = textUnits(slide.title) > 73 ? 127 : 99;
+    const start = spacing.top + titleHeight + gap;
+    if (sideTitle) {
+      const side = Math.floor(width * 0.36);
+      headingMark(margin, spacing.top, side);
+      title(margin, spacing.top + 27, side, 290, type.title + 5);
+      rows(indices, margin + side + gutter, spacing.top, width - side - gutter, bottom - spacing.top);
+    } else {
+      headingMark(margin, spacing.top - 12, width);
+      title(margin, spacing.top, width, titleHeight + 2, type.title + (rhythm?.role === 'conclusion' ? 3 : 0));
+      if (layout === 'chart') {
+        const annotations = indices.filter((i) => items[i].text.trim());
+        const longest = Math.max(...items.map(({ label }) => textUnits(label)));
+        const stacked = annotations.length > 1 || (annotations.length === 1 && longest > 24);
+        const panelWidth = annotations.length && !stacked ? Math.floor(width * 0.32) : 0;
+        const chartWidth = panelWidth ? width - panelWidth - gutter : width;
+        const chartLeft = graphic.chartSide === 'left' || !panelWidth;
+        const chartX = chartLeft ? margin : right - chartWidth;
+        const chartY = start + (unit ? 25 : 0);
+        const panelTop = stacked ? bottom - Math.min(143, Math.floor((bottom - chartY) * 0.48)) : start;
+        const chartBottom = stacked ? panelTop - 12 : bottom;
+        const categorySize = Math.max(10, Math.min(type.category,
+          Math.floor((chartWidth - 40) / items.length / Math.max(1, longest * 0.49))));
+        text(chartX, start - 1, chartWidth, 24, unit, type.caption, soft, 'unit');
+        objects.push({
+          type: 'chart', x: chartX, y: chartY, w: chartWidth, h: chartBottom - chartY,
+          items, ink, rule, categorySize, valueSize: type.value,
+          categoryBold: graphic.motif === 'rail', valueBold: graphic.motif === 'corner',
+          axisWidth: graphic.rule,
+          ...fontFor(fonts.data, items.map((item) => item.label).join(' ')),
+          valueFontFace: fonts.data.latin,
+          colors: items.map((_, i) => (!annotations.length || annotations.includes(i) ? accent : mutedBar)),
+        });
+        if (stacked) {
+          const cell = (width + gutter) / annotations.length - gutter;
+          annotations.forEach((i, index) => {
+            const x = margin + index * (cell + gutter);
+            ruleAt(x, panelTop, cell);
+            entry(i, x, panelTop + 8, cell, bottom - panelTop - 8);
+          });
+        } else if (panelWidth) {
+          const i = annotations[0];
+          const panelX = chartLeft ? right - panelWidth : margin;
+          if (graphic.panelFill) rect(panelX, panelTop, panelWidth, bottom - panelTop, tint);
+          ruleAt(panelX, panelTop, panelWidth, accent);
+          const x = panelX + spacing.inset;
+          const w = panelWidth - 2 * spacing.inset;
+          label(i, x, panelTop + 15, w, 62);
+          text(x, panelTop + 84, w, 70, [String(items[i].value), unit].filter(Boolean).join(' '),
+            Math.min(type.display, type.title - 4), accent, null, { font: 'data', bold: true });
+          body(i, x, panelTop + 164, w, bottom - panelTop - 164);
+        }
+      } else if (layout === 'image' && image) {
+        const imageWidth = (width - gutter) * (graphic.imageShare - (dense ? 0.08 : 0));
+        const imageLeft = graphic.imageSide === 'left';
+        picture(imageLeft ? margin : right - imageWidth, start, imageWidth, bottom - start);
+        rows(indices, imageLeft ? margin + imageWidth + gutter : margin, start,
+          width - imageWidth - gutter, bottom - start);
+      } else if (layout === 'timeline') {
+        const side = graphic.marker === 'circle' ? 10 : 11;
+        if (dense || graphic.motif === 'rule') {
+          const step = (bottom - start) / items.length;
+          const x = margin + side + spacing.inset;
+          if (items.length > 1) rect(margin + side / 2, start + 12, graphic.rule, (items.length - 1) * step, rule);
+          items.forEach((_, i) => {
+            const y = start + i * step;
+            const labelWidth = (right - x) * 0.25;
+            marker(margin, y + 8, side);
+            label(i, x, y + 4, labelWidth, step - 10);
+            body(i, x + labelWidth + gutter, y + 4, right - x - labelWidth - gutter, step - 10);
+          });
+        } else {
+          const cell = (width + gutter) / items.length - gutter;
+          ruleAt(margin, start + side / 2, (cell + gutter) * (items.length - 1) + side);
+          items.forEach((_, i) => {
+            const x = margin + i * (cell + gutter);
+            marker(x, start, side);
+            entry(i, x, start + gap, cell, bottom - start - gap);
+          });
+        }
+      } else if (layout === 'conclusion' || (layout === 'image' && dense)) {
+        rows(indices, margin, start, width, bottom - start);
+      } else {
+        columns(margin, start, width, bottom - start);
+      }
+    }
+  }
+  const folio = String(page).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+  text(right - 104, spacing.footer, 104, 21, folio, type.caption, soft, null, { font: 'data', align: 'right' });
   return objects;
 }

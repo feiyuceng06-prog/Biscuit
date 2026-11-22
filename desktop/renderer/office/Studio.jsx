@@ -21,6 +21,7 @@ import {
   X,
 } from 'lucide-react';
 import { themes, layouts } from '../../electron/office/deck.mjs';
+import { DesignBrief } from './DesignBrief.jsx';
 import { Canvas } from './Canvas.jsx';
 import { Inspector } from './Inspector.jsx';
 
@@ -187,7 +188,7 @@ export function Studio({
                       if (window.matchMedia('(max-width: 700px)').matches) setPages(false);
                     }}
                   >
-                    <Canvas slide={s} index={i} total={total} theme={theme} />
+                    <Canvas slide={s} index={i} total={total} theme={theme} design={deck.design} />
                     <span>
                       {i + 1}　{s.title || '无标题'}
                     </span>
@@ -222,7 +223,7 @@ export function Studio({
             <Canvas
               key={slide.id + String(playing)}
               slide={slide}
-              theme={theme}
+              theme={theme} design={deck.design}
               index={index}
               total={total}
               onEdit={playing ? undefined : write}
@@ -308,13 +309,14 @@ export function Studio({
             )}
             {panel === 'design' && (
               <>
+                <DesignBrief key={deck.id} deck={deck} commit={commit} onError={onError} disabled={!!busy} />
                 <h4>整份文稿风格</h4>
                 <div className="studio-themes">
                   {Object.entries(themes).map(([key, t]) => (
                     <button
                       key={key}
-                      aria-pressed={theme === key}
-                      onClick={() => commit({ ...deck, theme: key })}
+                      aria-pressed={!deck.design && theme === key}
+                      onClick={() => commit({ ...deck, theme: key, design: undefined })}
                     >
                       <span className="studio-layout-preview" aria-hidden="true">
                         <Canvas slide={slide} index={index} total={total} theme={key} />
@@ -337,7 +339,7 @@ export function Studio({
                           slide={{ ...slide, layout: key }}
                           index={index}
                           total={total}
-                          theme={theme}
+                          theme={theme} design={deck.design}
                         />
                       </span>
                       {name}

@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 export async function checkOffice(application, page, workspace, output, fixture) {
   await page.getByRole('button', { name: '办公', exact: true }).click();
@@ -36,6 +37,25 @@ export async function checkOffice(application, page, workspace, output, fixture)
   await page.locator('.office-thumb').nth(1).click();
   await page.getByRole('button', { name: '模板与版式' }).click();
   await expect(page.locator('.studio-themes button svg')).toHaveCount(3);
+  const design = office.locator('.office-director');
+  await design.locator('summary').click();
+  await design.getByLabel('受众').fill('运营管理层');
+  await design.getByLabel('视觉方向').selectOption('corporate');
+  const referencePath = fileURLToPath(new URL('../../docs/presentation/evidence/before/monthly.pptx', import.meta.url));
+  await application.evaluate(({ dialog }, file) => {
+    const original = dialog.showOpenDialog;
+    dialog.showOpenDialog = async () => {
+      dialog.showOpenDialog = original;
+      return { canceled: false, filePaths: [file] };
+    };
+  }, referencePath);
+  await design.getByRole('button', { name: '分析参考 PPTX' }).click();
+  await expect(design).toContainText('monthly · 5 页', { timeout: 20000 });
+  await design.getByRole('button', { name: '应用设计方案' }).click();
+  await expect(design.locator('summary')).toContainText('企业汇报');
+  await expect(design.locator('p')).not.toBeEmpty();
+  await expect(page.locator('.office-canvas')).toContainText('48 人次');
+  await design.locator('summary').click();
   await page.getByRole('button', { name: '午夜' }).click();
   await page.getByRole('button', { name: '收起面板' }).click();
   await expect(page.locator('.office-canvas')).toContainText('48 人次');

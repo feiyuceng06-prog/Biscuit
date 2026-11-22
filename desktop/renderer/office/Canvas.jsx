@@ -11,8 +11,8 @@ function Chart({ o }) {
   const baseline = 35 + (height * high) / span,
     step = (o.w - 40) / values.length;
   return (
-    <g transform={'translate(' + o.x + ' ' + o.y + ')'}>
-      <path d={'M10 ' + baseline + 'h' + (o.w - 20)} stroke={'#' + o.rule} />
+    <g fontFamily={o.fontFamily} transform={'translate(' + o.x + ' ' + o.y + ')'}>
+      <path d={'M10 ' + baseline + 'h' + (o.w - 20)} stroke={'#' + o.rule} strokeWidth={o.axisWidth} />
       {o.items.map((r, i) => {
         const x = 20 + step * (i + 0.5),
           top = baseline - (height * (r.value / scale)) / span;
@@ -29,13 +29,13 @@ function Chart({ o }) {
               x={x}
               y={r.value >= 0 ? top - 8 : top + 18}
               textAnchor="middle"
-              fontSize="17"
+              fontSize={o.valueSize ?? 17} fontWeight={o.valueBold ? 700 : undefined} fontFamily={o.valueFontFace}
               fill={'#' + o.ink}
             >
               {r.value}
             </text>
             <foreignObject x={x - step * 0.5} y={o.h - 28} width={step} height="30">
-              <div className="office-chart-label" style={{ color: '#' + o.ink }}>
+              <div className="office-chart-label" style={{ color: '#' + o.ink, fontSize: o.categorySize, fontWeight: o.categoryBold ? 700 : undefined }}>
                 {r.label}
               </div>
             </foreignObject>
@@ -45,7 +45,7 @@ function Chart({ o }) {
     </g>
   );
 }
-export function Canvas({ slide, index, total, theme, onEdit }) {
+export function Canvas({ slide, index, total, theme, design, onEdit }) {
   const [active, setActive] = useState(null);
   const preview = onEdit
     ? {
@@ -65,7 +65,7 @@ export function Canvas({ slide, index, total, theme, onEdit }) {
       role={onEdit?'group':'img'}
       aria-label={slide.title || '无标题幻灯片'}
     >
-      {composition(preview, index + 1, total, theme).map((o, i) => {
+      {composition(preview, index + 1, total, theme, design).map((o, i) => {
         const box = { x: o.x, y: o.y, width: o.w, height: o.h };
         if (o.type === 'rect') return <rect key={i} {...box} fill={'#' + o.color} />;
         if (o.type === 'ellipse')
@@ -87,7 +87,12 @@ export function Canvas({ slide, index, total, theme, onEdit }) {
         const [field, row] = o.field?.split('-') || [];
         const value = row === undefined ? slide[field] : slide.items[row]?.[field];
         const style = {
-          fontFamily: o.serif ? '"Noto Serif CJK SC", "Songti SC", SimSun, serif' : undefined,
+          ...(o.wrapPadding && {
+            paddingLeft: o.align === 'center' ? o.wrapPadding / 2 : 0,
+            paddingRight: o.align === 'center' ? o.wrapPadding / 2 : o.wrapPadding,
+            boxSizing: 'border-box',
+          }),
+          lineHeight: o.lineHeight, fontFamily: o.fontFamily || (o.serif ? '"Noto Serif CJK SC", "Songti SC", SimSun, serif' : undefined),
           textAlign: o.align, fontSize: o.size, color: '#' + o.color, fontWeight: o.bold ? 700 : 400,
         };
         return (

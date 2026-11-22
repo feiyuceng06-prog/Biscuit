@@ -5,14 +5,19 @@ import { createHash } from 'node:crypto';
 import os from 'node:os';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { composition } from './deck.mjs';
+import { composition, readDeck } from './deck.mjs';
 
-export function reviewManifest(deck) {
+export function reviewManifest(raw) {
+  const deck = readDeck(raw);
   return {
     deckId: deck.id, brief: deck.brief,
+    ...(deck.design && { design: {
+      direction: deck.design.direction,
+      rhythm: deck.design.rhythm,
+    } }),
     slides: deck.slides.map((slide, i) => ({
       slideId: slide.id, layout: slide.layout,
-      objects: composition(slide, i + 1, deck.slides.length, deck.theme).map(({data, ...o}, j) => ({
+      objects: composition(slide, i + 1, deck.slides.length, deck.theme, deck.design).map(({data, ...o}, j) => ({
         ...o, id: o.field || o.type + '-' + (j + 1),
       })),
     })),

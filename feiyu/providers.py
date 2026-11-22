@@ -670,10 +670,16 @@ class OpenAICompatBackend(Billing):
         return "\n".join(rows)
 
     @request_attempt
-    def ask(self, prompt: str, max_tokens: int = 2000) -> str:
+    def ask(self, prompt: str, max_tokens: int = 2000, *, json_reply: bool = False) -> str:
         """一次性提问，不带工具也不进对话历史 """
+        options = {}
+        if json_reply and self.model == "deepseek-flash" and self.client.base_url.host == "api.deepseek.com":
+            options["response_format"] = {"type": "json_object"}
+            # On the official Flash endpoint, reasoning can exhaust a short JSON
+            # review's entire completion budget before the first output token.
+            options["extra_body"] = {"thinking": {"type": "disabled"}}
         reply = self._sdk_call('ask',
-            model=self.model, max_tokens=max_tokens,
+            model=self.model, max_tokens=max_tokens, **options,
             messages=[{"role": "user", "content": prompt}],
         )
         usage = getattr(reply, "usage", None)

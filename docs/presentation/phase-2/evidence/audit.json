@@ -1,0 +1,424 @@
+{
+  "product": {
+    "before": {
+      "metrics": [
+        {
+          "page": 1,
+          "editableTextBoxes": 4,
+          "pictures": 1,
+          "charts": 0,
+          "largestNativeTextPt": 58.0,
+          "typefaces": [
+            "Microsoft YaHei"
+          ]
+        },
+        {
+          "page": 2,
+          "editableTextBoxes": 6,
+          "pictures": 1,
+          "charts": 0,
+          "largestNativeTextPt": 44.0,
+          "typefaces": [
+            "Microsoft YaHei"
+          ]
+        },
+        {
+          "page": 3,
+          "editableTextBoxes": 6,
+          "pictures": 0,
+          "charts": 0,
+          "largestNativeTextPt": 52.0,
+          "typefaces": [
+            "Microsoft YaHei"
+          ]
+        }
+      ],
+      "status": "needs_review",
+      "critic": {
+        "status": "checked",
+        "modelAlias": "deepseek-flash",
+        "checkedSlides": [
+          "product-1",
+          "product-2",
+          "product-3"
+        ]
+      },
+      "findings": [
+        [
+          "product-1",
+          "deterministic",
+          "overflow"
+        ],
+        [
+          "product-1",
+          "vision-model",
+          "overflow"
+        ],
+        [
+          "product-1",
+          "vision-model",
+          "overflow"
+        ],
+        [
+          "product-2",
+          "vision-model",
+          "weak-hierarchy"
+        ],
+        [
+          "product-3",
+          "vision-model",
+          "crowded"
+        ]
+      ]
+    },
+    "after": {
+      "metrics": [
+        {
+          "page": 1,
+          "editableTextBoxes": 4,
+          "pictures": 1,
+          "charts": 0,
+          "largestNativeTextPt": 49.0,
+          "typefaces": [
+            "Arial",
+            "Noto Sans CJK SC",
+            "Noto Serif CJK SC"
+          ]
+        },
+        {
+          "page": 2,
+          "editableTextBoxes": 6,
+          "pictures": 1,
+          "charts": 0,
+          "largestNativeTextPt": 49.0,
+          "typefaces": [
+            "Arial",
+            "Noto Sans CJK SC",
+            "Noto Serif CJK SC"
+          ]
+        },
+        {
+          "page": 3,
+          "editableTextBoxes": 6,
+          "pictures": 0,
+          "charts": 0,
+          "largestNativeTextPt": 52.0,
+          "typefaces": [
+            "Arial",
+            "Noto Sans CJK SC",
+            "Noto Serif CJK SC"
+          ]
+        }
+      ],
+      "status": "needs_review",
+      "critic": {
+        "status": "checked",
+        "modelAlias": "deepseek-flash",
+        "checkedSlides": [
+          "product-1",
+          "product-2",
+          "product-3"
+        ]
+      },
+      "findings": [
+        [
+          "product-3",
+          "vision-model",
+          "low-contrast"
+        ],
+        [
+          "product-3",
+          "vision-model",
+          "crowded"
+        ],
+        [
+          "product-3",
+          "vision-model",
+          "source-missing"
+        ]
+      ]
+    },
+    "identicalContent": true
+  },
+  "business": {
+    "before": {
+      "metrics": [
+        {
+          "page": 1,
+          "editableTextBoxes": 4,
+          "pictures": 0,
+          "charts": 0,
+          "largestNativeTextPt": 75.0,
+          "typefaces": [
+            "Microsoft YaHei"
+          ]
+        },
+        {
+          "page": 2,
+          "editableTextBoxes": 6,
+          "pictures": 0,
+          "charts": 1,
+          "largestNativeTextPt": 63.0,
+          "typefaces": [
+            "Microsoft YaHei"
+          ]
+        },
+        {
+          "page": 3,
+          "editableTextBoxes": 6,
+          "pictures": 0,
+          "charts": 0,
+          "largestNativeTextPt": 44.0,
+          "typefaces": [
+            "Microsoft YaHei"
+          ]
+        }
+      ],
+      "status": "needs_review",
+      "critic": {
+        "status": "checked",
+        "modelAlias": "deepseek-flash",
+        "checkedSlides": [
+          "business-1",
+          "business-2",
+          "business-3"
+        ]
+      },
+      "findings": [
+        [
+          "business-1",
+          "vision-model",
+          "weak-hierarchy"
+        ],
+        [
+          "business-1",
+          "vision-model",
+          "poor-alignment"
+        ],
+        [
+          "business-3",
+          "vision-model",
+          "crowded"
+        ],
+        [
+          "business-3",
+          "vision-model",
+          "inconsistent-style"
+        ]
+      ]
+    },
+    "after": {
+      "metrics": [
+        {
+          "page": 1,
+          "editableTextBoxes": 4,
+          "pictures": 0,
+          "charts": 0,
+          "largestNativeTextPt": 58.0,
+          "typefaces": [
+            "Noto Sans CJK SC",
+            "Segoe UI"
+          ]
+        },
+        {
+          "page": 2,
+          "editableTextBoxes": 6,
+          "pictures": 0,
+          "charts": 1,
+          "largestNativeTextPt": 43.0,
+          "typefaces": [
+            "Noto Sans CJK SC",
+            "Segoe UI"
+          ]
+        },
+        {
+          "page": 3,
+          "editableTextBoxes": 6,
+          "pictures": 0,
+          "charts": 0,
+          "largestNativeTextPt": 43.0,
+          "typefaces": [
+            "Noto Sans CJK SC",
+            "Segoe UI"
+          ]
+        }
+      ],
+      "status": "needs_review",
+      "critic": {
+        "status": "checked",
+        "modelAlias": "deepseek-flash",
+        "checkedSlides": [
+          "business-1",
+          "business-2",
+          "business-3"
+        ]
+      },
+      "findings": [
+        [
+          "business-1",
+          "vision-model",
+          "weak-hierarchy"
+        ],
+        [
+          "business-2",
+          "vision-model",
+          "poor-alignment"
+        ],
+        [
+          "business-2",
+          "vision-model",
+          "overflow"
+        ],
+        [
+          "business-3",
+          "vision-model",
+          "weak-hierarchy"
+        ],
+        [
+          "business-3",
+          "vision-model",
+          "weak-hierarchy"
+        ],
+        [
+          "business-3",
+          "vision-model",
+          "repetitive-layout"
+        ]
+      ]
+    },
+    "identicalContent": true
+  },
+  "technical": {
+    "before": {
+      "metrics": [
+        {
+          "page": 1,
+          "editableTextBoxes": 4,
+          "pictures": 0,
+          "charts": 0,
+          "largestNativeTextPt": 75.0,
+          "typefaces": [
+            "Microsoft YaHei"
+          ]
+        },
+        {
+          "page": 2,
+          "editableTextBoxes": 8,
+          "pictures": 0,
+          "charts": 0,
+          "largestNativeTextPt": 44.0,
+          "typefaces": [
+            "Microsoft YaHei"
+          ]
+        },
+        {
+          "page": 3,
+          "editableTextBoxes": 6,
+          "pictures": 0,
+          "charts": 0,
+          "largestNativeTextPt": 44.0,
+          "typefaces": [
+            "Microsoft YaHei"
+          ]
+        }
+      ],
+      "status": "needs_review",
+      "critic": {
+        "status": "checked",
+        "modelAlias": "deepseek-flash",
+        "checkedSlides": [
+          "technical-1",
+          "technical-2",
+          "technical-3"
+        ]
+      },
+      "findings": [
+        [
+          "technical-2",
+          "vision-model",
+          "clipping"
+        ],
+        [
+          "technical-2",
+          "vision-model",
+          "poor-alignment"
+        ],
+        [
+          "technical-2",
+          "vision-model",
+          "poor-alignment"
+        ],
+        [
+          "technical-3",
+          "vision-model",
+          "inconsistent-style"
+        ],
+        [
+          "technical-3",
+          "vision-model",
+          "weak-hierarchy"
+        ]
+      ]
+    },
+    "after": {
+      "metrics": [
+        {
+          "page": 1,
+          "editableTextBoxes": 4,
+          "pictures": 0,
+          "charts": 0,
+          "largestNativeTextPt": 60.0,
+          "typefaces": [
+            "Courier New",
+            "Noto Sans CJK SC"
+          ]
+        },
+        {
+          "page": 2,
+          "editableTextBoxes": 8,
+          "pictures": 0,
+          "charts": 0,
+          "largestNativeTextPt": 45.0,
+          "typefaces": [
+            "Courier New",
+            "Noto Sans CJK SC"
+          ]
+        },
+        {
+          "page": 3,
+          "editableTextBoxes": 6,
+          "pictures": 0,
+          "charts": 0,
+          "largestNativeTextPt": 45.0,
+          "typefaces": [
+            "Courier New",
+            "Noto Sans CJK SC"
+          ]
+        }
+      ],
+      "status": "needs_review",
+      "critic": {
+        "status": "checked",
+        "modelAlias": "deepseek-flash",
+        "checkedSlides": [
+          "technical-1",
+          "technical-2",
+          "technical-3"
+        ]
+      },
+      "findings": [
+        [
+          "technical-3",
+          "vision-model",
+          "crowded"
+        ],
+        [
+          "technical-3",
+          "vision-model",
+          "weak-hierarchy"
+        ]
+      ]
+    },
+    "identicalContent": true
+  }
+}

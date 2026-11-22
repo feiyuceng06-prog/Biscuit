@@ -1,0 +1,71 @@
+[
+  {
+    "slideId": "business-1",
+    "sha256": "1826f290255b490523a9b962b50fcc8a88388cb5c11ef9e76564f3fa007fe231",
+    "status": "unavailable",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [],
+    "errorType": "JSONDecodeError",
+    "issues": []
+  },
+  {
+    "slideId": "business-2",
+    "sha256": "ab21706cbc97012d5f1e3e74343f8a4c76ce8908965113070a96e83f41a22e1e",
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "business-2"
+    ],
+    "issues": [
+      {
+        "slideId": "business-2",
+        "elementIds": [
+          "title",
+          "text-9"
+        ],
+        "kind": "weak-hierarchy",
+        "severity": "minor",
+        "confidence": 0.86,
+        "evidence": "Top headline and right callout both repeat “48 人次”; the callout number is 47 pt versus the 43 pt title, so the supporting panel competes with the main headline.",
+        "suggestedChange": "Reduce the right-callout value size or turn the panel into a delta-only insight so the headline remains the primary focal point.",
+        "source": "vision-model",
+        "issueId": "vision:business-2:1"
+      },
+      {
+        "slideId": "business-2",
+        "elementIds": [
+          "chart-5"
+        ],
+        "kind": "low-contrast",
+        "severity": "minor",
+        "confidence": 0.78,
+        "evidence": "First two chart bars use #8098BC on #F7F9FD, approximately 2.8:1 contrast, below the 3:1 non-text contrast target; the third bar is much darker.",
+        "suggestedChange": "Darken the muted bars or add a subtle outline so all bars remain visibly comparable without losing the third-week emphasis.",
+        "source": "vision-model",
+        "issueId": "vision:business-2:2"
+      },
+      {
+        "slideId": "business-2",
+        "elementIds": [
+          "chart-5"
+        ],
+        "kind": "source-missing",
+        "severity": "minor",
+        "confidence": 0.7,
+        "evidence": "The chart/footer area shows only the page number “02 / 03”; no data source or reporting-period note is visible under the chart.",
+        "suggestedChange": "Add a small source/period note beneath the chart identifying the attendance data source and reporting window.",
+        "source": "vision-model",
+        "issueId": "vision:business-2:3"
+      }
+    ]
+  },
+  {
+    "slideId": "business-3",
+    "sha256": "8554ed0f5565a7f8f08014e7e7524702bdd2cb44d1be23961352eed8ed8efe8a",
+    "status": "unavailable",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [],
+    "errorType": "JSONDecodeError",
+    "issues": []
+  }
+]

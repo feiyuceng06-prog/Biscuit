@@ -9,7 +9,7 @@ export async function powerPoint(raw) {
   ppt.title = deck.title;
   for (const [index, slide] of deck.slides.entries()) {
     const page = ppt.addSlide();
-    for (const o of composition(slide, index + 1, deck.slides.length, deck.theme)) {
+    for (const o of composition(slide, index + 1, deck.slides.length, deck.theme, deck.design)) {
       const box = { x: o.x / 72, y: o.y / 72, w: o.w / 72, h: o.h / 72 };
       if (o.type === 'rect')
         page.addShape(ppt.ShapeType.rect, {
@@ -26,13 +26,20 @@ export async function powerPoint(raw) {
       if (o.type === 'text')
         page.addText(o.value, {
           ...box,
-          fontFace: o.serif ? 'Noto Serif CJK SC' : 'Microsoft YaHei',
+          fontFace: o.fontFace ?? (o.serif ? 'Noto Serif CJK SC' : 'Microsoft YaHei'),
+          ...(o.lineHeight && { lineSpacing: o.size * o.lineHeight }),
           lang: 'zh-CN',
           align: o.align || 'left',
           fontSize: o.size,
           bold: o.bold,
           color: o.color,
-          margin: 0,
+          // Office and LibreOffice can hang CJK punctuation past the wrap boundary.
+          // PptxGenJS writes the first two array entries as the left and right insets.
+          margin: o.wrapPadding
+            ? o.align === 'center'
+              ? [o.wrapPadding / 2, o.wrapPadding / 2, 0, 0]
+              : [0, o.wrapPadding, 0, 0]
+            : 0,
           valign: 'top',
           breakLine: false,
           fit: 'shrink',
@@ -48,7 +55,15 @@ export async function powerPoint(raw) {
             showLegend: false,
             showTitle: false,
             showValue: true,
-            catAxisLabelFontSize: 13,
+            catAxisLabelFontSize: o.categorySize ?? 13,
+            ...(o.fontFace && {
+              catAxisLabelFontFace: o.fontFace,
+              catAxisLabelFontBold: o.categoryBold,
+              catAxisLineSize: o.axisWidth,
+              catAxisLabelFrequency: 1,
+              dataLabelFontFace: o.valueFontFace,
+              dataLabelFontBold: o.valueBold,
+            }),
             catAxisLabelColor: o.ink,
             valAxisHidden: true,
             valGridLine: { style: 'none' },
@@ -59,7 +74,7 @@ export async function powerPoint(raw) {
             dataLabelFormatCode: 'General',
             dataLabelColor: o.ink,
             chartColors: o.colors,
-            dataLabelFontSize: 15,
+            dataLabelFontSize: o.valueSize ?? 15,
             showCatName: false,
             showBorder: false,
           },

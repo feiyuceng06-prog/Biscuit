@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "deckId": "product",
+  "pptxSha256": "be2f0696c1e23b1f304e2fb70915b6f6448766f8de2ac1df0f07276e138af7a9",
+  "status": "needs_review",
+  "critic": {
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "product-1",
+      "product-2",
+      "product-3"
+    ]
+  },
+  "pages": [
+    {
+      "slideId": "product-1",
+      "png": "slide-1.png",
+      "sha256": "f127b68ab744a5654dff168dca19d1bc0799099fece809714fe4a9577819e76b"
+    },
+    {
+      "slideId": "product-2",
+      "png": "slide-2.png",
+      "sha256": "656054313240568d3b01de268e9af7082f5c1dff6b776cfcf5c2830540c40c6a"
+    },
+    {
+      "slideId": "product-3",
+      "png": "slide-3.png",
+      "sha256": "2baf0b357f3a9d3a7f2e4a267d1faef4a3f9aa053d1a3f94fc86b80e9ed6febc"
+    }
+  ],
+  "issues": [
+    {
+      "issueId": "product-1:text-0:overflow",
+      "slideId": "product-1",
+      "elementIds": [
+        "text-0"
+      ],
+      "kind": "overflow",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "PDF word bounding box extends 16.4 pt beyond the text frame.",
+      "suggestedChange": "Check surrounding content in the PNG and increase the text frame.",
+      "source": "deterministic"
+    },
+    {
+      "slideId": "product-1",
+      "elementIds": [
+        "title"
+      ],
+      "kind": "overflow",
+      "severity": "major",
+      "confidence": 0.95,
+      "evidence": "标题文本“把阅览室带回家”折行，最后的“家”字单独位于第二行，占据框架底部附近；字形在 y≈380–490 的框架范围内贴近下边缘。",
+      "suggestedChange": "加宽标题框（例如扩展到约 415px 的图像开始处），或略微减小字号/字距，使“把阅览室带回家”排成一行。",
+      "source": "vision-model",
+      "issueId": "vision:product-1:1"
+    },
+    {
+      "slideId": "product-1",
+      "elementIds": [
+        "text-0"
+      ],
+      "kind": "overflow",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "预检报告称文本边界超出 text-0 画框 16.4 pt；截图显示正文“闭馆以后，继续读完借来的那本书。”在 y≈368–468 的画框内排成一行。",
+      "suggestedChange": "增大 text-0 文本框高度，或减小字号/行距，使整句落在画框内。",
+      "source": "vision-model",
+      "issueId": "vision:product-1:2"
+    },
+    {
+      "slideId": "product-2",
+      "elementIds": [
+        "text-0"
+      ],
+      "kind": "weak-hierarchy",
+      "severity": "minor",
+      "confidence": 0.6,
+      "evidence": "The descriptive text 记下页码和一句原文。 uses color #454D5A on white, while nearby labels 书签/重读 use #14181E; the body copy reads noticeably lighter than the labels despite carrying the actual explanation.",
+      "suggestedChange": "Darken body text-0/text-1 toward the label color, or reduce the gap between label and body weight so the explanation reads as primary content.",
+      "source": "vision-model",
+      "issueId": "vision:product-2:1"
+    },
+    {
+      "slideId": "product-3",
+      "elementIds": [
+        "title"
+      ],
+      "kind": "crowded",
+      "severity": "major",
+      "confidence": 0.86,
+      "evidence": "标题“内测先回答两个问题”在字符“两”后折行，“个问题”单独成第二行，导致3行标题占据左侧约343px宽框，视觉密度大。",
+      "suggestedChange": "缩小标题字号或调整框宽，使标题保持完整单行（或断为“内测先回答/两个问题”的均衡两行）。",
+      "source": "vision-model",
+      "issueId": "vision:product-3:1"
+    }
+  ],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "bbe5c005fdc58e1a0382e2adf740551efa7fba2d8ac5653223e25f7e16a7c7b0",
+  "fonts": [
+    "BAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     87  0",
+    "CAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     77  0",
+    "DAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     67  0",
+    "EAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     57  0",
+    "FAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     62  0",
+    "GAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     72  0",
+    "HAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     92  0",
+    "IAAAAA+SourceHanSansSC-Regular       TrueType          WinAnsi          yes yes yes     82  0"
+  ],
+  "contactSheet": "contact.png",
+  "durationMs": 15701
+}

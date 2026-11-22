@@ -1,6 +1,6 @@
 const { contextBridge, ipcRenderer } = require('electron');
 const commands = new Set(['connect', 'send', 'where_am_i', 'switch', 'upload', 'read_image',
-  'list_files', 'preview_file', 'open_url', 'notify', 'term_start', 'term_write', 'term_resize', 'term_stop', 'shown', 'update_state', 'prepare_update', 'apply_update', 'check_updates', 'presentation_save']);
+  'list_files', 'preview_file', 'open_url', 'notify', 'term_start', 'term_write', 'term_resize', 'term_stop', 'shown', 'update_state', 'prepare_update', 'apply_update', 'check_updates', 'presentation_save', 'presentation_reference', 'presentation_design_enabled']);
 const channels = new Set(['feiyu://event', 'feiyu://term', 'feiyu://update', 'feiyu://state']);
 contextBridge.exposeInMainWorld('feiyuDesktop', {
   platform: process.platform,

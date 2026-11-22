@@ -215,6 +215,26 @@ class ReviewTests(unittest.TestCase):
                 self.assertNotEqual(parts[1], parts[2])
                 self.assertNotIn("tools", requests[0])
 
+    def test_short_json_reply_is_scoped_to_official_deepseek_flash(self):
+        from feiyu.providers import OpenAICompatBackend
+
+        reply = SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content='{"issues":[]}'))])
+        for model, host, requested, expected in [
+            ("deepseek-flash", "api.deepseek.com", True, True),
+            ("deepseek-flash", "api.deepseek.com", False, False),
+            ("deepseek-flash", "other.example", True, False),
+            ("another-model", "api.deepseek.com", True, False),
+        ]:
+            with self.subTest(model=model, host=host, requested=requested):
+                backend = OpenAICompatBackend(model=model, base_url="https://" + host, api_key="fixture",
+                                              system="", tools=[])
+                with backend.client, patch.object(backend, "_sdk_call", return_value=reply) as call:
+                    self.assertEqual(backend.ask("JSON", json_reply=requested), '{"issues":[]}')
+                    self.assertEqual(call.call_args.kwargs.get("response_format"),
+                                     {"type": "json_object"} if expected else None)
+                    self.assertEqual(call.call_args.kwargs.get("extra_body"),
+                                     {"thinking": {"type": "disabled"}} if expected else None)
+
     def test_critic_requires_valid_evidence_and_ids(self):
         slide = {"slideId": "s", "objects": [{"id": "title"}]}
         finding = {
