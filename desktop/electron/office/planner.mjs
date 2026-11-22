@@ -1,3 +1,5 @@
+import { galleryFrames } from './photos.mjs';
+
 // Content types and layout geometry are shared by ranking, Canvas and PPTX.
 export function textUnits(value) {
   return Array.from(value).reduce((total, char) => total + (char.charCodeAt(0) < 128 ? 0.6 : 1.05), 0);
@@ -78,9 +80,21 @@ const typeFloor = { title: 25, label: 15, body: 15, caption: 12, value: 14 };
 const mediaReason = '使用现有配图，保留完整画面。';
 
 function candidateSet(slide, content, rhythm, tokens) {
-  const { layout, title, image, items } = slide;
+  const { layout, title, items } = slide;
+  const image = slide.image || slide.photos?.length;
   const { data, indices } = content;
   const meta = (family, variant, score, reason, extra) => ({ layout: family, variant, score, reason, ...extra });
+  const album = tokens.graphics.photoAlbum;
+  if (!data.length && (album || slide.photos?.length)) {
+    if (layout === 'cover')
+      return [meta('cover', 'photo-cover', 68, '按素材顺序布置居中的照片组，标题、副标题和图注各有独立空间。')];
+    if (layout === 'image' && image) return [
+      meta('image', 'photo-work', 67, '先展示作品，再阅读标题和说明。'),
+      meta('image', 'photo-work-side', 56, '在作品旁为长标题和说明分配独立空间。'),
+    ];
+    if (layout === 'conclusion' || (layout === 'image' && !image))
+      return [meta('statement', 'photo-essay', 67, '用标题与独立说明栏组织阅读顺序。')];
+  }
   const presentation = rhythm.role === 'opening' || rhythm.role === 'transition' || rhythm.role === 'conclusion';
   const compact = rhythm.density !== 'dense';
   const left = tokens.titleAlignment !== 'center';
@@ -153,12 +167,13 @@ function candidateSet(slide, content, rhythm, tokens) {
 // content intact, and measure the inferred alternatives alongside the originals.
 function candidatesForContent(slide, content, rhythm, tokens) {
   const original = candidateSet(slide, content, rhythm, tokens);
-  if (slide.layout !== 'conclusion' && !(slide.layout === 'image' && !slide.image)) return original;
+  if (original[0].variant.startsWith('photo-')) return original;
+  if (slide.layout !== 'conclusion' && !(slide.layout === 'image' && !slide.image && !slide.photos?.length)) return original;
   const count = content.indices.length;
   const { title } = slide;
   let inferred;
   if (content.data.length >= 2) inferred = 'chart';
-  else if (slide.image) inferred = 'image';
+  else if (slide.image || slide.photos?.length) inferred = 'image';
   else if (count > 1 && (timeIntervals(slide.items).dated
       || /流程|工序|处理步骤|工作步骤|流水线|\b(?:workflow|pipeline|procedure|steps)\b/i.test(title))) inferred = 'timeline';
   else if (count === 2 && /对比|两种|两类|差异|\b(?:compare|comparison|versus|vs)\b/i.test(title)) inferred = 'comparison';
@@ -169,7 +184,7 @@ function candidatesForContent(slide, content, rhythm, tokens) {
 
 const preferredFloor = (region) => region.role === 'title'
   ? Math.max(typeFloor.title, Math.floor(region.size * 0.62))
-  : Math.max(typeFloor[region.role], region.size - 5);
+  : Math.min(region.size, Math.max(typeFloor[region.role], region.size - 5));
 
 // Relative chart label allowance follows the chart's category allocation.
 function measure(resolved, tokens) {
@@ -209,7 +224,7 @@ function reasons(candidate, overflow, repeated) {
   ];
 }
 
-export function planSlides(deck, rhythm, tokens) {
+export function planSlides(deck, rhythm, tokens, requestedPhotoCounts = {}) {
   const inputs = deck.slides.map((slide, index) => {
     const content = slideContent(slide);
     const candidates = candidatesForContent(slide, content, rhythm[index], tokens)
@@ -238,6 +253,9 @@ export function planSlides(deck, rhythm, tokens) {
     const { layout, variant, resolved, overflow, chartEncoding } = picked;
     const lead = slide.items.find((item) => item.label.trim() || item.text.trim());
     const keyMessage = (variant === 'statement-takeaway' && slide.items[0].text.trim()) || slide.title.trim() || lead?.label.trim() || lead?.text.trim() || '';
+    const photos = resolved.gallery ?? [];
+    const photoFocus = variant === 'photo-cover' ? Math.floor((photos.length - 1) / 2) : 0;
+    const requested = requestedPhotoCounts[slide.layout];
     const contentBindings = [
       ...resolved.text.filter(({ value }) => value.trim()).map(({ nodeId, slotId, emphasis }) =>
         ({ nodeId, slotId, emphasis })),
@@ -245,10 +263,15 @@ export function planSlides(deck, rhythm, tokens) {
         { nodeId: id, slotId: 'chart-category', emphasis: 'secondary' },
         { nodeId: id, slotId: 'chart-value', emphasis: resolved.chart.focus < 0 || index === resolved.chart.focus ? 'primary' : 'secondary' },
       ]) ?? [],
-      ...(slide.image ? [{ nodeId: slide.id, slotId: 'image', emphasis: layout === 'image' ? 'primary' : 'supporting' }] : []),
+      ...(resolved.picture ? [{ nodeId: slide.id, slotId: 'image', emphasis: layout === 'image' ? 'primary' : 'supporting' }] : []),
+      ...photos.map(({ photo, slotId }, index) => ({
+        nodeId: photo.id, slotId, emphasis: index === photoFocus && ['cover', 'image'].includes(layout)
+          ? 'primary' : 'supporting',
+      })),
       ...(slide.notes.trim() ? [{ nodeId: slide.id, slotId: 'speaker-notes', emphasis: 'supporting' }] : []),
     ];
-    const focalPoint = variant === 'statement-takeaway' ? 'takeaway' : layout === 'image' ? 'image' : resolved.chart ? 'chart'
+    const focalPoint = variant === 'statement-takeaway' ? 'takeaway' : resolved.chart ? 'chart'
+      : photos[photoFocus] && ['cover', 'image'].includes(layout) ? photos[photoFocus].slotId : layout === 'image' ? 'image'
       : contentBindings[0]?.slotId ?? 'headline';
     plans.push({
       slideId: slide.id, sourceLayout: slide.layout, layout, variant, keyMessage, focalPoint,
@@ -263,6 +286,11 @@ export function planSlides(deck, rhythm, tokens) {
       assetStrategy: {
         image: slide.image ? { source: 'existing-slide-image', fit: 'contain', slotId: 'image' } : null,
         chart: chartEncoding ? { source: 'slide-items', editable: true, encoding: chartEncoding } : null,
+        ...(slide.photos?.length > 0 && { photos: photos.filter(({ photo }) => !photo.legacy).map(({ photo, slotId }) => ({
+          source: 'slide-photo', photoId: photo.id, slotId, fit: photo.fit ?? 'contain',
+          focus: { x: photo.focus?.x ?? 0.5, y: photo.focus?.y ?? 0.5 },
+        })) }),
+        ...(requested !== undefined && { photoCount: { requested, actual: photos.length + Number(Boolean(resolved.picture)) } }),
       },
       ...(overflow.length && { contentEditProposal: {
         action: 'split-slide', summary: '建议将超出容量的内容移至后续页，保留原文、数值和备注。',
@@ -277,7 +305,11 @@ export function planSlides(deck, rhythm, tokens) {
 export function resolveSlideLayout(slide, tokens, plan, content = slideContent(slide)) {
   const { layout, variant, chartEncoding } = plan;
   const { typography: type, spacing, graphics, palette } = tokens;
-  const { items, image } = slide;
+  const { items } = slide;
+  const photoLayout = variant.startsWith('photo-');
+  const photos = (slide.photos ?? []).map((photo, index) => ({ ...photo, index }));
+  if (slide.image && (photos.length || photoLayout)) photos.push({ id: slide.id, data: slide.image, legacy: true });
+  const image = slide.image || photos.length;
   const { data, entries, annotations, indices } = content;
   const left = spacing.margin;
   const width = 960 - 2 * left;
@@ -290,6 +322,7 @@ export function resolveSlideLayout(slide, tokens, plan, content = slideContent(s
   const text = [];
   const marks = [];
   let picture;
+  let gallery;
   let chart;
   const box = (x, y, w, h) => ({ x, y, w, h });
   const rect = (x, y, w, h, color) => marks.push({ type: 'rect', ...box(x, y, w, h), color });
@@ -340,8 +373,22 @@ export function resolveSlideLayout(slide, tokens, plan, content = slideContent(s
     if (!image) return region;
     const imageWidth = (region.w - gap) * share;
     const onLeft = side === 'left';
-    picture = box(onLeft ? region.x : region.x + region.w - imageWidth, region.y, imageWidth, region.h);
+    setPictures(box(onLeft ? region.x : region.x + region.w - imageWidth, region.y, imageWidth, region.h));
     return box(onLeft ? region.x + imageWidth + gap : region.x, region.y, region.w - imageWidth - gap, region.h);
+  }
+  function setPictures(region, strip = false) {
+    if (!photos.length) {
+      if (slide.image) picture = region;
+      return;
+    }
+    gallery = galleryFrames(photos, region, strip).map(({ captionY, captionHeight, ...frame }, i) => {
+      const photo = photos[i];
+      const slotId = photo.legacy ? 'image' : 'photo-' + photo.index;
+      field(box(frame.x, captionY, frame.w, captionHeight), photo.caption?.trim() ? photo.caption : '',
+        slotId + '-caption', 'caption-' + photo.index, 'caption',
+        { size: Math.min(11, type.caption), nodeId: photo.id, align: 'center' });
+      return { ...frame, photo, slotId };
+    });
   }
   function headingMark(x, y, w) {
     if (graphics.motif === 'rule') rule(x, y, w, 'brand-rule');
@@ -369,7 +416,71 @@ export function resolveSlideLayout(slide, tokens, plan, content = slideContent(s
   const start = top + header + spacing.gap;
   const units = slide.unit ?? '';
   const unitHeight = units ? 24 : 0;
-  if (cover) {
+  if (photoLayout) {
+    function heading(region, size, align) {
+      const reserve = eastAsian.test(slide.title) ? 1 : 0;
+      while (size > typeFloor.title
+        && textHeight(slide.title, size, region.w, type.lineHeight + 0.09, reserve) > region.h) size--;
+      field(region, slide.title, 'headline', 'title', 'title', { size, emphasis: 'primary', align });
+    }
+    const written = indices.filter(i => items[i].label.trim() || items[i].text.trim());
+    const fullWidth = box(left, 0, width, 0);
+    const showUnit = (region) => field(region, units, 'chart-unit', 'unit', 'caption');
+    if (variant === 'photo-cover') {
+      const first = items[0];
+      const extra = written.filter(i => i !== 0);
+      const headingY = image ? 38 : 166;
+      const headingH = Math.min(98, Math.max(65, textHeight(slide.title, type.cover, width, type.lineHeight + 0.09, 1)));
+      heading({ ...fullWidth, y: headingY, h: headingH }, type.cover, 'center');
+      const subtitleY = headingY + headingH + 4;
+      const subtitleH = first.text ? Math.min(53, Math.max(28,
+        textHeight(first.text, type.body, width, type.lineHeight + 0.09, 1))) : 0;
+      field({ ...fullWidth, y: subtitleY, h: subtitleH }, first.text, 'subtitle', 'text-0', 'body',
+        { nodeId: first.id, align: 'center', size: Math.min(15, type.body) });
+      if (image) {
+        const mediaY = Math.max(162, subtitleY + subtitleH + 6);
+        const mediaBottom = extra.length ? 389 : 438;
+        const captionAllowance = photos.some(photo => photo.caption?.trim()) ? 40 : 0;
+        const mediaHeight = mediaBottom - mediaY + captionAllowance;
+        setPictures(box(94, mediaY, 772, mediaHeight), true);
+      }
+      const lastPhotoEdge = gallery?.reduce((edge, photo) => Math.max(edge, photo.y + photo.h), 0) ?? 0;
+      const hasCaptions = photos.some(photo => photo.caption?.trim());
+      const creditY = image ? Math.min(extra.length ? 432 : 482, lastPhotoEdge + (hasCaptions ? 48 : 10)) : subtitleY + subtitleH + 24;
+      field({ ...fullWidth, y: creditY, h: 18 }, first.label, 'opening-credit', 'label-0', 'caption',
+        { nodeId: first.id, align: 'center' });
+      showUnit(box(left, 501, Math.min(180, width), unitHeight));
+      if (extra.length) {
+        const rowsY = creditY + (first.label ? 19 : 1);
+        const cell = (width - (extra.length - 1) * gap) / extra.length;
+        extra.forEach((i, n) => entry(i, left + n * (cell + gap), rowsY, cell, spacing.footer - rowsY, 'opening-extra-' + i));
+      }
+    } else if (variant === 'photo-work') {
+      const footerY = written.length ? 373 : 412;
+      setPictures(box(left, top, width, footerY - top - 20));
+      const headlineWidth = written.length ? Math.floor(width * 0.49) : width;
+      heading(box(left, footerY, headlineWidth, bottom - footerY), type.title, 'left');
+      showUnit(box(left, spacing.footer, Math.min(180, width), unitHeight));
+      if (written.length) rows(written, left + headlineWidth + gap, footerY + 1, width - headlineWidth - gap, bottom - footerY, 'work-details');
+    } else {
+      const side = variant === 'photo-work-side' || (variant === 'photo-essay' && image);
+      const leftW = Math.floor(width * (side ? 0.53 : 0.43));
+      const contentX = left + leftW + gap;
+      const contentW = right - contentX;
+      const titleX = side ? contentX : left;
+      const titleW = side ? contentW : leftW;
+      const headingH = Math.max(76, Math.min(174,
+        textHeight(slide.title, type.title, titleW, type.lineHeight + 0.09, 1)));
+      const detailsY = side ? top + headingH + 24 : top + 24;
+      heading(box(titleX, top, titleW, headingH), type.title, 'left');
+      if (image) {
+        const mediaY = side ? top : top + headingH + 22;
+        setPictures(box(left, mediaY, leftW, bottom - mediaY));
+      }
+      showUnit(box(contentX, detailsY, contentW, unitHeight));
+      if (written.length) rows(written, contentX, detailsY + unitHeight, contentW, bottom - detailsY - unitHeight, 'essay-details');
+    }
+  } else if (cover) {
     const brief = variant === 'cover-brief';
     const region = reserveImage(box(left, brief ? 56 : 80, width, bottom - (brief ? 56 : 80)),
       brief ? 0.33 : graphics.imageShare);
@@ -444,7 +555,7 @@ export function resolveSlideLayout(slide, tokens, plan, content = slideContent(s
       }
     } else if (variant === 'image-caption') {
       const imageH = Math.floor(h * 0.47);
-      picture = box(left, y, width, imageH);
+      setPictures(box(left, y, width, imageH));
       rows(indices, left, y + imageH + 8, width, h - imageH - 8, 'image-caption');
     } else {
       const share = variant === 'image-hero' ? Math.min(0.64, graphics.imageShare + 0.13)
@@ -493,5 +604,5 @@ export function resolveSlideLayout(slide, tokens, plan, content = slideContent(s
       }
     }
   }
-  return { text, marks, picture, chart, palette: (cover && tokens.openingPalette) || palette };
+  return { text, marks, picture, gallery, chart, palette: (cover && tokens.openingPalette) || palette };
 }

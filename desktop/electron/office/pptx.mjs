@@ -1,6 +1,10 @@
 import pptxgen from 'pptxgenjs';
 import { readDeck, composition } from './deck.mjs';
 
+// PptxGenJS interprets numeric values of 100 or more as EMUs.
+const imageCoord = (inches) => inches >= 100 ? Math.round(inches * 914400) : inches;
+const pictureName = (value) => value.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '');
+
 export async function powerPoint(raw) {
   const deck = readDeck(raw);
   const ppt = new pptxgen();
@@ -32,6 +36,7 @@ export async function powerPoint(raw) {
           align: o.align || 'left',
           fontSize: o.size,
           bold: o.bold,
+          italic: o.italic,
           color: o.color,
           // Office and LibreOffice can hang CJK punctuation past the wrap boundary.
           // PptxGenJS writes the first two array entries as the left and right insets.
@@ -93,8 +98,18 @@ export async function powerPoint(raw) {
           },
         );
       if (o.type === 'image') {
-        // Keep the whole image visible in its reserved rectangle.
-        page.addImage({ data: o.data, ...box });
+        const options = { data: o.data, ...box,
+          ...(o.photoId && { objectName: pictureName(o.name || o.photoId), altText: pictureName(o.alt) }) };
+        if (o.crop) {
+          // Set the source size and native crop independently so PowerPoint retains the full media.
+          const width = box.w / o.crop.w;
+          const height = box.h / o.crop.h;
+          options.w = imageCoord(width);
+          options.h = imageCoord(height);
+          options.sizing = { type: 'crop', w: box.w, h: box.h,
+            x: imageCoord(o.crop.x * width), y: imageCoord(o.crop.y * height) };
+        }
+        page.addImage(options);
       }
     }
     if (slide.notes) page.addNotes(slide.notes);

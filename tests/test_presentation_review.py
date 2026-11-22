@@ -74,6 +74,25 @@ class ReviewTests(unittest.TestCase):
         self.assertEqual(report["renderWarning"], "renderer diagnostic")
 
     @requires_renderer
+    def test_exported_photo_crop_and_position_are_checked_against_the_plan(self):
+        sample = SAMPLE.parents[1] / "phase-3/acceptance/portrait"
+        shutil.copyfile(sample / "manifest.json", self.work / "manifest.json")
+        with zipfile.ZipFile(sample / "deck.pptx") as source, zipfile.ZipFile(self.deck, "w") as output:
+            for entry in source.infolist():
+                data = source.read(entry)
+                if entry.filename == "ppt/slides/slide1.xml":
+                    page = ET.fromstring(data)
+                    pictures = page.findall(".//{*}pic")
+                    pictures[0].find(".//{*}srcRect").set("l", "0")
+                    pictures[1].find(".//{*}xfrm/{*}off").set("x", str(200 * 12700))
+                    data = ET.tostring(page, encoding="utf-8")
+                output.writestr(entry, data)
+        with patch.dict(os.environ, BISCUIT_PRESENTATION_CRITIC=""):
+            report = review(self.work, self.output)
+        self.assertEqual(report["status"], "blocked")
+        self.assertEqual({issue["kind"] for issue in report["issues"]}, {"image-crop", "image-position"})
+
+    @requires_renderer
     def test_actual_export_corruption(self):
         def damage(label, title, body, folio):
             label.find(".//{*}rPr/{*}solidFill/{*}srgbClr").set("val", "FBF6EB")

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { composition } from '../../electron/office/deck.mjs';
+import { maxPhotoCaption } from '../../electron/office/photos.mjs';
 
 function Chart({ o }) {
   if (o.encoding) return <PlannedChart o={o} />;
@@ -127,15 +128,20 @@ function LegacyChart({ o }) {
 }
 export function Canvas({ slide, index, total, theme, design, onEdit }) {
   const [active, setActive] = useState(null);
+  const photoLayout = design?.slidePlans?.find(plan => plan.slideId === slide.id)?.variant.startsWith('photo-');
   const preview = onEdit
     ? {
         ...slide,
         title: slide.title || '点击添加标题',
-        items: slide.items.map((r) => ({
+        items: photoLayout ? slide.items : slide.items.map((r) => ({
           ...r,
           label: r.label || (design?.version === 2 && slide.layout === 'chart' ? '' : '添加小标题'),
           text: r.text || (slide.layout === 'chart' ? '' : '点击添加正文'),
         })),
+        ...(active?.startsWith('caption-') && {
+          photos: slide.photos?.map((photo, i) =>
+            active === 'caption-' + i && !photo.caption?.trim() ? { ...photo, caption: '点击添加图注' } : photo),
+        }),
       }
     : slide;
   return (
@@ -161,11 +167,18 @@ export function Canvas({ slide, index, total, theme, design, onEdit }) {
               strokeWidth="1.25"
             />
           );
-        if (o.type === 'image')
-          return <image key={i} {...box} href={o.data} preserveAspectRatio="none" />;
+        if (o.type === 'image') {
+          if (!o.crop) return <image key={i} {...box} href={o.data} preserveAspectRatio="none" data-photo-id={o.photoId} />;
+          const { x, y, w, h } = o.crop;
+          return <svg key={i} {...box} viewBox={`${x} ${y} ${w} ${h}`} overflow="hidden"
+            preserveAspectRatio="none" data-photo-id={o.photoId}>
+            <image x={0} y={0} width={1} height={1} href={o.data} preserveAspectRatio="none" />
+          </svg>;
+        }
         if (o.type === 'chart') return <Chart key={i} o={o} />;
         const [field, row] = o.field?.split('-') || [];
-        const value = row === undefined ? slide[field] : slide.items[row]?.[field];
+        const value = field === 'caption' ? slide.photos[row]?.caption ?? ''
+          : row === undefined ? slide[field] : slide.items[row]?.[field];
         const style = {
           ...(o.wrapPadding && {
             paddingLeft: o.align === 'center' ? o.wrapPadding / 2 : 0,
@@ -174,6 +187,7 @@ export function Canvas({ slide, index, total, theme, design, onEdit }) {
           }),
           lineHeight: o.lineHeight, fontFamily: o.fontFamily || (o.serif ? '"Noto Serif CJK SC", "Songti SC", SimSun, serif' : undefined),
           textAlign: o.align, fontSize: o.size, color: '#' + o.color, fontWeight: o.bold ? 700 : 400,
+          fontStyle: o.italic ? 'italic' : undefined,
         };
         return (
           <foreignObject key={o.field || i} {...box}>
@@ -183,7 +197,7 @@ export function Canvas({ slide, index, total, theme, design, onEdit }) {
                 style={style}
                 aria-label="画布文字"
                 autoFocus
-                maxLength={field === 'unit' ? 24 : field === 'title' ? 120 : field === 'label' ? 60 : 220}
+                maxLength={field === 'caption' ? maxPhotoCaption : field === 'unit' ? 24 : field === 'title' ? 120 : field === 'label' ? 60 : 220}
                 value={value}
                 onFocus={(e) => e.target.select()}
                 onChange={(e) => onEdit(field, row, e.target.value)}

@@ -1,0 +1,89 @@
+[
+  {
+    "slideId": "eadafaa1-279d-4ce8-bb15-505b0a11a138",
+    "sha256": "4cbda8ef4e98818fde96a1ed2dcfdfda504c095668c745720abf65ae99796eb6",
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "eadafaa1-279d-4ce8-bb15-505b0a11a138"
+    ],
+    "issues": [
+      {
+        "slideId": "eadafaa1-279d-4ce8-bb15-505b0a11a138",
+        "elementIds": [
+          "photo:18b2de08-175c-4504-86e3-3cdd97b05ff9",
+          "photo:dc9acff4-6562-4021-a963-a8966bb147e3",
+          "photo:f093100b-a37d-4818-8171-6800bc1bbd77"
+        ],
+        "kind": "weak-hierarchy",
+        "severity": "minor",
+        "confidence": 0.7,
+        "evidence": "Contact sheet shows the middle photograph at x=362 w=236 overlapping the side photos' visual band; in the full slide the three images read as a flat centered row rather than a deliberate cover composition.",
+        "suggestedChange": "Increase size and vertical offset of the center image or stagger the side images to create a clearer focal hierarchy.",
+        "source": "vision-model",
+        "issueId": "vision:eadafaa1-279d-4ce8-bb15-505b0a11a138:1"
+      }
+    ]
+  },
+  {
+    "slideId": "fcb45ddf-e42c-4d27-8569-692ece1ec178",
+    "sha256": "c964d9a8d4a91300ad37eb0f31119df3477c6a7cf21cfea0f3a27a575b44e8c6",
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "fcb45ddf-e42c-4d27-8569-692ece1ec178"
+    ],
+    "issues": []
+  },
+  {
+    "slideId": "43c9d93c-cdf9-404b-aac5-44494bb02f22",
+    "sha256": "09d4d44eac8012d63e1235648658e5f892e561106e5f7ab57950a8aac09e388e",
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "43c9d93c-cdf9-404b-aac5-44494bb02f22"
+    ],
+    "issues": [
+      {
+        "slideId": "43c9d93c-cdf9-404b-aac5-44494bb02f22",
+        "elementIds": [
+          "title"
+        ],
+        "kind": "clipping",
+        "severity": "major",
+        "confidence": 0.9,
+        "evidence": "Title text frame ends near y≈216 in the rendered slide; the second line of the title ('leaves room for') is visually cut off at the bottom edge of its frame, with the descenders of 'f' and the baseline of the text sitting at the boundary.",
+        "suggestedChange": "Increase the title text frame height or reduce the title font size so both lines fit fully within the frame without any glyphs touching the bottom edge.",
+        "source": "vision-model",
+        "issueId": "vision:43c9d93c-cdf9-404b-aac5-44494bb02f22:1"
+      },
+      {
+        "slideId": "43c9d93c-cdf9-404b-aac5-44494bb02f22",
+        "elementIds": [
+          "title",
+          "label-0"
+        ],
+        "kind": "overlap",
+        "severity": "major",
+        "confidence": 0.85,
+        "evidence": "The bottom of the title frame (y=42, h=174, bottom=216) visually reaches into the horizontal rule and 'The sky' label at y=247; the rendered title's second line sits close to the divider line, with the line crossing near the title's lower boundary.",
+        "suggestedChange": "Add vertical spacing between the title and the divider/label, or reduce the title frame height, so no visible marks touch.",
+        "source": "vision-model",
+        "issueId": "vision:43c9d93c-cdf9-404b-aac5-44494bb02f22:2"
+      },
+      {
+        "slideId": "43c9d93c-cdf9-404b-aac5-44494bb02f22",
+        "elementIds": [
+          "photo:79f517aa-620a-4012-81be-48eb8d86c054"
+        ],
+        "kind": "image-mismatch",
+        "severity": "minor",
+        "confidence": 0.7,
+        "evidence": "The contact sheet shows the conclusion slide's photograph as a large sepia harbor image with ships, while the full slide renders that same photo smaller and shifted; the visual composition on the conclusion page does not match the intended 'one photograph' emphasis from the brief.",
+        "suggestedChange": "Enlarge or reposition the conclusion photograph so it fills the left column as intended by the layout key and brief.",
+        "source": "vision-model",
+        "issueId": "vision:43c9d93c-cdf9-404b-aac5-44494bb02f22:3"
+      }
+    ]
+  }
+]

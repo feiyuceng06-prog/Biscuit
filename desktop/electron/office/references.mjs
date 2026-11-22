@@ -11,6 +11,9 @@ const study = (id, direction, title, layouts, topics, density, lesson) => ({
 });
 
 const library = [
+  study('photography-opening', 'photography', '摄影集开篇', ['cover'], ['story', 'launch'], 'sparse', '用居中的照片组串起开篇叙事。'),
+  study('photography-work', 'photography', '摄影作品', ['image'], ['story', 'launch'], 'balanced', '为作品留出连续的展示空间，图注与图片独立。'),
+  study('photography-essay', 'photography', '摄影说明', ['conclusion', 'comparison', 'chart', 'timeline'], ['story', 'teaching'], 'balanced', '在独立的文字区保留完整说明。'),
   study('editorial-opening', 'editorial', '长文叙事开篇', ['cover', 'conclusion'], ['story', 'teaching'], 'sparse', '用大标题和细线建立叙事层级。'),
   study('editorial-feature', 'editorial', '图文专题', ['image', 'timeline'], ['story', 'teaching'], 'balanced', '用留白将图片和图旁说明分开。'),
   study('editorial-evidence', 'editorial', '叙事中的证据', ['chart', 'comparison'], ['report', 'story'], 'balanced', '给事实标签留出空间，用细线组织证据。'),

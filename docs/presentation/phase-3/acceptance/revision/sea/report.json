@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "deckId": "6ca7bc77-ad1b-487c-b8f7-d85ecc4ac11a",
+  "pptxSha256": "8fc37a27cc532c92ef12e5f51c82667f7a0f048a2dfd6267ff6984fd0a241a60",
+  "status": "needs_review",
+  "critic": {
+    "status": "unavailable",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [],
+    "errorType": "JSONDecodeError"
+  },
+  "pages": [
+    {
+      "slideId": "eadafaa1-279d-4ce8-bb15-505b0a11a138",
+      "png": "slide-1.png",
+      "sha256": "76d796910f90bb0fda65a92c358b41d6ee49024179545ba69090fd1cc4d67888"
+    },
+    {
+      "slideId": "fcb45ddf-e42c-4d27-8569-692ece1ec178",
+      "png": "slide-2.png",
+      "sha256": "c964d9a8d4a91300ad37eb0f31119df3477c6a7cf21cfea0f3a27a575b44e8c6"
+    },
+    {
+      "slideId": "43c9d93c-cdf9-404b-aac5-44494bb02f22",
+      "png": "slide-3.png",
+      "sha256": "d3205703432bf17844cf6f982b1688a85791afd6562ca64c295c9fb64e83ba07"
+    }
+  ],
+  "issues": [],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "b58b457a3569e486a7fd040bd5052b10933715de41b498e5d8924223a070408f",
+  "contactSheet": "contact.png",
+  "fonts": [
+    "BAAAAA+LiberationSerif-Italic        TrueType          WinAnsi          yes yes yes     66  0",
+    "CAAAAA+Arial                         TrueType          WinAnsi          yes yes yes     81  0",
+    "DAAAAA+Arial                         TrueType          WinAnsi          yes yes yes     76  0",
+    "EAAAAA+LiberationSerif-Italic        TrueType          WinAnsi          yes yes yes     56  0",
+    "FAAAAA+Arial-Bold                    TrueType          WinAnsi          yes yes yes     71  0",
+    "GAAAAA+LiberationSerif-Italic        TrueType          WinAnsi          yes yes yes     61  0"
+  ],
+  "durationMs": 45274
+}

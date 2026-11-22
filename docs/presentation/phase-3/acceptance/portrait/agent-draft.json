@@ -1,0 +1,23 @@
+{
+  "id": "b2b53125-fcc0-4383-a18a-697b85424d41",
+  "source": "1. cover · A Quiet Gaze\nDisplay label: Portrait studies / The Met Collection\nDisplay text: Julia Margaret Cameron\nJulia Margaret Cameron | Sappho | 1865 | https://www.metmuseum.org/art/collection/search/282044\nJulia Margaret Cameron | Zoe, Maid of Athens | 1866 | https://www.metmuseum.org/art/collection/search/282043\nJulia Margaret Cameron | Julia Jackson | 1867 | https://www.metmuseum.org/art/collection/search/267426\nJulia Margaret Cameron | Thomas Carlyle | 1867 | https://www.metmuseum.org/art/collection/search/269434\nJulia Margaret Cameron | Circe | 1865 | https://www.metmuseum.org/art/collection/search/266257",
+  "brief": "English photography portfolio. Use the source page titles and display copy verbatim, with the specified layouts. Put catalogue credit and the source URL in notes. Warm white paper, dark italic serif type. Cover: five photographs.",
+  "modelAlias": "deepseek-flash",
+  "slides": [
+    {
+      "id": "c396f9fc-4e5e-4f81-9d6a-1c0ce21a1e25",
+      "title": "A Quiet Gaze",
+      "layout": "cover",
+      "items": [
+        {
+          "id": "8a26bcae-066f-4949-87fe-67468699a45d",
+          "label": "Portrait studies",
+          "text": "Julia Margaret Cameron",
+          "value": 0
+        }
+      ],
+      "notes": "封面：五幅摄影。图录署名：The Met Collection；艺术家：Julia Margaret Cameron。来源页显示标签：Portrait studies / The Met Collection；显示文本：Julia Margaret Cameron。作品与来源 URL：Sappho, 1865 — https://www.metmuseum.org/art/collection/search/282044；Zoe, Maid of Athens, 1866 — https://www.metmuseum.org/art/collection/search/282043；Julia Jackson, 1867 — https://www.metmuseum.org/art/collection/search/267426；Thomas Carlyle, 1867 — https://www.metmuseum.org/art/collection/search/269434；Circe, 1865 — https://www.metmuseum.org/art/collection/search/266257。",
+      "generated": true
+    }
+  ]
+}

@@ -1,0 +1,626 @@
+{
+  "deckId": "6ca7bc77-ad1b-487c-b8f7-d85ecc4ac11a",
+  "brief": "English photography portfolio. For outline output use precisely the required number of slides with the literal English layout keys shown before each source title (cover, image, conclusion). Use {title,slides:[{title,layout}]} for the outline. Copy the page titles and display text from the catalogue selection. Put catalogue credit and the source URL in notes. Warm white paper, dark italic serif type. Cover: three photographs. Work slide: one photograph. Essay slide: one photograph.",
+  "design": {
+    "direction": "photography",
+    "rhythm": [
+      {
+        "slideId": "eadafaa1-279d-4ce8-bb15-505b0a11a138",
+        "layout": "cover",
+        "role": "opening",
+        "emphasis": "image",
+        "density": "sparse",
+        "referenceId": "photography-opening",
+        "rationale": "用居中的照片组串起开篇叙事。"
+      },
+      {
+        "slideId": "fcb45ddf-e42c-4d27-8569-692ece1ec178",
+        "layout": "image",
+        "role": "context",
+        "emphasis": "image",
+        "density": "sparse",
+        "referenceId": "photography-work",
+        "rationale": "为作品留出连续的展示空间，图注与图片独立。"
+      },
+      {
+        "slideId": "43c9d93c-cdf9-404b-aac5-44494bb02f22",
+        "layout": "conclusion",
+        "role": "conclusion",
+        "emphasis": "image",
+        "density": "sparse",
+        "referenceId": "photography-essay",
+        "rationale": "在独立的文字区保留完整说明。"
+      }
+    ],
+    "version": 2,
+    "slidePlans": [
+      {
+        "slideId": "eadafaa1-279d-4ce8-bb15-505b0a11a138",
+        "sourceLayout": "cover",
+        "layout": "cover",
+        "variant": "photo-cover",
+        "keyMessage": "The Shape of the Horizon",
+        "focalPoint": "photo-1",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "eadafaa1-279d-4ce8-bb15-505b0a11a138",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "caee2e17-8fe3-4379-9e2f-11c7fa790416",
+            "slotId": "subtitle",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "caee2e17-8fe3-4379-9e2f-11c7fa790416",
+            "slotId": "opening-credit",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "18b2de08-175c-4504-86e3-3cdd97b05ff9",
+            "slotId": "photo-0",
+            "emphasis": "supporting"
+          },
+          {
+            "nodeId": "dc9acff4-6562-4021-a963-a8966bb147e3",
+            "slotId": "photo-1",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "f093100b-a37d-4818-8171-6800bc1bbd77",
+            "slotId": "photo-2",
+            "emphasis": "supporting"
+          },
+          {
+            "nodeId": "eadafaa1-279d-4ce8-bb15-505b0a11a138",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "photography-opening"
+        ],
+        "selectionReason": "按素材顺序布置居中的照片组，标题、副标题和图注各有独立空间。",
+        "candidates": [
+          {
+            "layout": "cover",
+            "variant": "photo-cover",
+            "score": 67.52,
+            "feasible": true,
+            "reasons": [
+              "按素材顺序布置居中的照片组，标题、副标题和图注各有独立空间。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": null,
+          "chart": null,
+          "photos": [
+            {
+              "source": "slide-photo",
+              "photoId": "18b2de08-175c-4504-86e3-3cdd97b05ff9",
+              "slotId": "photo-0",
+              "fit": "cover",
+              "focus": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            },
+            {
+              "source": "slide-photo",
+              "photoId": "dc9acff4-6562-4021-a963-a8966bb147e3",
+              "slotId": "photo-1",
+              "fit": "cover",
+              "focus": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            },
+            {
+              "source": "slide-photo",
+              "photoId": "f093100b-a37d-4818-8171-6800bc1bbd77",
+              "slotId": "photo-2",
+              "fit": "cover",
+              "focus": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            }
+          ],
+          "photoCount": {
+            "requested": 3,
+            "actual": 3
+          }
+        }
+      },
+      {
+        "slideId": "fcb45ddf-e42c-4d27-8569-692ece1ec178",
+        "sourceLayout": "image",
+        "layout": "image",
+        "variant": "photo-work",
+        "keyMessage": "A wave breaks below a bank of clouds",
+        "focalPoint": "photo-0",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "fcb45ddf-e42c-4d27-8569-692ece1ec178",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "de2496a1-7f2b-4359-b501-a8185e8f813e",
+            "slotId": "work-details-0-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "de2496a1-7f2b-4359-b501-a8185e8f813e",
+            "slotId": "work-details-0-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "cbf54f78-fa5d-411a-979c-345b22644032",
+            "slotId": "photo-0",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "fcb45ddf-e42c-4d27-8569-692ece1ec178",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "photography-work"
+        ],
+        "selectionReason": "先展示作品，再阅读标题和说明。",
+        "candidates": [
+          {
+            "layout": "image",
+            "variant": "photo-work",
+            "score": 66.71,
+            "feasible": true,
+            "reasons": [
+              "先展示作品，再阅读标题和说明。"
+            ]
+          },
+          {
+            "layout": "image",
+            "variant": "photo-work-side",
+            "score": 55.71,
+            "feasible": true,
+            "reasons": [
+              "在作品旁为长标题和说明分配独立空间。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": null,
+          "chart": null,
+          "photos": [
+            {
+              "source": "slide-photo",
+              "photoId": "cbf54f78-fa5d-411a-979c-345b22644032",
+              "slotId": "photo-0",
+              "fit": "contain",
+              "focus": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            }
+          ],
+          "photoCount": {
+            "requested": 1,
+            "actual": 1
+          }
+        }
+      },
+      {
+        "slideId": "43c9d93c-cdf9-404b-aac5-44494bb02f22",
+        "sourceLayout": "conclusion",
+        "layout": "statement",
+        "variant": "photo-essay",
+        "keyMessage": "What a low horizon leaves room for",
+        "focalPoint": "headline",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "43c9d93c-cdf9-404b-aac5-44494bb02f22",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "124b5e81-22a0-48f9-94a9-292df5b3bcb4",
+            "slotId": "essay-details-0-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "124b5e81-22a0-48f9-94a9-292df5b3bcb4",
+            "slotId": "essay-details-0-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "79f517aa-620a-4012-81be-48eb8d86c054",
+            "slotId": "photo-0",
+            "emphasis": "supporting"
+          },
+          {
+            "nodeId": "43c9d93c-cdf9-404b-aac5-44494bb02f22",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "photography-essay"
+        ],
+        "selectionReason": "用标题与独立说明栏组织阅读顺序。",
+        "candidates": [
+          {
+            "layout": "statement",
+            "variant": "photo-essay",
+            "score": 66.71,
+            "feasible": true,
+            "reasons": [
+              "用标题与独立说明栏组织阅读顺序。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": null,
+          "chart": null,
+          "photos": [
+            {
+              "source": "slide-photo",
+              "photoId": "79f517aa-620a-4012-81be-48eb8d86c054",
+              "slotId": "photo-0",
+              "fit": "contain",
+              "focus": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            }
+          ],
+          "photoCount": {
+            "requested": 1,
+            "actual": 1
+          }
+        }
+      }
+    ]
+  },
+  "slides": [
+    {
+      "slideId": "eadafaa1-279d-4ce8-bb15-505b0a11a138",
+      "layout": "cover",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "F7F3F2",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "image",
+          "x": 187,
+          "y": 202.90510948905109,
+          "w": 168,
+          "h": 206.18978102189783,
+          "crop": {
+            "x": 0.1930982724440669,
+            "y": 0,
+            "w": 0.6138034551118662,
+            "h": 1
+          },
+          "photoId": "18b2de08-175c-4504-86e3-3cdd97b05ff9",
+          "name": "301885.jpg",
+          "alt": "301885.jpg",
+          "slotId": "photo-0",
+          "id": "photo:18b2de08-175c-4504-86e3-3cdd97b05ff9"
+        },
+        {
+          "type": "image",
+          "x": 362,
+          "y": 174,
+          "w": 236,
+          "h": 264,
+          "crop": {
+            "x": 0.1543434343434344,
+            "y": 0,
+            "w": 0.6913131313131312,
+            "h": 1
+          },
+          "photoId": "dc9acff4-6562-4021-a963-a8966bb147e3",
+          "name": "283124.jpg",
+          "alt": "283124.jpg",
+          "slotId": "photo-1",
+          "id": "photo:dc9acff4-6562-4021-a963-a8966bb147e3"
+        },
+        {
+          "type": "image",
+          "x": 605,
+          "y": 202.90510948905109,
+          "w": 168,
+          "h": 206.18978102189783,
+          "crop": {
+            "x": 0.1808765222316625,
+            "y": 0,
+            "w": 0.638246955536675,
+            "h": 1
+          },
+          "photoId": "f093100b-a37d-4818-8171-6800bc1bbd77",
+          "name": "267425.jpg",
+          "alt": "267425.jpg",
+          "slotId": "photo-2",
+          "id": "photo:f093100b-a37d-4818-8171-6800bc1bbd77"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 38,
+          "w": 840,
+          "h": 98,
+          "value": "The Shape of the Horizon",
+          "field": "title",
+          "size": 58,
+          "color": "282423",
+          "bold": false,
+          "align": "center",
+          "italic": true,
+          "lineHeight": 1.2,
+          "fontFace": "Liberation Serif",
+          "fontFamily": "\"Liberation Serif\", \"Noto Serif CJK SC\", Georgia, \"Songti SC\", SimSun, serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 140,
+          "w": 840,
+          "h": 28,
+          "value": "Gustave Le Gray",
+          "field": "text-0",
+          "size": 15,
+          "color": "524947",
+          "bold": false,
+          "align": "center",
+          "italic": true,
+          "lineHeight": 1.2,
+          "fontFace": "Liberation Serif",
+          "fontFamily": "\"Liberation Serif\", \"Noto Serif CJK SC\", Georgia, \"Songti SC\", SimSun, serif",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 448,
+          "w": 840,
+          "h": 18,
+          "value": "Marine studies / The Met Collection",
+          "field": "label-0",
+          "size": 11,
+          "color": "524947",
+          "bold": false,
+          "align": "center",
+          "italic": true,
+          "lineHeight": 1.2,
+          "fontFace": "Liberation Serif",
+          "fontFamily": "\"Liberation Serif\", \"Noto Serif CJK SC\", Georgia, \"Songti SC\", SimSun, serif",
+          "id": "label-0"
+        }
+      ]
+    },
+    {
+      "slideId": "fcb45ddf-e42c-4d27-8569-692ece1ec178",
+      "layout": "image",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "F7F3F2",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "rect",
+          "color": "B8ADAA",
+          "x": 499,
+          "y": 374,
+          "w": 401,
+          "h": 1,
+          "id": "rect-2"
+        },
+        {
+          "type": "image",
+          "x": 288.4188911704312,
+          "y": 42,
+          "w": 383.1622176591376,
+          "h": 311,
+          "photoId": "cbf54f78-fa5d-411a-979c-345b22644032",
+          "name": "261941.jpg",
+          "alt": "261941.jpg",
+          "slotId": "photo-0",
+          "id": "photo:cbf54f78-fa5d-411a-979c-345b22644032"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 373,
+          "w": 411,
+          "h": 106,
+          "value": "A wave breaks below a bank of clouds",
+          "field": "title",
+          "size": 38,
+          "color": "282423",
+          "bold": false,
+          "align": "left",
+          "italic": true,
+          "lineHeight": 1.2,
+          "fontFace": "Liberation Serif",
+          "fontFamily": "\"Liberation Serif\", \"Noto Serif CJK SC\", Georgia, \"Songti SC\", SimSun, serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 499,
+          "y": 381,
+          "w": 401,
+          "h": 27.09,
+          "value": "Sète",
+          "field": "label-0",
+          "size": 21,
+          "color": "76544A",
+          "bold": true,
+          "align": "left",
+          "lineHeight": 1.2,
+          "fontFace": "Arial",
+          "fontFamily": "Arial, \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 499,
+          "y": 412.09,
+          "w": 401,
+          "h": 62.91,
+          "value": "White surf crosses the dark foreground.",
+          "field": "text-0",
+          "size": 20,
+          "color": "524947",
+          "bold": false,
+          "align": "left",
+          "lineHeight": 1.2,
+          "fontFace": "Arial",
+          "fontFamily": "Arial, \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 796,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "02 / 03",
+          "field": null,
+          "size": 11,
+          "color": "524947",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.2,
+          "fontFace": "Arial",
+          "fontFamily": "Arial, \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-7"
+        }
+      ]
+    },
+    {
+      "slideId": "43c9d93c-cdf9-404b-aac5-44494bb02f22",
+      "layout": "conclusion",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "F7F3F2",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "rect",
+          "color": "B8ADAA",
+          "x": 533,
+          "y": 240,
+          "w": 367,
+          "h": 1,
+          "id": "rect-2"
+        },
+        {
+          "type": "image",
+          "x": 60,
+          "y": 93.625,
+          "w": 445,
+          "h": 333.75,
+          "photoId": "79f517aa-620a-4012-81be-48eb8d86c054",
+          "name": "306320.jpg",
+          "alt": "306320.jpg",
+          "slotId": "photo-0",
+          "id": "photo:79f517aa-620a-4012-81be-48eb8d86c054"
+        },
+        {
+          "type": "text",
+          "x": 533,
+          "y": 42,
+          "w": 367,
+          "h": 174,
+          "value": "What a low horizon leaves room for",
+          "field": "title",
+          "size": 44,
+          "color": "282423",
+          "bold": false,
+          "align": "left",
+          "italic": true,
+          "lineHeight": 1.2,
+          "fontFace": "Liberation Serif",
+          "fontFamily": "\"Liberation Serif\", \"Noto Serif CJK SC\", Georgia, \"Songti SC\", SimSun, serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 533,
+          "y": 247,
+          "w": 367,
+          "h": 27.09,
+          "value": "The sky",
+          "field": "label-0",
+          "size": 21,
+          "color": "76544A",
+          "bold": true,
+          "align": "left",
+          "lineHeight": 1.2,
+          "fontFace": "Arial",
+          "fontFamily": "Arial, \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 533,
+          "y": 278.09,
+          "w": 367,
+          "h": 195.91,
+          "value": "A low band of ships leaves most of the frame to the sky.",
+          "field": "text-0",
+          "size": 20,
+          "color": "524947",
+          "bold": false,
+          "align": "left",
+          "lineHeight": 1.2,
+          "fontFace": "Arial",
+          "fontFamily": "Arial, \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 796,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "03 / 03",
+          "field": null,
+          "size": 11,
+          "color": "524947",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.2,
+          "fontFace": "Arial",
+          "fontFamily": "Arial, \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-7"
+        }
+      ]
+    }
+  ]
+}

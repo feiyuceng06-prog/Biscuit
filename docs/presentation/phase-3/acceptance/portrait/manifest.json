@@ -1,0 +1,313 @@
+{
+  "deckId": "b2b53125-fcc0-4383-a18a-697b85424d41",
+  "brief": "English photography portfolio. Use the source page titles and display copy verbatim, with the specified layouts. Put catalogue credit and the source URL in notes. Warm white paper, dark italic serif type. Cover: five photographs.",
+  "design": {
+    "direction": "photography",
+    "rhythm": [
+      {
+        "slideId": "c396f9fc-4e5e-4f81-9d6a-1c0ce21a1e25",
+        "layout": "cover",
+        "role": "opening",
+        "emphasis": "image",
+        "density": "sparse",
+        "referenceId": "photography-opening",
+        "rationale": "用居中的照片组串起开篇叙事。"
+      }
+    ],
+    "version": 2,
+    "slidePlans": [
+      {
+        "slideId": "c396f9fc-4e5e-4f81-9d6a-1c0ce21a1e25",
+        "sourceLayout": "cover",
+        "layout": "cover",
+        "variant": "photo-cover",
+        "keyMessage": "A Quiet Gaze",
+        "focalPoint": "photo-2",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "c396f9fc-4e5e-4f81-9d6a-1c0ce21a1e25",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "8a26bcae-066f-4949-87fe-67468699a45d",
+            "slotId": "subtitle",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "8a26bcae-066f-4949-87fe-67468699a45d",
+            "slotId": "opening-credit",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "870fc6c1-105b-45b7-85ff-b0d404d753d6",
+            "slotId": "photo-0",
+            "emphasis": "supporting"
+          },
+          {
+            "nodeId": "e5c04c71-cff2-41cf-b2d7-be1429700400",
+            "slotId": "photo-1",
+            "emphasis": "supporting"
+          },
+          {
+            "nodeId": "14e0095d-d18c-421c-9cdc-61d418b0315d",
+            "slotId": "photo-2",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "17efc9c0-cdab-406f-843a-128a814ca259",
+            "slotId": "photo-3",
+            "emphasis": "supporting"
+          },
+          {
+            "nodeId": "34d2566d-cf84-4d30-bce1-b1d0413a9eee",
+            "slotId": "photo-4",
+            "emphasis": "supporting"
+          },
+          {
+            "nodeId": "c396f9fc-4e5e-4f81-9d6a-1c0ce21a1e25",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "photography-opening"
+        ],
+        "selectionReason": "按素材顺序布置居中的照片组，标题、副标题和图注各有独立空间。",
+        "candidates": [
+          {
+            "layout": "cover",
+            "variant": "photo-cover",
+            "score": 67.52,
+            "feasible": true,
+            "reasons": [
+              "按素材顺序布置居中的照片组，标题、副标题和图注各有独立空间。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": null,
+          "chart": null,
+          "photos": [
+            {
+              "source": "slide-photo",
+              "photoId": "870fc6c1-105b-45b7-85ff-b0d404d753d6",
+              "slotId": "photo-0",
+              "fit": "cover",
+              "focus": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            },
+            {
+              "source": "slide-photo",
+              "photoId": "e5c04c71-cff2-41cf-b2d7-be1429700400",
+              "slotId": "photo-1",
+              "fit": "cover",
+              "focus": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            },
+            {
+              "source": "slide-photo",
+              "photoId": "14e0095d-d18c-421c-9cdc-61d418b0315d",
+              "slotId": "photo-2",
+              "fit": "cover",
+              "focus": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            },
+            {
+              "source": "slide-photo",
+              "photoId": "17efc9c0-cdab-406f-843a-128a814ca259",
+              "slotId": "photo-3",
+              "fit": "cover",
+              "focus": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            },
+            {
+              "source": "slide-photo",
+              "photoId": "34d2566d-cf84-4d30-bce1-b1d0413a9eee",
+              "slotId": "photo-4",
+              "fit": "cover",
+              "focus": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            }
+          ],
+          "photoCount": {
+            "requested": 5,
+            "actual": 5
+          }
+        }
+      }
+    ]
+  },
+  "slides": [
+    {
+      "slideId": "c396f9fc-4e5e-4f81-9d6a-1c0ce21a1e25",
+      "layout": "cover",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "F7F3F2",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "image",
+          "x": 94,
+          "y": 221.5,
+          "w": 86,
+          "h": 157,
+          "crop": {
+            "x": 0.1204821935540813,
+            "y": 0,
+            "w": 0.7590356128918374,
+            "h": 1
+          },
+          "photoId": "870fc6c1-105b-45b7-85ff-b0d404d753d6",
+          "name": "282044.jpg",
+          "alt": "282044.jpg",
+          "slotId": "photo-0",
+          "id": "photo:870fc6c1-105b-45b7-85ff-b0d404d753d6"
+        },
+        {
+          "type": "image",
+          "x": 187,
+          "y": 193,
+          "w": 168,
+          "h": 214,
+          "crop": {
+            "x": 0.027554626496311296,
+            "y": 0,
+            "w": 0.9448907470073774,
+            "h": 1
+          },
+          "photoId": "e5c04c71-cff2-41cf-b2d7-be1429700400",
+          "name": "282043.jpg",
+          "alt": "282043.jpg",
+          "slotId": "photo-1",
+          "id": "photo:e5c04c71-cff2-41cf-b2d7-be1429700400"
+        },
+        {
+          "type": "image",
+          "x": 362,
+          "y": 163,
+          "w": 236,
+          "h": 274,
+          "crop": {
+            "x": 0,
+            "y": 0.05929731638418079,
+            "w": 1,
+            "h": 0.8814053672316384
+          },
+          "photoId": "14e0095d-d18c-421c-9cdc-61d418b0315d",
+          "name": "267426.jpg",
+          "alt": "267426.jpg",
+          "slotId": "photo-2",
+          "id": "photo:14e0095d-d18c-421c-9cdc-61d418b0315d"
+        },
+        {
+          "type": "image",
+          "x": 605,
+          "y": 193,
+          "w": 168,
+          "h": 214,
+          "crop": {
+            "x": 0.0128975828509022,
+            "y": 0,
+            "w": 0.9742048342981956,
+            "h": 1
+          },
+          "photoId": "17efc9c0-cdab-406f-843a-128a814ca259",
+          "name": "269434.jpg",
+          "alt": "269434.jpg",
+          "slotId": "photo-3",
+          "id": "photo:17efc9c0-cdab-406f-843a-128a814ca259"
+        },
+        {
+          "type": "image",
+          "x": 780,
+          "y": 221.5,
+          "w": 86,
+          "h": 157,
+          "crop": {
+            "x": 0.1427582387150374,
+            "y": 0,
+            "w": 0.7144835225699252,
+            "h": 1
+          },
+          "photoId": "34d2566d-cf84-4d30-bce1-b1d0413a9eee",
+          "name": "266257.jpg",
+          "alt": "266257.jpg",
+          "slotId": "photo-4",
+          "id": "photo:34d2566d-cf84-4d30-bce1-b1d0413a9eee"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 38,
+          "w": 840,
+          "h": 77.4,
+          "value": "A Quiet Gaze",
+          "field": "title",
+          "size": 60,
+          "color": "282423",
+          "bold": false,
+          "align": "center",
+          "italic": true,
+          "lineHeight": 1.2,
+          "fontFace": "Liberation Serif",
+          "fontFamily": "\"Liberation Serif\", \"Noto Serif CJK SC\", Georgia, \"Songti SC\", SimSun, serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 119.4,
+          "w": 840,
+          "h": 28,
+          "value": "Julia Margaret Cameron",
+          "field": "text-0",
+          "size": 15,
+          "color": "524947",
+          "bold": false,
+          "align": "center",
+          "italic": true,
+          "lineHeight": 1.2,
+          "fontFace": "Liberation Serif",
+          "fontFamily": "\"Liberation Serif\", \"Noto Serif CJK SC\", Georgia, \"Songti SC\", SimSun, serif",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 447,
+          "w": 840,
+          "h": 18,
+          "value": "Portrait studies / The Met Collection",
+          "field": "label-0",
+          "size": 11,
+          "color": "524947",
+          "bold": false,
+          "align": "center",
+          "italic": true,
+          "lineHeight": 1.2,
+          "fontFace": "Liberation Serif",
+          "fontFamily": "\"Liberation Serif\", \"Noto Serif CJK SC\", Georgia, \"Songti SC\", SimSun, serif",
+          "id": "label-0"
+        }
+      ]
+    }
+  ]
+}

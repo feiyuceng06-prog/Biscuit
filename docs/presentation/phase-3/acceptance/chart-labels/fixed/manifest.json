@@ -1,0 +1,306 @@
+{
+  "deckId": "0e9388bb-593b-40ba-aaa2-79b468bdf5fb",
+  "brief": "",
+  "design": {
+    "direction": "corporate",
+    "rhythm": [
+      {
+        "slideId": "dbfe77cd-4ee9-4c96-8462-c4ad6ffac5b3",
+        "layout": "chart",
+        "role": "evidence",
+        "emphasis": "data",
+        "density": "dense",
+        "referenceId": "corporate-evidence",
+        "rationale": "为证据安排一致的横向空间，保留可编辑图表。"
+      }
+    ],
+    "version": 2,
+    "slidePlans": [
+      {
+        "slideId": "dbfe77cd-4ee9-4c96-8462-c4ad6ffac5b3",
+        "sourceLayout": "chart",
+        "layout": "chart",
+        "variant": "bars-focus",
+        "keyMessage": "Change in waiting time by service area",
+        "focalPoint": "chart",
+        "density": "dense",
+        "contentBindings": [
+          {
+            "nodeId": "dbfe77cd-4ee9-4c96-8462-c4ad6ffac5b3",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "dbfe77cd-4ee9-4c96-8462-c4ad6ffac5b3",
+            "slotId": "chart-unit",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "576caea6-c181-4fff-9f37-51a3c33dbc7b",
+            "slotId": "chart-category",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "576caea6-c181-4fff-9f37-51a3c33dbc7b",
+            "slotId": "chart-value",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "2b44c3de-ebc0-426b-b1b5-0e610e33e75a",
+            "slotId": "chart-category",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "2b44c3de-ebc0-426b-b1b5-0e610e33e75a",
+            "slotId": "chart-value",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "000fa387-159a-412b-a399-f11a21bf8109",
+            "slotId": "chart-category",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "000fa387-159a-412b-a399-f11a21bf8109",
+            "slotId": "chart-value",
+            "emphasis": "primary"
+          }
+        ],
+        "referenceIds": [
+          "corporate-evidence"
+        ],
+        "selectionReason": "以共同零点向两侧展示正负变化，保留零值标签。",
+        "candidates": [
+          {
+            "layout": "chart",
+            "variant": "bars-focus",
+            "score": 63,
+            "feasible": true,
+            "reasons": [
+              "以共同零点向两侧展示正负变化，保留零值标签。"
+            ]
+          },
+          {
+            "layout": "chart",
+            "variant": "bars-details",
+            "score": 58,
+            "feasible": true,
+            "reasons": [
+              "以共同零点向两侧展示正负变化，保留零值标签。 将图表集中在略窄的内容区。"
+            ]
+          },
+          {
+            "layout": "chart",
+            "variant": "columns-focus",
+            "score": 41,
+            "feasible": true,
+            "reasons": [
+              "以共同零基线对照离散类别的原始数值。"
+            ]
+          },
+          {
+            "layout": "chart",
+            "variant": "columns-details",
+            "score": 36,
+            "feasible": true,
+            "reasons": [
+              "以共同零基线对照离散类别的原始数值。 将图表集中在略窄的内容区。"
+            ]
+          }
+        ],
+        "chartEncoding": "bars",
+        "assetStrategy": {
+          "image": null,
+          "chart": {
+            "source": "slide-items",
+            "editable": true,
+            "encoding": "bars"
+          }
+        }
+      }
+    ]
+  },
+  "slides": [
+    {
+      "slideId": "dbfe77cd-4ee9-4c96-8462-c4ad6ffac5b3",
+      "layout": "chart",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "F7F9FD",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "rect",
+          "color": "244F96",
+          "x": 54,
+          "y": 28,
+          "w": 55,
+          "h": 4,
+          "id": "rect-2"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 40,
+          "w": 852,
+          "h": 116.38000000000001,
+          "value": "Change in waiting time by service area",
+          "field": "title",
+          "size": 43,
+          "color": "152C48",
+          "bold": true,
+          "align": "left",
+          "lineHeight": 1.24,
+          "fontFace": "Segoe UI",
+          "fontFamily": "\"Segoe UI\", \"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 176.38,
+          "w": 852,
+          "h": 24,
+          "value": "minutes",
+          "field": "unit",
+          "size": 13,
+          "color": "465A72",
+          "bold": false,
+          "align": "left",
+          "lineHeight": 1.24,
+          "fontFace": "Segoe UI",
+          "fontFamily": "\"Segoe UI\", \"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "unit"
+        },
+        {
+          "type": "chart",
+          "x": 54,
+          "y": 200.38,
+          "w": 852,
+          "h": 278.62,
+          "encoding": "bars",
+          "items": [
+            {
+              "id": "576caea6-c181-4fff-9f37-51a3c33dbc7b",
+              "label": "Main reading room and weekend information desk for visitors",
+              "text": "",
+              "value": -13
+            },
+            {
+              "id": "2b44c3de-ebc0-426b-b1b5-0e610e33e75a",
+              "label": "Self-service book returns and reserved volume collection",
+              "text": "",
+              "value": 0
+            },
+            {
+              "id": "000fa387-159a-412b-a399-f11a21bf8109",
+              "label": "Interlibrary volume transfers and accessibility assistance",
+              "text": "",
+              "value": 6.125
+            }
+          ],
+          "focus": -1,
+          "domain": {
+            "min": -14.82,
+            "max": 7.945
+          },
+          "ink": "152C48",
+          "rule": "AABCD6",
+          "categorySize": 11,
+          "plot": {
+            "left": 346.68,
+            "right": 795,
+            "top": 3,
+            "bottom": 275.62,
+            "labelWidth": 289.68
+          },
+          "wrappedCategories": true,
+          "valueSize": 15,
+          "axisWidth": 2,
+          "fontFace": "Segoe UI",
+          "fontFamily": "\"Segoe UI\", \"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "valueFontFace": "Segoe UI",
+          "colors": [
+            "244F96",
+            "244F96",
+            "244F96"
+          ],
+          "id": "chart-5"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 234.18666666666667,
+          "w": 289.68,
+          "h": 30.26,
+          "value": "Main reading room and weekend information desk for visitors",
+          "field": null,
+          "size": 11,
+          "color": "152C48",
+          "bold": false,
+          "align": "left",
+          "lineHeight": 1.24,
+          "fontFace": "Segoe UI",
+          "fontFamily": "\"Segoe UI\", \"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-6"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 325.06,
+          "w": 289.68,
+          "h": 30.26,
+          "value": "Self-service book returns and reserved volume collection",
+          "field": null,
+          "size": 11,
+          "color": "152C48",
+          "bold": false,
+          "align": "left",
+          "lineHeight": 1.24,
+          "fontFace": "Segoe UI",
+          "fontFamily": "\"Segoe UI\", \"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-7"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 415.93333333333334,
+          "w": 289.68,
+          "h": 30.26,
+          "value": "Interlibrary volume transfers and accessibility assistance",
+          "field": null,
+          "size": 11,
+          "color": "152C48",
+          "bold": false,
+          "align": "left",
+          "lineHeight": 1.24,
+          "fontFace": "Segoe UI",
+          "fontFamily": "\"Segoe UI\", \"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-8"
+        },
+        {
+          "type": "text",
+          "x": 802,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "01 / 01",
+          "field": null,
+          "size": 13,
+          "color": "465A72",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.24,
+          "fontFace": "Segoe UI",
+          "fontFamily": "\"Segoe UI\", \"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-9"
+        }
+      ]
+    }
+  ]
+}

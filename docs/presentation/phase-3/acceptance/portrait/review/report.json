@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "deckId": "b2b53125-fcc0-4383-a18a-697b85424d41",
+  "pptxSha256": "0db4036a7dba87b85d442f84e24e0a0e7506a88a8d527aac186265f45d08ee17",
+  "status": "checked",
+  "critic": {
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "c396f9fc-4e5e-4f81-9d6a-1c0ce21a1e25"
+    ]
+  },
+  "pages": [
+    {
+      "slideId": "c396f9fc-4e5e-4f81-9d6a-1c0ce21a1e25",
+      "png": "slide-1.png",
+      "sha256": "b8f27d339818ca6a0bccca3b22b82fe2988eb32f361df70a5f318b90947b3ad5"
+    }
+  ],
+  "issues": [],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "efca24904783567ffe303b576de071574a0ba21a68dc1675450b339e1ef344d3",
+  "contactSheet": "contact.png",
+  "fonts": [
+    "BAAAAA+LiberationSerif-Italic        TrueType          WinAnsi          yes yes yes     44  0",
+    "CAAAAA+LiberationSerif-Italic        TrueType          WinAnsi          yes yes yes     34  0",
+    "DAAAAA+LiberationSerif-Italic        TrueType          WinAnsi          yes yes yes     39  0"
+  ],
+  "durationMs": 37238
+}

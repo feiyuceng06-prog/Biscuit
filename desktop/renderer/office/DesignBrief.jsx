@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { planDesign } from '../../electron/office/director.mjs';
+import { hasPhotos } from '../../electron/office/photos.mjs';
 
-const directions = { auto: '自动选择', editorial: '编辑叙事', minimal: '极简', corporate: '企业汇报', technology: '技术说明' };
+const directions = { auto: '自动选择', photography: '摄影集', editorial: '编辑叙事', minimal: '极简', corporate: '企业汇报', technology: '技术说明' };
 
 export function DesignBrief({ deck, slideId, commit, onError, disabled }) {
   const [preferences, setPreferences] = useState(deck.design?.preferences || {});
@@ -9,6 +10,7 @@ export function DesignBrief({ deck, slideId, commit, onError, disabled }) {
   useEffect(() => { setUsePlanner(deck.design?.version !== 1); }, [deck.design?.version]);
   const [loading, setLoading] = useState(false);
   const pagePlan = deck.design?.slidePlans?.find(page => page.slideId === slideId);
+  const count = pagePlan?.assetStrategy.photoCount;
   const saved = JSON.stringify(deck.design?.preferences || {});
   useEffect(() => { setPreferences(JSON.parse(saved)); }, [saved]);
   function update(field, value) {
@@ -45,7 +47,9 @@ export function DesignBrief({ deck, slideId, commit, onError, disabled }) {
         <label>视觉方向<select value={preferences.direction || 'auto'} onChange={e => update('direction', e.target.value)}>
           {Object.entries(directions).map(([id, label]) => <option key={id} value={id}>{label}</option>)}
         </select></label>
-        <label className="office-planner-toggle"><input type="checkbox" checked={usePlanner}
+        <label className="office-planner-toggle"><input type="checkbox"
+          checked={usePlanner || preferences.direction === 'photography' || hasPhotos(deck)}
+          disabled={preferences.direction === 'photography' || hasPhotos(deck)}
           onChange={e => setUsePlanner(e.target.checked)} />根据每页内容规划构图</label>
         <div className="office-actions">
           <button type="button" onClick={reference}>{loading ? '分析中…' : '分析参考 PPTX'}</button>
@@ -58,6 +62,7 @@ export function DesignBrief({ deck, slideId, commit, onError, disabled }) {
       {pagePlan && <section className="office-page-plan" aria-label="本页构图">
         <strong>本页构图</strong>
         <span>{pagePlan.selectionReason}</span>
+        {count && count.requested !== count.actual && <small>制作要求为 {count.requested} 张照片，本页已导入 {count.actual} 张。</small>}
         {pagePlan.contentEditProposal && <small>此页内容较密，可手动拆页。已保留全部原文。</small>}
       </section>}
     </details>
