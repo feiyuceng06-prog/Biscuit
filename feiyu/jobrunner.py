@@ -13,9 +13,8 @@ import sys
 import time
 
 
-def main():
-    directory = Path(sys.argv[1])
-    operation = sys.argv[2]
+def main(directory, operation):
+    directory = Path(directory)
     stopped = []
     signal.signal(signal.SIGTERM, lambda *_: stopped.append('cancelled'))
     os.write(1, b'READY\n')
@@ -111,4 +110,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1], sys.argv[2])

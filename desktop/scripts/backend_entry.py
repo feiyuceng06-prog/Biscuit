@@ -5,6 +5,10 @@ configure_frozen_environment()
 
 import sys
 
+if sys.platform == 'linux' and len(sys.argv) == 4 and sys.argv[1] == '--_job-supervisor':
+    from feiyu.jobrunner import main as supervise_job
+    raise SystemExit(supervise_job(sys.argv[2], sys.argv[3]))
+
 if sys.platform == 'linux' and len(sys.argv) == 6 and sys.argv[1] == '--_sdk-supervisor':
     from feiyu.sdk_lifecycle import supervise
     raise SystemExit(supervise(int(sys.argv[2]), int(sys.argv[3]), sys.argv[4], int(sys.argv[5])))
