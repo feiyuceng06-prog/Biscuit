@@ -1,0 +1,131 @@
+[
+  {
+    "slideId": "0409ae18-8a41-4084-a6d2-1704240055ba",
+    "sha256": "1740128757bdb2e0a883d5acd636487236768d462ea9861c825bc0e164858e0e",
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "0409ae18-8a41-4084-a6d2-1704240055ba"
+    ],
+    "issues": [
+      {
+        "slideId": "0409ae18-8a41-4084-a6d2-1704240055ba",
+        "elementIds": [
+          "title"
+        ],
+        "kind": "overflow",
+        "severity": "major",
+        "confidence": 0.9,
+        "evidence": "The final glyph '间' at approximately x=790, y=95 crosses the title frame's bottom edge (y≈136) and overlaps the subtitle area below.",
+        "suggestedChange": "Reduce the title font size or increase the frame height so all glyphs fit inside the text box.",
+        "source": "vision-model",
+        "issueId": "vision:0409ae18-8a41-4084-a6d2-1704240055ba:1"
+      },
+      {
+        "slideId": "0409ae18-8a41-4084-a6d2-1704240055ba",
+        "elementIds": [
+          "title",
+          "text-0"
+        ],
+        "kind": "overlap",
+        "severity": "major",
+        "confidence": 0.85,
+        "evidence": "The second line of the title encroaches on the subtitle '先看人物与背景的距离…' at approximately y=140.",
+        "suggestedChange": "Shorten the title or reflow it so the subtitle has clear space.",
+        "source": "vision-model",
+        "issueId": "vision:0409ae18-8a41-4084-a6d2-1704240055ba:2"
+      },
+      {
+        "slideId": "0409ae18-8a41-4084-a6d2-1704240055ba",
+        "elementIds": [
+          "label-0"
+        ],
+        "kind": "weak-hierarchy",
+        "severity": "minor",
+        "confidence": 0.7,
+        "evidence": "The date label 'ca. 1857—1870s' sits directly beneath the left photo, but its centered x-position (60–900) makes the association with the left image visually ambiguous.",
+        "suggestedChange": "Align the date label under the specific image it describes or add a visible tag/pointer.",
+        "source": "vision-model",
+        "issueId": "vision:0409ae18-8a41-4084-a6d2-1704240055ba:3"
+      }
+    ]
+  },
+  {
+    "slideId": "8899c342-7eac-4a4c-9064-c61e3f0c7853",
+    "sha256": "a5fc7cd38df0304d2be537f00e234397b2b90ef5e38f68e56ab711756eac82b2",
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "8899c342-7eac-4a4c-9064-c61e3f0c7853"
+    ],
+    "issues": [
+      {
+        "slideId": "8899c342-7eac-4a4c-9064-c61e3f0c7853",
+        "elementIds": [
+          "photo:17351a49-d921-430b-b204-bd89ad246ec3",
+          "photo:0b051cf6-62b5-4923-b725-af74b25f2a29"
+        ],
+        "kind": "poor-alignment",
+        "severity": "minor",
+        "confidence": 0.85,
+        "evidence": "Left photo bottom edge y≈383 while right photo bottom edge y≈383 are consistent, but photos are positioned at different horizontal offsets (left photo x≈182-352, right photo x≈568-818) with unequal gap and unequal label starts relative to each frame.",
+        "suggestedChange": "Align both photos and their labels to a shared column grid so label baselines and image edges line up consistently.",
+        "source": "vision-model",
+        "issueId": "vision:8899c342-7eac-4a4c-9064-c61e3f0c7853:1"
+      },
+      {
+        "slideId": "8899c342-7eac-4a4c-9064-c61e3f0c7853",
+        "elementIds": [
+          "title"
+        ],
+        "kind": "crowded",
+        "severity": "suggestion",
+        "confidence": 0.7,
+        "evidence": "Title occupies two lines across w=840 with large 49pt italic text; line break occurs after '再看树枝与', leaving '天空交界' isolated on the second line.",
+        "suggestedChange": "Reduce title size or adjust width so the phrase breaks more naturally, e.g., keep a complete semantic clause per line.",
+        "source": "vision-model",
+        "issueId": "vision:8899c342-7eac-4a4c-9064-c61e3f0c7853:2"
+      },
+      {
+        "slideId": "8899c342-7eac-4a4c-9064-c61e3f0c7853",
+        "elementIds": [
+          "label-0",
+          "label-1",
+          "text-0",
+          "text-1"
+        ],
+        "kind": "inconsistent-style",
+        "severity": "suggestion",
+        "confidence": 0.6,
+        "evidence": "The two image labels use different alignment relative to their photos: left label at x=60 while photo starts at x≈182; right label at x=486 while photo starts at x≈568.",
+        "suggestedChange": "Anchor each caption block to its associated image left edge or to a consistent column start.",
+        "source": "vision-model",
+        "issueId": "vision:8899c342-7eac-4a4c-9064-c61e3f0c7853:3"
+      }
+    ]
+  },
+  {
+    "slideId": "46f39f63-e6d4-415f-83dc-b063bd0e93fa",
+    "sha256": "17f19a556f5ceedc5d6820a75f3622534d65f198ac4590b34d6f602962c9c318",
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "46f39f63-e6d4-415f-83dc-b063bd0e93fa"
+    ],
+    "issues": [
+      {
+        "slideId": "46f39f63-e6d4-415f-83dc-b063bd0e93fa",
+        "elementIds": [
+          "text-0"
+        ],
+        "kind": "clipping",
+        "severity": "major",
+        "confidence": 0.9,
+        "evidence": "The bottom of the body text frame (text-0, y=247, h=227) cuts through the final line. The baseline glyphs '开阅读。' are visually sliced at y≈474, and the right edge of the text frame clips the end of the line '作品信息分开阅读。'.",
+        "suggestedChange": "Increase the height of the text-0 box to 244 and reduce the font size from 20 to 18 to prevent clipping.",
+        "source": "vision-model",
+        "issueId": "vision:46f39f63-e6d4-415f-83dc-b063bd0e93fa:1"
+      }
+    ]
+  }
+]

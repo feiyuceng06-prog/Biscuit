@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "deckId": "4afdd4d4-3d46-447e-9b11-2f6ffbdb6267",
+  "status": "draft",
+  "pptxSha256": "29403b5fb5e159b104a06de7de1927fd4d536c5815da3c87f69006d9e75c0102",
+  "pages": [],
+  "issues": [],
+  "critic": {
+    "status": "unavailable"
+  },
+  "error": "Review worker unavailable",
+  "destination": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/verified/biscuit-photo-delivery-chP8yQ/作品.pptx.review-HRqOgV/draft.pptx",
+  "requestedDestination": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/verified/biscuit-photo-delivery-chP8yQ/作品.pptx",
+  "reviewStatus": "preview_unavailable",
+  "report": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/verified/biscuit-photo-delivery-chP8yQ/作品.pptx.review-HRqOgV/report.json",
+  "initialPptx": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/verified/biscuit-photo-delivery-chP8yQ/作品.pptx.review-HRqOgV/initial/deck.pptx",
+  "initialReport": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/verified/biscuit-photo-delivery-chP8yQ/作品.pptx.review-HRqOgV/initial/review/report.json",
+  "finalPptx": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/verified/biscuit-photo-delivery-chP8yQ/作品.pptx.review-HRqOgV/draft.pptx",
+  "finalReport": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/verified/biscuit-photo-delivery-chP8yQ/作品.pptx.review-HRqOgV/initial/review/report.json",
+  "selectedStage": "initial",
+  "renderCount": 1,
+  "repairAttempts": 0,
+  "durationMs": 13,
+  "failureReason": "Review worker unavailable",
+  "rounds": [
+    {
+      "stage": "initial",
+      "changes": [],
+      "durationMs": 11,
+      "pptx": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/verified/biscuit-photo-delivery-chP8yQ/作品.pptx.review-HRqOgV/initial/deck.pptx",
+      "report": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/verified/biscuit-photo-delivery-chP8yQ/作品.pptx.review-HRqOgV/initial/review/report.json",
+      "reviewStatus": "preview_unavailable",
+      "accepted": true,
+      "reason": "Review worker unavailable"
+    }
+  ],
+  "skipped": [],
+  "unresolvedIssues": []
+}

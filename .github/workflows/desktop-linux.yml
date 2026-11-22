@@ -76,6 +76,11 @@ jobs:
       - run: npm run build
         working-directory: desktop
       - run: desktop/build/python-build/bin/python -m unittest -v tests.test_presentation_review
+      - name: Verify photographic deliveries and archived user inputs
+        run: |
+          PYTHON="$PWD/desktop/build/python-build/bin/python" node --test desktop/tests/office-photo-delivery.test.mjs
+          python evals/presentation/photo-pilot/audit.py > /tmp/photo-pilot-audit.json
+          diff -u docs/presentation/photography-pilot/audit.json /tmp/photo-pilot-audit.json
       - run: presentation_design_engine=1 xvfb-run -a npm run test:desktop
         working-directory: desktop
       - run: npm run dist:linux

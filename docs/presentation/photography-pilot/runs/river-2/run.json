@@ -1,0 +1,30 @@
+{
+  "name": "river",
+  "model": "deepseek-flash",
+  "reopen": false,
+  "started": "2026-11-22T11:17:51.587Z",
+  "events": [
+    {
+      "action": "outline",
+      "ms": 4391,
+      "attempt": 1
+    },
+    {
+      "action": "body",
+      "ms": 9263,
+      "attempt": 1
+    },
+    {
+      "action": "保存源文件",
+      "ms": 17474,
+      "status": "已保存到 /home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/river-2/source.deck.json"
+    },
+    {
+      "action": "导出 PPTX",
+      "ms": 19380,
+      "status": "已保存到 /home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/river-2/deck.pptx · 基础检查通过 · 模型视觉审查未完成 · 报告 /home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/river-2/deck.pptx.review-B9yTpN/report.json"
+    }
+  ],
+  "manualPageEdits": 0,
+  "totalMs": 19380
+}

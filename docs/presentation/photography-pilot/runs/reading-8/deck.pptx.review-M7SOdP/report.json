@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "deckId": "e0928557-3020-49aa-afbd-cd5ff35da21f",
+  "pptxSha256": "1d7c0db81ee85762ece1dd4bb61a01dddd43de3e600146017c065e359a7713d4",
+  "status": "checked",
+  "critic": {
+    "status": "not_requested"
+  },
+  "pages": [
+    {
+      "slideId": "89754157-1056-4fcd-a8b3-afbd38e1aa2c",
+      "png": "initial/review/slide-1.png",
+      "sha256": "50ee2b17aa31be6fb58a920973e6059363045a0000abba2dea0ec2f35192d78a"
+    },
+    {
+      "slideId": "acda08e6-ae93-43b9-82fc-a32eea1b7995",
+      "png": "initial/review/slide-2.png",
+      "sha256": "2f155f0ed9405436ae95782aa96a371a18a7eb20533ebdeb985dd58fab916c50"
+    },
+    {
+      "slideId": "91146ad0-1b2f-4963-8f09-e24a29e92858",
+      "png": "initial/review/slide-3.png",
+      "sha256": "1799176807c3ff1dc1e5a071e7e39575f5f376a24cacc60a42efe253c5703c3b"
+    }
+  ],
+  "issues": [],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "5b5e9e84c63fd44010d2249f5e597c6b8358f87fa30c5808526f9570b96a8eac",
+  "contactSheet": "initial/review/contact.png",
+  "fonts": [
+    "BAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     89  0",
+    "CAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     84  0",
+    "DAAAAA+LiberationSerif-Italic        TrueType          WinAnsi          yes yes yes     59  0",
+    "EAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     99  0",
+    "FAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     64  0",
+    "GAAAAA+Arial                         TrueType          WinAnsi          yes yes yes     79  0",
+    "HAAAAA+Arial                         TrueType          WinAnsi          yes yes yes     74  0",
+    "IAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     94  0",
+    "JAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes     69  0"
+  ],
+  "durationMs": 2874,
+  "destination": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/reading-8/deck.pptx",
+  "requestedDestination": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/reading-8/deck.pptx",
+  "reviewStatus": "checked",
+  "report": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/reading-8/deck.pptx.review-M7SOdP/report.json",
+  "initialPptx": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/reading-8/deck.pptx.review-M7SOdP/initial/deck.pptx",
+  "initialReport": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/reading-8/deck.pptx.review-M7SOdP/initial/review/report.json",
+  "finalPptx": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/reading-8/deck.pptx.review-M7SOdP/final.pptx",
+  "finalReport": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/reading-8/deck.pptx.review-M7SOdP/initial/review/report.json",
+  "selectedStage": "initial",
+  "renderCount": 1,
+  "repairAttempts": 0,
+  "failureReason": null,
+  "rounds": [
+    {
+      "stage": "initial",
+      "changes": [],
+      "durationMs": 2857,
+      "pptx": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/reading-8/deck.pptx.review-M7SOdP/initial/deck.pptx",
+      "report": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/reading-8/deck.pptx.review-M7SOdP/initial/review/report.json",
+      "reviewStatus": "checked",
+      "accepted": true,
+      "reason": null
+    }
+  ],
+  "skipped": [],
+  "pdf": "initial/review/deck.pdf",
+  "unresolvedIssues": []
+}

@@ -1,0 +1,602 @@
+{
+  "deckId": "606a90ff-2ed5-4526-8539-ef90e3e4cb94",
+  "brief": "为摄影读书会制作一本中文摄影作品集。请决定页序、页面角色和主次，以馆藏资料为准。",
+  "design": {
+    "direction": "photography",
+    "rhythm": [
+      {
+        "slideId": "0409ae18-8a41-4084-a6d2-1704240055ba",
+        "layout": "cover",
+        "role": "opening",
+        "emphasis": "image",
+        "density": "balanced",
+        "referenceId": "photography-opening",
+        "rationale": "用居中的照片组串起开篇叙事。"
+      },
+      {
+        "slideId": "8899c342-7eac-4a4c-9064-c61e3f0c7853",
+        "layout": "comparison",
+        "role": "contrast",
+        "emphasis": "image",
+        "density": "sparse",
+        "referenceId": "photography-essay",
+        "rationale": "在独立的文字区保留完整说明。"
+      },
+      {
+        "slideId": "46f39f63-e6d4-415f-83dc-b063bd0e93fa",
+        "layout": "conclusion",
+        "role": "conclusion",
+        "emphasis": "image",
+        "density": "balanced",
+        "referenceId": "photography-essay",
+        "rationale": "在独立的文字区保留完整说明。"
+      }
+    ],
+    "version": 2,
+    "slidePlans": [
+      {
+        "slideId": "0409ae18-8a41-4084-a6d2-1704240055ba",
+        "sourceLayout": "cover",
+        "layout": "cover",
+        "variant": "photo-cover",
+        "keyMessage": "从人物的凝视到雪松的枝影：在不同画幅之间缓慢翻阅十九世纪摄影的五个瞬间",
+        "focalPoint": "photo-0",
+        "density": "balanced",
+        "contentBindings": [
+          {
+            "nodeId": "0409ae18-8a41-4084-a6d2-1704240055ba",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "83ddc362-3db7-48ba-bda8-2701bf776c20",
+            "slotId": "subtitle",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "83ddc362-3db7-48ba-bda8-2701bf776c20",
+            "slotId": "opening-credit",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "9fe370bf-e3f5-4207-8c5e-4b3cd389eaae",
+            "slotId": "photo-0",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "3520b84c-6306-4a5e-91d2-fbf0ca53bd1a",
+            "slotId": "photo-1",
+            "emphasis": "supporting"
+          },
+          {
+            "nodeId": "0409ae18-8a41-4084-a6d2-1704240055ba",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "photography-opening"
+        ],
+        "selectionReason": "按素材顺序布置居中的照片组，标题、副标题和图注各有独立空间。",
+        "candidates": [
+          {
+            "layout": "cover",
+            "variant": "photo-cover",
+            "score": 67.52,
+            "feasible": true,
+            "reasons": [
+              "按素材顺序布置居中的照片组，标题、副标题和图注各有独立空间。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": null,
+          "chart": null,
+          "photos": [
+            {
+              "source": "slide-photo",
+              "photoId": "9fe370bf-e3f5-4207-8c5e-4b3cd389eaae",
+              "slotId": "photo-0",
+              "fit": "contain",
+              "focus": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            },
+            {
+              "source": "slide-photo",
+              "photoId": "3520b84c-6306-4a5e-91d2-fbf0ca53bd1a",
+              "slotId": "photo-1",
+              "fit": "contain",
+              "focus": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            }
+          ]
+        }
+      },
+      {
+        "slideId": "8899c342-7eac-4a4c-9064-c61e3f0c7853",
+        "sourceLayout": "comparison",
+        "layout": "comparison",
+        "variant": "photo-comparison",
+        "keyMessage": "先看人物与背景的距离，再看树枝与天空交界",
+        "focalPoint": "headline",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "8899c342-7eac-4a4c-9064-c61e3f0c7853",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "6e7855a7-31f4-41fc-8008-19cd26b889eb",
+            "slotId": "pair-0-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "6e7855a7-31f4-41fc-8008-19cd26b889eb",
+            "slotId": "pair-0-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "70d0d2ca-242a-44c6-a64b-43fd1f9f84e4",
+            "slotId": "pair-1-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "70d0d2ca-242a-44c6-a64b-43fd1f9f84e4",
+            "slotId": "pair-1-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "17351a49-d921-430b-b204-bd89ad246ec3",
+            "slotId": "photo-0",
+            "emphasis": "supporting"
+          },
+          {
+            "nodeId": "0b051cf6-62b5-4923-b725-af74b25f2a29",
+            "slotId": "photo-1",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "photography-essay"
+        ],
+        "selectionReason": "把每幅照片与同序的对照文字放进同一栏。",
+        "candidates": [
+          {
+            "layout": "comparison",
+            "variant": "photo-comparison",
+            "score": 66.41,
+            "feasible": true,
+            "reasons": [
+              "把每幅照片与同序的对照文字放进同一栏。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": null,
+          "chart": null,
+          "photos": [
+            {
+              "source": "slide-photo",
+              "photoId": "17351a49-d921-430b-b204-bd89ad246ec3",
+              "slotId": "photo-0",
+              "fit": "contain",
+              "focus": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            },
+            {
+              "source": "slide-photo",
+              "photoId": "0b051cf6-62b5-4923-b725-af74b25f2a29",
+              "slotId": "photo-1",
+              "fit": "contain",
+              "focus": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            }
+          ]
+        }
+      },
+      {
+        "slideId": "46f39f63-e6d4-415f-83dc-b063bd0e93fa",
+        "sourceLayout": "conclusion",
+        "layout": "statement",
+        "variant": "photo-essay",
+        "keyMessage": "保留照片边界，分开阅读画面观察与馆藏信息",
+        "focalPoint": "headline",
+        "density": "balanced",
+        "contentBindings": [
+          {
+            "nodeId": "46f39f63-e6d4-415f-83dc-b063bd0e93fa",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "4917426f-8d25-4c84-808d-f093a569571e",
+            "slotId": "essay-details-0-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "1adb2d81-9291-4cb3-be40-070746805a07",
+            "slotId": "photo-0",
+            "emphasis": "supporting"
+          },
+          {
+            "nodeId": "46f39f63-e6d4-415f-83dc-b063bd0e93fa",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "photography-essay"
+        ],
+        "selectionReason": "用标题与独立说明栏组织阅读顺序。",
+        "candidates": [
+          {
+            "layout": "statement",
+            "variant": "photo-essay",
+            "score": 67,
+            "feasible": true,
+            "reasons": [
+              "用标题与独立说明栏组织阅读顺序。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": null,
+          "chart": null,
+          "photos": [
+            {
+              "source": "slide-photo",
+              "photoId": "1adb2d81-9291-4cb3-be40-070746805a07",
+              "slotId": "photo-0",
+              "fit": "contain",
+              "focus": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "slides": [
+    {
+      "slideId": "0409ae18-8a41-4084-a6d2-1704240055ba",
+      "layout": "cover",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "F7F3F2",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "image",
+          "x": 224.44890510948903,
+          "y": 185.5620437956204,
+          "w": 218.1021897810219,
+          "h": 240.87591240875915,
+          "photoId": "9fe370bf-e3f5-4207-8c5e-4b3cd389eaae",
+          "name": "260348.jpg",
+          "alt": "260348.jpg",
+          "slotId": "photo-0",
+          "id": "photo:9fe370bf-e3f5-4207-8c5e-4b3cd389eaae"
+        },
+        {
+          "type": "image",
+          "x": 483.5,
+          "y": 198.35999999999996,
+          "w": 286,
+          "h": 215.28000000000003,
+          "photoId": "3520b84c-6306-4a5e-91d2-fbf0ca53bd1a",
+          "name": "260089.jpg",
+          "alt": "260089.jpg",
+          "slotId": "photo-1",
+          "id": "photo:3520b84c-6306-4a5e-91d2-fbf0ca53bd1a"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 38,
+          "w": 840,
+          "h": 98,
+          "value": "从人物的凝视到雪松的枝影：在不同画幅之间缓慢翻阅十九世纪摄影的五个瞬间",
+          "field": "title",
+          "size": 37,
+          "color": "282423",
+          "bold": false,
+          "align": "center",
+          "italic": true,
+          "wrapPadding": 37,
+          "lineHeight": 1.2,
+          "fontFace": "Noto Serif CJK SC",
+          "fontFamily": "\"Noto Serif CJK SC\", \"Liberation Serif\", Georgia, \"Songti SC\", SimSun, serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 140,
+          "w": 840,
+          "h": 28,
+          "value": "先看人物与背景的距离，再移向树枝与天空交界",
+          "field": "text-0",
+          "size": 15,
+          "color": "524947",
+          "bold": false,
+          "align": "center",
+          "italic": true,
+          "wrapPadding": 15,
+          "lineHeight": 1.2,
+          "fontFace": "Noto Serif CJK SC",
+          "fontFamily": "\"Noto Serif CJK SC\", \"Liberation Serif\", Georgia, \"Songti SC\", SimSun, serif",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 436.4379562043796,
+          "w": 840,
+          "h": 18,
+          "value": "ca. 1857—1870s",
+          "field": "label-0",
+          "size": 11,
+          "color": "524947",
+          "bold": false,
+          "align": "center",
+          "italic": true,
+          "lineHeight": 1.2,
+          "fontFace": "Liberation Serif",
+          "fontFamily": "\"Liberation Serif\", \"Noto Serif CJK SC\", Georgia, \"Songti SC\", SimSun, serif",
+          "id": "label-0"
+        }
+      ]
+    },
+    {
+      "slideId": "8899c342-7eac-4a4c-9064-c61e3f0c7853",
+      "layout": "comparison",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "F7F3F2",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "image",
+          "x": 181.5972454545455,
+          "y": 196.42000000000002,
+          "w": 170.80550909090906,
+          "h": 186.57999999999998,
+          "photoId": "17351a49-d921-430b-b204-bd89ad246ec3",
+          "name": "260349.jpg",
+          "alt": "260349.jpg",
+          "slotId": "photo-0",
+          "id": "photo:17351a49-d921-430b-b204-bd89ad246ec3"
+        },
+        {
+          "type": "image",
+          "x": 568.0073081607795,
+          "y": 196.42000000000002,
+          "w": 249.9853836784409,
+          "h": 186.57999999999998,
+          "photoId": "0b051cf6-62b5-4923-b725-af74b25f2a29",
+          "name": "260090.jpg",
+          "alt": "260090.jpg",
+          "slotId": "photo-1",
+          "id": "photo:0b051cf6-62b5-4923-b725-af74b25f2a29"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 42,
+          "w": 840,
+          "h": 126.42,
+          "value": "先看人物与背景的距离，再看树枝与天空交界",
+          "field": "title",
+          "size": 49,
+          "color": "282423",
+          "bold": false,
+          "align": "left",
+          "italic": true,
+          "wrapPadding": 49,
+          "lineHeight": 1.2,
+          "fontFace": "Noto Serif CJK SC",
+          "fontFamily": "\"Noto Serif CJK SC\", \"Liberation Serif\", Georgia, \"Songti SC\", SimSun, serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 393,
+          "w": 414,
+          "h": 27.09,
+          "value": "竖幅",
+          "field": "label-0",
+          "size": 21,
+          "color": "76544A",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 21,
+          "lineHeight": 1.2,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 424.09,
+          "w": 414,
+          "h": 54.91,
+          "value": "Rajpoots",
+          "field": "text-0",
+          "size": 20,
+          "color": "524947",
+          "bold": false,
+          "align": "left",
+          "lineHeight": 1.2,
+          "fontFace": "Arial",
+          "fontFamily": "Arial, \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 486,
+          "y": 393,
+          "w": 414,
+          "h": 27.09,
+          "value": "横幅",
+          "field": "label-1",
+          "size": 21,
+          "color": "76544A",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 21,
+          "lineHeight": 1.2,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-1"
+        },
+        {
+          "type": "text",
+          "x": 486,
+          "y": 424.09,
+          "w": 414,
+          "h": 54.91,
+          "value": "Cedars of Lebanon",
+          "field": "text-1",
+          "size": 20,
+          "color": "524947",
+          "bold": false,
+          "align": "left",
+          "lineHeight": 1.2,
+          "fontFace": "Arial",
+          "fontFamily": "Arial, \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-1"
+        },
+        {
+          "type": "text",
+          "x": 796,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "02 / 03",
+          "field": null,
+          "size": 11,
+          "color": "524947",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.2,
+          "fontFace": "Arial",
+          "fontFamily": "Arial, \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-9"
+        }
+      ]
+    },
+    {
+      "slideId": "46f39f63-e6d4-415f-83dc-b063bd0e93fa",
+      "layout": "conclusion",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "F7F3F2",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "rect",
+          "color": "B8ADAA",
+          "x": 533,
+          "y": 240,
+          "w": 367,
+          "h": 1,
+          "id": "rect-2"
+        },
+        {
+          "type": "image",
+          "x": 105.91227272727272,
+          "y": 42,
+          "w": 353.17545454545456,
+          "h": 437,
+          "photoId": "1adb2d81-9291-4cb3-be40-070746805a07",
+          "name": "260350.jpg",
+          "alt": "260350.jpg",
+          "slotId": "photo-0",
+          "id": "photo:1adb2d81-9291-4cb3-be40-070746805a07"
+        },
+        {
+          "type": "text",
+          "x": 533,
+          "y": 42,
+          "w": 367,
+          "h": 174,
+          "value": "保留照片边界，分开阅读画面观察与馆藏信息",
+          "field": "title",
+          "size": 44,
+          "color": "282423",
+          "bold": false,
+          "align": "left",
+          "italic": true,
+          "wrapPadding": 44,
+          "lineHeight": 1.2,
+          "fontFace": "Noto Serif CJK SC",
+          "fontFamily": "\"Noto Serif CJK SC\", \"Liberation Serif\", Georgia, \"Songti SC\", SimSun, serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 533,
+          "y": 247,
+          "w": 367,
+          "h": 227,
+          "value": "请先观察人物与背景之间的距离，再把视线移向树枝与天空交界的地方。阅读时可以从画幅的中心向外寻找细节，也可以从边缘折回主体。把横幅和竖幅放在一起，是为了比较观看的节奏。请保留各张照片自身的边界，把对画面的观察和馆藏目录所载的作品信息分开阅读。",
+          "field": "text-0",
+          "size": 20,
+          "color": "524947",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 20,
+          "lineHeight": 1.2,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 796,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "03 / 03",
+          "field": null,
+          "size": 11,
+          "color": "524947",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.2,
+          "fontFace": "Arial",
+          "fontFamily": "Arial, \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-6"
+        }
+      ]
+    }
+  ]
+}

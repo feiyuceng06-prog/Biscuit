@@ -1,0 +1,12 @@
+npm notice run feiyu-desktop@0.95.0 test:desktop
+npm notice run node tests/smoke.mjs && node tests/verify-trust.mjs
+PASS: offline automatic check is quiet; manual failure is visible and chat remains usable
+PASS ordinary input/Send hit testing, preview on/off (empty), five window sizes; device scale recorded
+PASS: actual GUI streamed synthetic conversation and durable session restore after actual application restart
+PASS ordinary input/Send hit testing, preview on/off (file), five window sizes; device scale recorded
+PASS: 15 model form model setup checks
+PASS: three appearance choices, live system changes, persistence, legacy migration, terminal colors
+PASS: fullscreen icon-only intro, automatic exit, Escape, reduced motion, focus restoration
+PASS: automatic release notice, both themes, persisted dismissal, manual rediscovery, canonical release link
+PASS: real backend, file preview, isolated renderer, path boundary, PTY, workspace switching, settings
+PASS: verify startup consent, literal command display, rejection, approval and persisted trust

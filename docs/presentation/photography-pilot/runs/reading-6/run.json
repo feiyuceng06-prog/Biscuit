@@ -1,0 +1,42 @@
+{
+  "name": "reading",
+  "model": "deepseek-flash",
+  "reopen": false,
+  "started": "2026-11-22T11:19:51.868Z",
+  "events": [
+    {
+      "action": "outline",
+      "ms": 4641,
+      "attempt": 1
+    },
+    {
+      "action": "body",
+      "ms": 13584,
+      "attempt": 1
+    },
+    {
+      "action": "generation-error",
+      "ms": 24489,
+      "phase": "body",
+      "attempt": 1,
+      "error": "模型返回的页面格式不完整，请重试"
+    },
+    {
+      "action": "body",
+      "ms": 24611,
+      "attempt": 2
+    },
+    {
+      "action": "保存源文件",
+      "ms": 54978,
+      "status": "已保存到 /home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/reading-6/source.deck.json"
+    },
+    {
+      "action": "导出 PPTX",
+      "ms": 57990,
+      "status": "基础检查通过 · /home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/reading-6/deck.pptx · 修复尝试 0 次 · 报告 /home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/reading-6/deck.pptx.review-pay9Ua/report.json"
+    }
+  ],
+  "manualPageEdits": 0,
+  "totalMs": 57990
+}

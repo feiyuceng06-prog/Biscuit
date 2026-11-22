@@ -1,0 +1,22 @@
+{
+  "name": "reading",
+  "model": "deepseek-flash",
+  "reopen": false,
+  "started": "2026-11-22T11:17:51.593Z",
+  "events": [
+    {
+      "action": "outline",
+      "ms": 4478,
+      "attempt": 1
+    },
+    {
+      "action": "body",
+      "ms": 11866,
+      "attempt": 1
+    }
+  ],
+  "manualPageEdits": 0,
+  "failure": "locator.waitFor: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /home/Feiyu/Biscuit/desktop/node_modules/electron/dist/electron -r /home/Feiyu/Biscuit/desktop/node_modules/playwright-core/lib/server/electron/loader.js --no-sandbox --inspect=0 --remote-debugging-port=0 /home/Feiyu/Biscuit/desktop --user-data-dir=/tmp/biscuit-photo-session-WCKLYA/profile -w /tmp/biscuit-photo-session-WCKLYA -m deepseek-flash\n<launched> pid=1080850\n[pid=1080850][err] Debugger listening on ws://127.0.0.1:45731/0675c353-933f-439f-aa66-59f7fab756f4\n[pid=1080850][err] For help, see: https://nodejs.org/learn/getting-started/debugging\n[pid=1080850][err] Debugger attached.\n[pid=1080850][err] \n[pid=1080850][err] DevTools listening on ws://127.0.0.1:40165/devtools/browser/aed89b74-c90f-4cc3-bc00-7c0f13e1e781\n[pid=1080850][err] [1081011:1122/031751.783830:ERROR:components/viz/service/main/viz_main_impl.cc:192] Exiting GPU process due to errors during initialization\n[pid=1080850][err] [1081071:1122/031751.818688:ERROR:gpu/ipc/client/command_buffer_proxy_impl.cc:277] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.\nCall log:\n\u001b[2m  - waiting for locator('.office-status[role=alert]') to be visible\u001b[22m\n",
+  "status": "",
+  "totalMs": 50497
+}

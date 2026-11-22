@@ -1,0 +1,42 @@
+{
+  "name": "reading",
+  "model": "deepseek-flash",
+  "reopen": false,
+  "started": "2026-11-22T11:22:43.011Z",
+  "events": [
+    {
+      "action": "outline",
+      "ms": 4479,
+      "attempt": 1
+    },
+    {
+      "action": "generation-error",
+      "ms": 19905,
+      "phase": "outline",
+      "attempt": 1,
+      "error": "末页原文需要摄影展示或说明版式，请调整大纲后再试"
+    },
+    {
+      "action": "outline",
+      "ms": 19979,
+      "attempt": 2
+    },
+    {
+      "action": "body",
+      "ms": 30872,
+      "attempt": 1
+    },
+    {
+      "action": "保存源文件",
+      "ms": 56180,
+      "status": "已保存到 /home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/reading-8/source.deck.json"
+    },
+    {
+      "action": "导出 PPTX",
+      "ms": 59636,
+      "status": "基础检查通过 · /home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/reading-8/deck.pptx · 修复尝试 0 次 · 报告 /home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/reading-8/deck.pptx.review-M7SOdP/report.json"
+    }
+  ],
+  "manualPageEdits": 0,
+  "totalMs": 59636
+}

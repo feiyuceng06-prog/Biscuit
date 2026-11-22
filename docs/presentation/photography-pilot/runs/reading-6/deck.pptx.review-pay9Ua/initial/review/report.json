@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "deckId": "bddaf520-73a2-4ae5-825c-3c044492d936",
+  "pptxSha256": "bd5ae212428de0672f7f32236b5470a21ac01c6401c5e5963fa83f215b2f8466",
+  "status": "checked",
+  "critic": {
+    "status": "not_requested"
+  },
+  "pages": [
+    {
+      "slideId": "02cf89c3-9ded-4a4b-9a45-50ad13df3416",
+      "png": "slide-1.png",
+      "sha256": "caaa876b1552bdf475be5f3505f81ac25b0b02abc8cfa32f4c36f86804021f8d"
+    },
+    {
+      "slideId": "5e0336d1-1fff-4895-858e-15f87021be4f",
+      "png": "slide-2.png",
+      "sha256": "35567c88de75235ec6cb11a33707b1131cba01e51e2826e93976c7d8db0b739f"
+    },
+    {
+      "slideId": "a024a2a4-7727-45f0-b362-476015b5354f",
+      "png": "slide-3.png",
+      "sha256": "ad9009ddfd630f23fb097ae65bdfe4f39f21feed7c93bfe5d9b14833e8655de4"
+    }
+  ],
+  "issues": [],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "4c8d342f21ca4a64abb7715646c5ece363c0b7eef2c64a42b717f9dcc386adad",
+  "contactSheet": "contact.png",
+  "fonts": [
+    "BAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     90  0",
+    "CAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     80  0",
+    "DAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     85  0",
+    "EAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     95  0",
+    "FAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     65  0",
+    "GAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes     70  0",
+    "HAAAAA+Arial                         TrueType          WinAnsi          yes yes yes     75  0"
+  ],
+  "durationMs": 2441
+}

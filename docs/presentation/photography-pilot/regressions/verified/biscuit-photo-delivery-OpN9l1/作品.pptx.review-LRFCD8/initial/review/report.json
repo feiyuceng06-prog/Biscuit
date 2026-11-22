@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "deckId": "9786a15e-121f-4ad0-9c5a-22a1d77b08c1",
+  "pptxSha256": "b4cf74d9eefe81605dd619953db9d90d182fbecfc7fa51ad41fb193b3d797683",
+  "status": "needs_review",
+  "critic": {
+    "status": "not_requested"
+  },
+  "pages": [
+    {
+      "slideId": "2f882da6-1c84-4543-acf5-f326052fec76",
+      "png": "slide-1.png",
+      "sha256": "ac98f17e329ec5be1db8570c34f4796dedf6e58c6413edd05995b5b70c0990e7"
+    },
+    {
+      "slideId": "f317ee45-1667-45f4-9af1-eeaad160b943",
+      "png": "slide-2.png",
+      "sha256": "6190a6a6514921fa9a1ab2686f7f1a63a2891f39f7cbe32b3d8f3d992b681f84"
+    },
+    {
+      "slideId": "f60c480f-b6ed-42cd-be21-4888fb10b677",
+      "png": "slide-3.png",
+      "sha256": "20b6b7d0c54f56012b5473f80bd8132451130f4cab814ad8d19416eece3333ff"
+    }
+  ],
+  "issues": [
+    {
+      "issueId": "2f882da6-1c84-4543-acf5-f326052fec76:title:clipping",
+      "slideId": "2f882da6-1c84-4543-acf5-f326052fec76",
+      "elementIds": [
+        "title"
+      ],
+      "kind": "clipping",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "PDF words associated with the PPTX text box do not reconstruct the native text.",
+      "suggestedChange": "Check the PNG for cropped or missing characters and verify the extraction order.",
+      "source": "deterministic"
+    },
+    {
+      "issueId": "f317ee45-1667-45f4-9af1-eeaad160b943:text-0:clipping",
+      "slideId": "f317ee45-1667-45f4-9af1-eeaad160b943",
+      "elementIds": [
+        "text-0"
+      ],
+      "kind": "clipping",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "PDF words associated with the PPTX text box do not reconstruct the native text.",
+      "suggestedChange": "Check the PNG for cropped or missing characters and verify the extraction order.",
+      "source": "deterministic"
+    }
+  ],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "5faf937ba3392003a484aec13e412340312e342ab10ee14f133cc46ae5c22387",
+  "fonts": [
+    "BAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes    106  0",
+    "CAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes     81  0",
+    "DAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     71  0",
+    "EAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes     76  0",
+    "FAAAAA+Arial                         TrueType          WinAnsi          yes yes yes     86  0",
+    "GAAAAA+LiberationSerif-Italic        TrueType          WinAnsi          yes yes yes     61  0",
+    "HAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes    111  0",
+    "IAAAAA+Arial                         TrueType          WinAnsi          yes yes yes     96  0",
+    "JAAAAA+SourceHanSansCN-Regular       Type 1            Builtin          yes yes yes    101  0",
+    "KAAAAA+LiberationSerif-Italic        TrueType          WinAnsi          yes yes yes     66  0",
+    "LAAAAA+Arial                         TrueType          WinAnsi          yes yes yes     91  0"
+  ],
+  "contactSheet": "contact.png",
+  "durationMs": 1961
+}

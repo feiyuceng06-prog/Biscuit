@@ -1,0 +1,11 @@
+{
+  "name": "river",
+  "model": "deepseek-flash",
+  "reopen": false,
+  "started": "2026-11-22T11:16:58.994Z",
+  "events": [],
+  "manualPageEdits": 0,
+  "failure": "locator.selectOption: Timeout 25000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByLabel('页数', { exact: true })\u001b[22m\n",
+  "status": "",
+  "totalMs": 31435
+}

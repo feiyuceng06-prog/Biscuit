@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "deckId": "70dc154d-ab90-4b2a-9a77-b293b6f418a5",
+  "pptxSha256": "3f2db4b4d25fbec5ccc846e801273a51dc4a64b65e988b05c3240927ab3d452c",
+  "status": "checked",
+  "critic": {
+    "status": "not_requested"
+  },
+  "pages": [
+    {
+      "slideId": "25a40538-9286-44f0-b574-9fc9c9875ca1",
+      "png": "slide-1.png",
+      "sha256": "4fbc53f16eb0fee01ac6adf3f217359e5390f454d1f9902b47b75d1e99f824a7"
+    }
+  ],
+  "issues": [],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "bbd4cfb4ec998125a5b7d7dce014151b69e748695a8dfe3036dc3414092c18e3",
+  "contactSheet": "contact.png",
+  "fonts": [
+    "BAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     28  0",
+    "CAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     18  0",
+    "DAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     23  0"
+  ],
+  "durationMs": 1607
+}

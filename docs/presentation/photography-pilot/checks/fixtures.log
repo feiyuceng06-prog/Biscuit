@@ -1,0 +1,49 @@
+✖ actual Chinese text is re-rendered after one local fix and one photographic layout fallback (6433.914999ms)
+✖ real overflow with no safe layout retains a draft and an existing valid target (2329.658785ms)
+✔ unavailable preflight leaves an explicit draft without publishing the initial PPTX (16.856672ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 1
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9096.99788
+
+✖ failing tests:
+
+test at desktop/tests/office-photo-delivery.test.mjs:46:1
+✖ actual Chinese text is re-rendered after one local fix and one photographic layout fallback (6433.914999ms)
+  AssertionError [ERR_ASSERTION]: Unresolved deterministic findings: d7162405-ae0e-4725-a8f7-cead01d03d9d:title:clipping
+  + actual - expected
+  
+  + '/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-3v2bU1/作品.pptx.review-cpf4UC/draft.pptx'
+  - '/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-3v2bU1/作品.pptx'
+  
+      at TestContext.<anonymous> (file:///home/Feiyu/Biscuit/desktop/tests/office-photo-delivery.test.mjs:57:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-3v2bU1/作品.pptx.review-cpf4UC/draft.pptx',
+    expected: '/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-3v2bU1/作品.pptx',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at desktop/tests/office-photo-delivery.test.mjs:110:1
+✖ real overflow with no safe layout retains a draft and an existing valid target (2329.658785ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(report.issues.some(issue => issue.source === 'deterministic' && issue.kind === 'overflow'))
+  
+      at TestContext.<anonymous> (file:///home/Feiyu/Biscuit/desktop/tests/office-photo-delivery.test.mjs:128:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

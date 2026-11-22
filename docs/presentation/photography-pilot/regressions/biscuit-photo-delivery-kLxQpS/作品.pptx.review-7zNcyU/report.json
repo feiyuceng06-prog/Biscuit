@@ -1,0 +1,233 @@
+{
+  "schemaVersion": 1,
+  "deckId": "6763b988-c082-4c08-ba65-8e39e58a2a7a",
+  "pptxSha256": "3120ad777d07d2008142596e6ffe23c1be83181539cc7d4dd67fa54146fadd51",
+  "status": "draft",
+  "critic": {
+    "status": "not_requested"
+  },
+  "pages": [
+    {
+      "slideId": "539e0fa3-af73-4af2-a5ef-f647f615a2da",
+      "png": "initial/review/slide-1.png",
+      "sha256": "0c1891be122c718c8cf9c15978393d150a19e46ab17e365704675c22a2c7851b"
+    }
+  ],
+  "issues": [
+    {
+      "issueId": "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-0:clipping",
+      "slideId": "539e0fa3-af73-4af2-a5ef-f647f615a2da",
+      "elementIds": [
+        "caption-0"
+      ],
+      "kind": "clipping",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "PDF words associated with the PPTX text box do not reconstruct the native text.",
+      "suggestedChange": "Check the PNG for cropped or missing characters and verify the extraction order.",
+      "source": "deterministic"
+    },
+    {
+      "issueId": "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-1:clipping",
+      "slideId": "539e0fa3-af73-4af2-a5ef-f647f615a2da",
+      "elementIds": [
+        "caption-1"
+      ],
+      "kind": "clipping",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "PDF words associated with the PPTX text box do not reconstruct the native text.",
+      "suggestedChange": "Check the PNG for cropped or missing characters and verify the extraction order.",
+      "source": "deterministic"
+    },
+    {
+      "issueId": "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-2:clipping",
+      "slideId": "539e0fa3-af73-4af2-a5ef-f647f615a2da",
+      "elementIds": [
+        "caption-2"
+      ],
+      "kind": "clipping",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "PDF words associated with the PPTX text box do not reconstruct the native text.",
+      "suggestedChange": "Check the PNG for cropped or missing characters and verify the extraction order.",
+      "source": "deterministic"
+    },
+    {
+      "issueId": "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-3:clipping",
+      "slideId": "539e0fa3-af73-4af2-a5ef-f647f615a2da",
+      "elementIds": [
+        "caption-3"
+      ],
+      "kind": "clipping",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "PDF words associated with the PPTX text box do not reconstruct the native text.",
+      "suggestedChange": "Check the PNG for cropped or missing characters and verify the extraction order.",
+      "source": "deterministic"
+    },
+    {
+      "issueId": "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-4:clipping",
+      "slideId": "539e0fa3-af73-4af2-a5ef-f647f615a2da",
+      "elementIds": [
+        "caption-4"
+      ],
+      "kind": "clipping",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "PDF words associated with the PPTX text box do not reconstruct the native text.",
+      "suggestedChange": "Check the PNG for cropped or missing characters and verify the extraction order.",
+      "source": "deterministic"
+    },
+    {
+      "issueId": "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-5:clipping",
+      "slideId": "539e0fa3-af73-4af2-a5ef-f647f615a2da",
+      "elementIds": [
+        "caption-5"
+      ],
+      "kind": "clipping",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "PDF words associated with the PPTX text box do not reconstruct the native text.",
+      "suggestedChange": "Check the PNG for cropped or missing characters and verify the extraction order.",
+      "source": "deterministic"
+    },
+    {
+      "issueId": "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-6:clipping",
+      "slideId": "539e0fa3-af73-4af2-a5ef-f647f615a2da",
+      "elementIds": [
+        "caption-6"
+      ],
+      "kind": "clipping",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "PDF words associated with the PPTX text box do not reconstruct the native text.",
+      "suggestedChange": "Check the PNG for cropped or missing characters and verify the extraction order.",
+      "source": "deterministic"
+    },
+    {
+      "issueId": "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-7:clipping",
+      "slideId": "539e0fa3-af73-4af2-a5ef-f647f615a2da",
+      "elementIds": [
+        "caption-7"
+      ],
+      "kind": "clipping",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "PDF words associated with the PPTX text box do not reconstruct the native text.",
+      "suggestedChange": "Check the PNG for cropped or missing characters and verify the extraction order.",
+      "source": "deterministic"
+    },
+    {
+      "issueId": "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-8:clipping",
+      "slideId": "539e0fa3-af73-4af2-a5ef-f647f615a2da",
+      "elementIds": [
+        "caption-8"
+      ],
+      "kind": "clipping",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "PDF words associated with the PPTX text box do not reconstruct the native text.",
+      "suggestedChange": "Check the PNG for cropped or missing characters and verify the extraction order.",
+      "source": "deterministic"
+    },
+    {
+      "issueId": "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-9:clipping",
+      "slideId": "539e0fa3-af73-4af2-a5ef-f647f615a2da",
+      "elementIds": [
+        "caption-9"
+      ],
+      "kind": "clipping",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "PDF words associated with the PPTX text box do not reconstruct the native text.",
+      "suggestedChange": "Check the PNG for cropped or missing characters and verify the extraction order.",
+      "source": "deterministic"
+    },
+    {
+      "issueId": "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-10:clipping",
+      "slideId": "539e0fa3-af73-4af2-a5ef-f647f615a2da",
+      "elementIds": [
+        "caption-10"
+      ],
+      "kind": "clipping",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "PDF words associated with the PPTX text box do not reconstruct the native text.",
+      "suggestedChange": "Check the PNG for cropped or missing characters and verify the extraction order.",
+      "source": "deterministic"
+    },
+    {
+      "issueId": "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-11:clipping",
+      "slideId": "539e0fa3-af73-4af2-a5ef-f647f615a2da",
+      "elementIds": [
+        "caption-11"
+      ],
+      "kind": "clipping",
+      "severity": "major",
+      "confidence": 1,
+      "evidence": "PDF words associated with the PPTX text box do not reconstruct the native text.",
+      "suggestedChange": "Check the PNG for cropped or missing characters and verify the extraction order.",
+      "source": "deterministic"
+    }
+  ],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "06964f5ef602ce7adf5cbda5c9083c4e0daf4446be513586437fce5cda8b1849",
+  "fonts": [
+    "BAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     96  0",
+    "CAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes     86  0",
+    "DAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     76  0",
+    "EAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes     81  0",
+    "FAAAAA+Arial                         TrueType          WinAnsi          yes yes yes     91  0"
+  ],
+  "contactSheet": "initial/review/contact.png",
+  "durationMs": 2318,
+  "destination": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-kLxQpS/作品.pptx.review-7zNcyU/draft.pptx",
+  "requestedDestination": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-kLxQpS/作品.pptx",
+  "reviewStatus": "needs_review",
+  "report": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-kLxQpS/作品.pptx.review-7zNcyU/report.json",
+  "initialPptx": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-kLxQpS/作品.pptx.review-7zNcyU/initial/deck.pptx",
+  "initialReport": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-kLxQpS/作品.pptx.review-7zNcyU/initial/review/report.json",
+  "finalPptx": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-kLxQpS/作品.pptx.review-7zNcyU/draft.pptx",
+  "finalReport": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-kLxQpS/作品.pptx.review-7zNcyU/initial/review/report.json",
+  "repairAttempts": 0,
+  "failureReason": "Unresolved deterministic findings: 539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-0:clipping, 539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-1:clipping, 539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-2:clipping, 539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-3:clipping, 539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-4:clipping, 539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-5:clipping, 539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-6:clipping, 539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-7:clipping, 539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-8:clipping, 539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-9:clipping, 539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-10:clipping, 539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-11:clipping",
+  "rounds": [
+    {
+      "stage": "initial",
+      "changes": [],
+      "durationMs": 2297,
+      "pptx": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-kLxQpS/作品.pptx.review-7zNcyU/initial/deck.pptx",
+      "report": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-kLxQpS/作品.pptx.review-7zNcyU/initial/review/report.json",
+      "reviewStatus": "needs_review",
+      "accepted": true,
+      "reason": null
+    }
+  ],
+  "skipped": [
+    {
+      "stage": "local",
+      "reason": "No applicable text frames fit the available layout space."
+    },
+    {
+      "stage": "fallback",
+      "reason": "No applicable text frames fit the available layout space."
+    }
+  ],
+  "pdf": "initial/review/deck.pdf",
+  "unresolvedIssues": [
+    "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-0:clipping",
+    "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-1:clipping",
+    "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-2:clipping",
+    "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-3:clipping",
+    "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-4:clipping",
+    "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-5:clipping",
+    "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-6:clipping",
+    "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-7:clipping",
+    "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-8:clipping",
+    "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-9:clipping",
+    "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-10:clipping",
+    "539e0fa3-af73-4af2-a5ef-f647f615a2da:caption-11:clipping"
+  ]
+}

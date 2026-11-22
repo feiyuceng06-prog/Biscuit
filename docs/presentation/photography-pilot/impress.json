@@ -1,0 +1,390 @@
+{
+  "pair-3": [
+    {
+      "title": "两种画幅，一次停留 [QA]",
+      "requestedFont": "Noto Serif CJK SC",
+      "posture": "ITALIC",
+      "pictures": 2,
+      "modified": 2,
+      "before": [
+        [
+          7772,
+          6174
+        ],
+        [
+          17057,
+          7359
+        ]
+      ],
+      "beforeCrop": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "after": [
+        [
+          7772,
+          6174
+        ],
+        [
+          17257,
+          7359
+        ]
+      ],
+      "afterCrop": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          150,
+          0,
+          0,
+          0
+        ]
+      ]
+    }
+  ],
+  "reading-7": [
+    {
+      "title": "从人物的凝视到雪松的枝影：在不同画幅之间缓慢翻阅十九世纪摄影的五个瞬间 [QA]",
+      "requestedFont": "Noto Serif CJK SC",
+      "posture": "ITALIC",
+      "pictures": 2,
+      "modified": 2,
+      "before": [
+        [
+          7918,
+          6546
+        ],
+        [
+          17057,
+          6998
+        ]
+      ],
+      "beforeCrop": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "after": [
+        [
+          7918,
+          6546
+        ],
+        [
+          17257,
+          6998
+        ]
+      ],
+      "afterCrop": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          150,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "title": "先看人物与背景的距离，再看树枝与天空交界 [QA]",
+      "requestedFont": "Noto Serif CJK SC",
+      "posture": "ITALIC",
+      "pictures": 2,
+      "modified": 2,
+      "before": [
+        [
+          6406,
+          6929
+        ],
+        [
+          20038,
+          6929
+        ]
+      ],
+      "beforeCrop": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "after": [
+        [
+          6406,
+          6929
+        ],
+        [
+          20238,
+          6929
+        ]
+      ],
+      "afterCrop": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          150,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "title": "保留照片边界，分开阅读画面观察与馆藏信息 [QA]",
+      "requestedFont": "Noto Serif CJK SC",
+      "posture": "ITALIC",
+      "pictures": 1,
+      "modified": 1,
+      "before": [
+        [
+          3736,
+          1482
+        ]
+      ],
+      "beforeCrop": [
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "after": [
+        [
+          3936,
+          1482
+        ]
+      ],
+      "afterCrop": [
+        [
+          150,
+          0,
+          0,
+          0
+        ]
+      ]
+    }
+  ],
+  "reading-8": [
+    {
+      "title": "从人物的凝视到雪松的枝影：在不同画幅之间缓慢翻阅十九世纪摄影的五个瞬间 [QA]",
+      "requestedFont": "Noto Serif CJK SC",
+      "posture": "ITALIC",
+      "pictures": 2,
+      "modified": 2,
+      "before": [
+        [
+          7918,
+          6546
+        ],
+        [
+          17057,
+          6998
+        ]
+      ],
+      "beforeCrop": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "after": [
+        [
+          7918,
+          6546
+        ],
+        [
+          17257,
+          6998
+        ]
+      ],
+      "afterCrop": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          150,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "title": "决定将人物与风景并置，比较横幅与竖幅的观看节奏 [QA]",
+      "requestedFont": "Noto Serif CJK SC",
+      "posture": "ITALIC",
+      "pictures": 2,
+      "modified": 2,
+      "before": [
+        [
+          6406,
+          6929
+        ],
+        [
+          20038,
+          6929
+        ]
+      ],
+      "beforeCrop": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "after": [
+        [
+          6406,
+          6929
+        ],
+        [
+          20238,
+          6929
+        ]
+      ],
+      "afterCrop": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          150,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "title": "决定保留各张照片边界，并将画面观察与馆藏信息分开阅读 [QA]",
+      "requestedFont": "Noto Serif CJK SC",
+      "posture": "ITALIC",
+      "pictures": 1,
+      "modified": 1,
+      "before": [
+        [
+          3736,
+          1482
+        ]
+      ],
+      "beforeCrop": [
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "after": [
+        [
+          3936,
+          1482
+        ]
+      ],
+      "afterCrop": [
+        [
+          150,
+          0,
+          0,
+          0
+        ]
+      ]
+    }
+  ],
+  "river-3": [
+    {
+      "title": "开罗的尼罗河岸 [QA]",
+      "requestedFont": "Noto Serif CJK SC",
+      "posture": "ITALIC",
+      "pictures": 1,
+      "modified": 1,
+      "before": [
+        [
+          10671,
+          5750
+        ]
+      ],
+      "beforeCrop": [
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "after": [
+        [
+          10871,
+          5750
+        ]
+      ],
+      "afterCrop": [
+        [
+          150,
+          0,
+          0,
+          0
+        ]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "deckId": "c673be91-9fec-4440-82b0-e1605d05fa34",
+  "status": "draft",
+  "pptxSha256": "99278fe09cd7a54f304fc51b4129b212593f09fd8b75370f5d74254e3c8b2af5",
+  "pages": [],
+  "issues": [],
+  "critic": {
+    "status": "unavailable"
+  },
+  "error": "Review worker unavailable",
+  "destination": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-ckgGhn/作品.pptx.review-eIPpRF/draft.pptx",
+  "requestedDestination": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-ckgGhn/作品.pptx",
+  "reviewStatus": "preview_unavailable",
+  "report": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-ckgGhn/作品.pptx.review-eIPpRF/report.json",
+  "initialPptx": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-ckgGhn/作品.pptx.review-eIPpRF/initial/deck.pptx",
+  "initialReport": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-ckgGhn/作品.pptx.review-eIPpRF/initial/review/report.json",
+  "finalPptx": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-ckgGhn/作品.pptx.review-eIPpRF/draft.pptx",
+  "finalReport": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-ckgGhn/作品.pptx.review-eIPpRF/initial/review/report.json",
+  "repairAttempts": 0,
+  "durationMs": 13,
+  "failureReason": "Review worker unavailable",
+  "rounds": [
+    {
+      "stage": "initial",
+      "changes": [],
+      "durationMs": 11,
+      "pptx": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-ckgGhn/作品.pptx.review-eIPpRF/initial/deck.pptx",
+      "report": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/regressions/biscuit-photo-delivery-ckgGhn/作品.pptx.review-eIPpRF/initial/review/report.json",
+      "reviewStatus": "preview_unavailable",
+      "accepted": true,
+      "reason": "Review worker unavailable"
+    }
+  ],
+  "skipped": [],
+  "unresolvedIssues": []
+}

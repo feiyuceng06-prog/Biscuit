@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "deckId": "606a90ff-2ed5-4526-8539-ef90e3e4cb94",
+  "pptxSha256": "daaed7699d9ad487b09ad4cda85b8b19669b08f2d13357670467ec87a72cdfa4",
+  "status": "needs_review",
+  "critic": {
+    "status": "unavailable",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [],
+    "errorType": "JSONDecodeError"
+  },
+  "pages": [
+    {
+      "slideId": "0409ae18-8a41-4084-a6d2-1704240055ba",
+      "png": "slide-1.png",
+      "sha256": "1740128757bdb2e0a883d5acd636487236768d462ea9861c825bc0e164858e0e"
+    },
+    {
+      "slideId": "8899c342-7eac-4a4c-9064-c61e3f0c7853",
+      "png": "slide-2.png",
+      "sha256": "a5fc7cd38df0304d2be537f00e234397b2b90ef5e38f68e56ab711756eac82b2"
+    },
+    {
+      "slideId": "46f39f63-e6d4-415f-83dc-b063bd0e93fa",
+      "png": "slide-3.png",
+      "sha256": "17f19a556f5ceedc5d6820a75f3622534d65f198ac4590b34d6f602962c9c318"
+    }
+  ],
+  "issues": [],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "6e7660f054ec89e87757fdeaa8988453b3c3afdad0e88c86e7e10fc26b0070fc",
+  "contactSheet": "contact.png",
+  "fonts": [
+    "BAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     94  0",
+    "CAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     84  0",
+    "DAAAAA+LiberationSerif-Italic        TrueType          WinAnsi          yes yes yes     59  0",
+    "EAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     99  0",
+    "FAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     64  0",
+    "GAAAAA+Arial                         TrueType          WinAnsi          yes yes yes     79  0",
+    "HAAAAA+Arial                         TrueType          WinAnsi          yes yes yes     74  0",
+    "IAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     89  0",
+    "JAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes     69  0"
+  ],
+  "durationMs": 52448
+}

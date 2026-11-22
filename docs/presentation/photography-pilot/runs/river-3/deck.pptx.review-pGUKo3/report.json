@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "deckId": "ec285779-6da3-4551-8015-bf3335975b3c",
+  "pptxSha256": "bc304c095bcf1d8e559eb541def242fa8f954f68f1111e533d2dc52f3be6d4ab",
+  "status": "checked",
+  "critic": {
+    "status": "not_requested"
+  },
+  "pages": [
+    {
+      "slideId": "f5a887d1-8c01-4aff-9cb8-bbd16f2bfa14",
+      "png": "initial/review/slide-1.png",
+      "sha256": "76f07eb68abda50f2b70d60567347b1ab54633c8d4c1a86b061686a69f4c45d9"
+    }
+  ],
+  "issues": [],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "21d3f0395623863d29dea6ca8768863a8956c2ab20176d0a8091c4adfe7aa92d",
+  "contactSheet": "initial/review/contact.png",
+  "fonts": [
+    "BAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     28  0",
+    "CAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     23  0",
+    "DAAAAA+LiberationSerif-Italic        TrueType          WinAnsi          yes yes yes     18  0"
+  ],
+  "durationMs": 1749,
+  "destination": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/river-3/deck.pptx",
+  "requestedDestination": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/river-3/deck.pptx",
+  "reviewStatus": "checked",
+  "report": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/river-3/deck.pptx.review-pGUKo3/report.json",
+  "initialPptx": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/river-3/deck.pptx.review-pGUKo3/initial/deck.pptx",
+  "initialReport": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/river-3/deck.pptx.review-pGUKo3/initial/review/report.json",
+  "finalPptx": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/river-3/deck.pptx.review-pGUKo3/final.pptx",
+  "finalReport": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/river-3/deck.pptx.review-pGUKo3/initial/review/report.json",
+  "repairAttempts": 0,
+  "failureReason": null,
+  "rounds": [
+    {
+      "stage": "initial",
+      "changes": [],
+      "durationMs": 1744,
+      "pptx": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/river-3/deck.pptx.review-pGUKo3/initial/deck.pptx",
+      "report": "/home/Feiyu/Biscuit/docs/presentation/photography-pilot/runs/river-3/deck.pptx.review-pGUKo3/initial/review/report.json",
+      "reviewStatus": "checked",
+      "accepted": true,
+      "reason": null
+    }
+  ],
+  "skipped": [],
+  "unresolvedIssues": []
+}
