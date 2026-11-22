@@ -18,6 +18,7 @@
 - 第 3 页旧版把标题挤为两行，正文在右侧两块较窄的栏里换行。会前阅读方案把同一标题留在一行，两段采用左对齐的小标题和正文，去掉段间横线。参会者可以从标题向下连续阅读。新版下半页留白较多，投影演讲是否适合这种密度仍需设计审查。
 - 第 1、2 页的原生幻灯片 XML 在两版间逐字节一致。两轮渲染的像素差异局限于页脚页码。第 2 页仍是带内嵌 Excel 工作簿的原生柱形图，按原材料顺序记录阅览室 48、少儿借阅区 26、地方文献查询台 11、数字资源体验区 7 人次。两版都保留三页的可编辑文字及演讲者备注。[逐项审计脚本](../../../evals/presentation/runtime-pptx-audit.py)
 - 两份 PPTX 各经 LibreOffice 26.8.3.1 和 Poppler 26.11.0 渲染为三页，确定性预检均为 `checked`、零项告警。报告记录了实际字体（含 Noto Sans CJK SC）、PDF、逐页 PNG 及导出文件摘要。此项评估包括看图和文件检查。未调用视觉模型打分，未经独立设计师评审。
+- 边界回归覆盖了 85 个显式换行紧邻两个短段的情况。旧分配会产生负高度，新版先为各段标题和正文预留空间，超量内容继续触发拆页建议。复核三页样例的幻灯片 XML 与修正后导出逐字节一致。
 
 对话 Agent 也使用了新能力。在另一份三页经营简报上，真实 deepseek-flash 会话 `f87a8074` 发出一次内建 `read_file`，按页取得标题、备注和 26、35、48 三个数值。留存的工具返回与同一文件的 CLI 提取一致。[原始调用与返回](checks/agent-read-file.json) · [运行事件](checks/agent-trace.jsonl) · [CLI 对照](checks/commercial-cli.json)
 
@@ -37,6 +38,6 @@ SkillHub 的 `SOURCE.md` 指向 Anthropic 的 `skills/pptx`，未提供语义版
 
 ## 验证与审查
 
-桌面构建通过。68 项 Node 测试和 26 项 Python 演示文稿测试通过，含 10 项新增提取测试；另有 290 项相关 Python 回归通过。Linux 冻结后端完成有效和损坏文稿的用户入口冒烟，Electron 冒烟覆盖导入并追加已有材料、复制与撤销、新建、设计切换和保存。Windows PowerPoint、Keynote 和 macOS Electron 的打开、编辑与字形效果仍未验证。[Node 记录](checks/node-tests.log) · [Python 专项](checks/presentation-tests.log) · [相关回归](checks/related-tests.log) · [Electron 记录](checks/electron.log)
+桌面构建通过。69 项 Node 测试和 26 项 Python 演示文稿测试通过，含 10 项新增提取测试；另有 290 项相关 Python 回归通过。Linux 冻结后端完成有效和损坏文稿的用户入口冒烟，Electron 冒烟覆盖导入并追加已有材料、复制与撤销、新建、设计切换和保存。Windows PowerPoint、Keynote 和 macOS Electron 的打开、编辑与字形效果仍未验证。[Node 记录](checks/node-tests.log) · [Python 专项](checks/presentation-tests.log) · [相关回归](checks/related-tests.log) · [Electron 记录](checks/electron.log)
 
 运行 `python evals/presentation/runtime-pptx-audit.py` 可从交付文件重新核对逐页文字、演讲备注、图表缓存、工作簿、渲染摘要和像素差异。代码从摄影交付试点 `57227a9` 分支出来，人工审查顺序为 #14 → #15 → #16 → #17 → #18 → 本分支。

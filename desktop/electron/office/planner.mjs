@@ -516,9 +516,15 @@ export function resolveSlideLayout(slide, tokens, plan, content = slideContent(s
       return Math.max(1, lines(label, type.label) + lines(body, type.body) + 8);
     });
     const blockGap = Math.min(spacing.gap, 20);
-    const scale = Math.min(1, (bottom - y - blockGap * (indices.length - 1)) / heights.reduce((a, b) => a + b, 0));
+    const available = bottom - y - blockGap * (indices.length - 1);
+    const totalHeight = heights.reduce((a, b) => a + b, 0);
+    // Reserve a label and body line before sharing space with multi-paragraph items.
+    const floor = Math.min(available / indices.length, (type.label + type.body) * type.lineHeight + 8);
+    const reserved = heights.map(h => Math.min(h, floor));
+    const baseHeight = reserved.reduce((a, b) => a + b, 0);
+    const scale = totalHeight <= available ? 1 : (available - baseHeight) / (totalHeight - baseHeight);
     indices.forEach((i, n) => {
-      const h = heights[n] * scale;
+      const h = reserved[n] + (heights[n] - reserved[n]) * scale;
       entry(i, x, y, readWidth, h, 'reading-' + n);
       y += h + blockGap;
     });

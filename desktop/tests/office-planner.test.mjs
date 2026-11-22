@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import {
   newDeck, newSlide, blankItem, duplicateSlide, composition, readDeck, preserveLayoutContent, generatedBody, applyBody,
 } from '../electron/office/deck.mjs';
+import { resolveSlideLayout } from '../electron/office/planner.mjs';
 import { planDesign } from '../electron/office/director.mjs';
 import { powerPoint } from '../electron/office/pptx.mjs';
 import { reviewManifest } from '../electron/office/review.mjs';
@@ -226,4 +227,15 @@ test('duplicating and removing a chart page creates independent native charts an
   assert.equal(trimmed.file(/^ppt\/embeddings\/.*\.xlsx$/).length, 1);
   assert.match(await trimmed.file(/^ppt\/charts\/chart\d+\.xml$/)[0].async('string'), /<c:v>20<\/c:v>/);
   assert.throws(() => duplicateSlide({ ...deck, slides: Array(20).fill(deck.slides[0]) }, 0));
+});
+
+test('a long pre-read paragraph leaves positive space for adjacent label and body pairs', () => {
+  const deck = deckFor(slide('conclusion', '会前材料', [
+    row('依据', '长\n'.repeat(85)), row('范围', '短'), row('出处', '见附件'),
+  ]));
+  const design = plan(deck, { direction: 'corporate', setting: '会前阅读' });
+  const page = resolveSlideLayout(deck.slides[0], design.tokens, { layout: 'statement', variant: 'statement-reading' });
+  assert.ok(page.text.every(box => box.h > 0 && box.y + box.h <= 540));
+  assert.ok(page.text.some(box => box.value === deck.slides[0].items[0].text));
+  assert.ok(design.slidePlans[0].contentEditProposal);
 });
