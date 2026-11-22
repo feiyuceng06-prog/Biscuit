@@ -1729,7 +1729,9 @@ class Toolbox:
             directory.mkdir(mode=0o700)
             op.update(kind='background-job', output_ref=op['id'] + '.job/output')
             store.save(task)  # prepared and artifact association precede spawn
-            proc = subprocess.Popen([sys.executable, str(Path(jobs_mod.__file__).with_name('jobrunner.py')),
+            runner = ('--_job-supervisor' if getattr(sys, 'frozen', False)
+                      else str(Path(jobs_mod.__file__).with_name('jobrunner.py')))
+            proc = subprocess.Popen([sys.executable, runner,
                                      str(directory), op['id']], stdin=subprocess.PIPE,
                                     stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
                                     start_new_session=True)

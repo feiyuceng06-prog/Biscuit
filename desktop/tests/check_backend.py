@@ -37,6 +37,17 @@ if sys.platform.startswith('linux'):
 
     with tempfile.TemporaryDirectory(prefix='feiyu-frozen-runtime-') as directory:
         root = Path(directory)
+        # Without this dispatch the frozen binary treats jobrunner.py as a CLI prompt.
+        gate = [sys.argv[1], '--_job-supervisor', directory, 'test-operation']
+        probe = subprocess.run(gate, input=b'', capture_output=True, timeout=15, check=True)
+        assert probe.stdout == b'READY\n' and not (root / 'output').exists()
+        payload = dict(argv=['/bin/echo', 'background-ok'], cwd=directory, env=os.environ.copy())
+        probe = subprocess.run(gate, input=json.dumps(payload).encode() + b'\n',
+                               capture_output=True, timeout=15, check=True)
+        receipt = json.loads((root / 'receipt.json').read_text())
+        assert receipt['state'] == 'completed' and receipt['exit_code'] == 0, receipt
+        assert (root / 'output').read_bytes() == b'background-ok\n'
+        print('PASS: frozen background supervisor gates execution and records completion')
         cert, key = root / 'ca.pem', root / 'ca.key'
         subprocess.run(['openssl', 'req', '-x509', '-newkey', 'rsa:2048', '-nodes',
                         '-keyout', str(key), '-out', str(cert), '-days', '1',
