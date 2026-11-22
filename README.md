@@ -65,7 +65,7 @@ If venv is missing on Debian/Ubuntu, run `sudo apt install python3-venv` first. 
 
 ## Windows
 
-On the [download page](https://github.com/feiyuceng06-prog/Biscuit/releases/latest), download **Biscuit Setup 0.96.0.exe** and run it. Git Bash is included. Existing Feiyu settings and conversations are retained.
+On the [download page](https://github.com/feiyuceng06-prog/Biscuit/releases/latest), download **Biscuit.Setup.0.96.0.exe** and run it. Git Bash is included. Existing Feiyu settings and conversations are retained.
 
 The installer is unsigned, so Windows may show a security warning. Check the source and published SHA256 before installing. See the release notes for Windows limitations.
 

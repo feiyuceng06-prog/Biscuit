@@ -65,7 +65,7 @@ cd Biscuit
 
 ## Windows
 
-到[下载页面](https://github.com/feiyuceng06-prog/Biscuit/releases/latest)下载 **Biscuit Setup 0.96.0.exe**，双击安装即可。安装包已包含 Git Bash，升级会保留原有 Feiyu 配置和对话。
+到[下载页面](https://github.com/feiyuceng06-prog/Biscuit/releases/latest)下载 **Biscuit.Setup.0.96.0.exe**，双击安装即可。安装包已包含 Git Bash，升级会保留原有 Feiyu 配置和对话。
 
 安装包尚未签名，Windows 可能显示安全提示；安装前请核对下载来源和发布页的 SHA256。Windows 的已知限制见发布说明。
 

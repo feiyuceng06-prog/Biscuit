@@ -311,6 +311,7 @@ jobs:
           fi
           EXPECTED_TAG="desktop-v$(node -p "require('./desktop/package.json').version")"
           test "$TAG" = "$EXPECTED_TAG"
+          mv "built-windows/release/Biscuit Setup ${TAG#desktop-v}.exe" "built-windows/release/Biscuit.Setup.${TAG#desktop-v}.exe"
           {
             (cd built/release && sha256sum *.deb *.AppImage)
             (cd built-windows/release && sha256sum *.exe)
