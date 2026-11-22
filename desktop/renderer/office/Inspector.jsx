@@ -21,7 +21,7 @@ async function loadImage(file) {
     image.close();
   }
 }
-export function Inspector({ slide, edit, change, setChange, rewrite, busy, error }) {
+export function Inspector({ slide, edit, error }) {
   const updateItem = (id, patch) =>
     edit({ items: slide.items.map((item) => (item.id === id ? { ...item, ...patch } : item)) });
   const imageInput = async (e) => {
@@ -35,6 +35,7 @@ export function Inspector({ slide, edit, change, setChange, rewrite, busy, error
     }
   };
   const limit = maxItems(slide.layout);
+  const supportsImage = slide.layout === 'image' || slide.layout === 'cover';
   return (
     <aside className="office-inspector">
       <h3>编辑本页</h3>
@@ -57,14 +58,20 @@ export function Inspector({ slide, edit, change, setChange, rewrite, busy, error
           ))}
         </select>
       </label>
-      {slide.layout === 'image' && (
+      {supportsImage && (
         <label>
           配图
           <input type="file" accept="image/png,image/jpeg" onChange={imageInput} />
         </label>
       )}
-      {slide.layout === 'image' && slide.image && (
+      {supportsImage && slide.image && (
         <button onClick={() => edit({ image: '' })}>移除配图</button>
+      )}
+      {slide.layout === 'chart' && (
+        <label>
+          图表单位
+          <input maxLength={24} value={slide.unit || ''} onChange={(e) => edit({ unit: e.target.value })} />
+        </label>
       )}
       {slide.items.slice(0, limit).map((row, i) => (
         <fieldset key={row.id}>
@@ -105,6 +112,12 @@ export function Inspector({ slide, edit, change, setChange, rewrite, busy, error
               />
             </label>
           )}
+          {slide.layout === 'chart' && (
+            <label>
+              图旁解读（显示第一条非空解读）
+              <textarea maxLength={220} value={row.text} onChange={(e) => updateItem(row.id, { text: e.target.value })} />
+            </label>
+          )}
           {slide.items.length > 1 && (
             <button onClick={() => edit({ items: slide.items.filter((item) => item.id !== row.id) })}>
               移除这一项
@@ -123,19 +136,6 @@ export function Inspector({ slide, edit, change, setChange, rewrite, busy, error
           onChange={(e) => edit({ notes: e.target.value })}
         />
       </label>
-      <hr />
-      <label>
-        让 AI 修改本页正文
-        <textarea
-          maxLength={800}
-          value={change}
-          onChange={(e) => setChange(e.target.value)}
-          placeholder="例如：把风险和应对措施写得更具体"
-        />
-      </label>
-      <button disabled={busy} onClick={rewrite}>
-        重新生成本页正文
-      </button>
     </aside>
   );
 }

@@ -23,12 +23,15 @@ def generate(agent, request):
             raise ValueError("页数应为 1 到 20")
         task = ('生成 %d 页大纲。JSON 格式 {"title":"演示文稿标题","slides":'
                 '[{"title":"一句话标题","layout":"版式"}]}。版式从 %s 选择。'
-                '第一页优先封面，只有材料含具体数字时才使用 chart。' % (count, ", ".join(LAYOUTS)))
+                '第一页用封面点题，后续标题用一句短句写清本页发现或决定。只有材料中有同单位的可比数字才选 chart；有明确先后才选 timeline。不要为了用齐版式而拆页。' % (count, ", ".join(LAYOUTS)))
     elif action == "slide" and request.get("layout") in LAYOUTS:
         task = ('只写指定页的正文。JSON 格式 {"items":[{"label":"短标题","text":"简短说明",'
-                '"value":0}],"notes":"演讲备注和材料出处"}。cover 一项，comparison 两项，'
+                '"value":0}],"unit":"图表单位（若有）","notes":"演讲备注和材料出处"}。cover 一项，comparison 两项，'
                 '其他一至四项。chart 用同一单位的真实数值和类别名称，并在备注里写单位。'
-                '每项标题最多 18 字，正文最多 55 字。')
+                '封面 label 写材料中已有的项目、日期或听众，text 写一句副标题，避免和页标题重复。'
+                'chart 的 unit 写原始数值的单位（如 分钟 或 %），不换算数字。只对一个有证据的重点类别填写 text，解释它为什么重要。'
+                'timeline 的 label 写原有时间或阶段，text 写交付物；comparison 的两项用同一尺度。'
+                '每项标题最多 18 字，正文最多 55 字；背景、出处和细节放入演讲备注。')
         task += "\n本页内容：" + json.dumps({
             "title": field("title", 120), "layout": request["layout"],
             "outline": field("outline", 2600), "current": field("current", 3500),

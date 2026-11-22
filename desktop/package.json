@@ -1,6 +1,6 @@
 {
   "name": "feiyu-desktop",
-  "version": "0.93.0",
+  "version": "0.94.0",
   "description": "Biscuit desktop workbench",
   "author": {
     "name": "Feiyu",
@@ -57,7 +57,12 @@
       ]
     },
     "linux": {
-      "extraResources": [{ "from": "../get.sh", "to": "get.sh" }],
+      "extraResources": [
+        {
+          "from": "../get.sh",
+          "to": "get.sh"
+        }
+      ],
       "target": [
         "deb",
         "AppImage"
@@ -84,6 +89,7 @@
     }
   },
   "dependencies": {
+    "lucide-react": "^1.77.0",
     "node-pty": "^1.1.0",
     "pptxgenjs": "^4.0.1",
     "react": "^19.3.1",
