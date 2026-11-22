@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createPortal } from 'react-dom';
+import { Office } from './office/Office.jsx';
 import { UpdateNotice } from './updates.jsx';
 import './workbench.css';
 
@@ -69,6 +70,7 @@ function Workbench() {
     }
   }
   return <>
+    {createPortal(<Office key={workspace} workspace={workspace} />, document.getElementById('office-nav'))}
     {createPortal(<UpdateNotice />, document.getElementById('update-slot'))}
     {status.state === 'error' && <div className="backend-error" role="alert">
       <span>{status.message}</span>
@@ -108,6 +110,9 @@ function Workbench() {
 }
 
 if (desktop) {
+  const officeSlot = document.createElement('div');
+  officeSlot.id = 'office-nav';
+  document.getElementById('nav-shelf').before(officeSlot);
   const updateSlot = document.createElement('div');
   updateSlot.id = 'update-slot';
   document.getElementById('side').append(updateSlot);

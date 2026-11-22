@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { checkOffice } from './office-ui.mjs';
 import { checkModelForm } from './model-form.mjs';
 import { checkLayout, retainLayout } from './layout.mjs';
 import { dialogueFixture } from './dialogue-fixture.mjs';
@@ -159,6 +160,7 @@ try {
     await expect(page.locator('.files-panel')).toBeHidden();
   }
   await expect(page.locator('#nav-shelf')).toBeVisible();
+  await checkOffice(application,page,other,path.join(desktop,'test-results'),fixture);
   await page.locator('#nav-shelf').click();
   await expect(page.locator('#shelf')).toBeVisible();
   await checkModelForm(page);

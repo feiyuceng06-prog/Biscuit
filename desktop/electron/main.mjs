@@ -1,4 +1,6 @@
 import { app, BrowserWindow, ipcMain, dialog, shell, Notification, Menu, net } from 'electron';
+import { randomUUID } from 'node:crypto';
+import { readDeck } from './office/deck.mjs';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
@@ -87,6 +89,28 @@ ipcMain.handle('feiyu:window', (event, action) => {
 ipcMain.handle('feiyu:command', async (event, command, args = {}) => {
   trusted(event);
   switch (command) {
+    case 'presentation_save': {
+      const deck = readDeck(args.deck);
+      if (!['pptx', 'json'].includes(args.format)) throw Error('未知文件格式');
+      const pptx = args.format === 'pptx';
+      const suffix = pptx ? '.pptx' : '.deck.json';
+      const name = deck.title.replace(/[^\p{L}\p{N} _-]/gu, '').trim() || '演示文稿';
+      const result = await dialog.showSaveDialog(win, {
+        title: pptx ? '导出 PowerPoint' : '保存演示文稿源文件',
+        defaultPath: path.join(workspace || app.getPath('documents'), name + suffix),
+        filters: [{ name: pptx ? 'PowerPoint' : 'Biscuit 演示文稿', extensions: [pptx ? 'pptx' : 'json'] }],
+      });
+      if (result.canceled || !result.filePath) return null;
+      const destination = result.filePath;
+      if (!destination.toLowerCase().endsWith(pptx ? '.pptx' : '.json')) throw Error('请选择匹配的文件扩展名');
+      const data = pptx ? await (await import('./office/pptx.mjs')).powerPoint(deck) : JSON.stringify(deck, null, 2);
+      const temp = path.join(path.dirname(destination), '.' + randomUUID() + '.tmp');
+      try {
+        await fsp.writeFile(temp, data, { flag: 'wx', mode: 0o600 });
+        await fsp.rename(temp, destination);
+      } finally { await fsp.rm(temp, { force: true }); }
+      return destination;
+    }
     case 'check_updates':
       if (args.automatic === true && process.env.FEIYU_DISABLE_UPDATE_CHECK === '1') {
         return { status: 'idle', current: app.getVersion() };
