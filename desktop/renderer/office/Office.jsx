@@ -16,7 +16,7 @@ import { draft } from './drafts.mjs';
 import { libraryExample } from './library-example.mjs';
 import readingRoom from './reading-room.jpg';
 import { planDesign } from '../../electron/office/director.mjs';
-import { hasPhotos, maxDeckPictureData, maxPhotos, photographyIntent, pictureDataSize } from '../../electron/office/photos.mjs';
+import { hasPhotos, maxDeckPictureData, maxPhotos, photoCredits, photographyIntent, pictureDataSize } from '../../electron/office/photos.mjs';
 import { DesignBrief } from './DesignBrief.jsx';
 import { loadPhoto } from './Inspector.jsx';
 import { Studio } from './Studio.jsx';
@@ -197,11 +197,19 @@ export function Office({ workspace }) {
   async function save(format) {
     try {
       setError('');
+      setMessage('');
       const destination = await window.feiyuDesktop.core.invoke('presentation_save', {
         format,
         deck: current.current,
       });
       if (typeof destination === 'string') setMessage('已保存到 ' + destination);
+      else if (destination?.initialReport) {
+        const { status, repairAttempts, report } = destination;
+        const label = status === 'draft' ? '导出仅保留为草稿' : status === 'export_failed' ? '导出失败'
+          : status === 'checked' ? '基础检查通过' : '需复核';
+        setMessage(label + (destination.destination ? ' · ' + destination.destination : '') +
+          ' · 修复尝试 ' + repairAttempts + ' 次 · 报告 ' + report);
+      }
       else if (destination) {
         const label = { checked: '基础检查通过', needs_review: '需复核', blocked: '发现阻断问题',
           preview_unavailable: '无法完成预览检查' }[destination.status];
@@ -242,6 +250,8 @@ export function Office({ workspace }) {
     void run('正在生成大纲', async (signal) => {
       const result = await requestPage(
         { action: 'outline', source: original.source, brief: original.brief, count,
+          photoBrief: original.photoInput && JSON.stringify({ title: original.photoInput.title,
+            finalCopy: original.photoInput.copy, files: (original.pendingPhotos ?? []).map(p => mediaText(p.name, 80)) }),
           direction: original.design?.preferences?.direction && original.design.preferences.direction !== 'auto'
             ? original.design.direction : original.photoInput ? 'photography' : original.design?.direction },
         signal,
@@ -274,6 +284,7 @@ export function Office({ workspace }) {
         const media = active.photos?.length || requestedPhotos !== undefined
           ? JSON.stringify({
               requestedPhotos,
+              sourceRows: photoCredits(now.source, active.photos).join('\n').slice(0, 1300),
               photos: (active.photos ?? []).map(({ name, caption }) => ({
                 name: mediaText(name, 40), caption: mediaText(caption, 60),
               })),
@@ -473,6 +484,7 @@ export function Office({ workspace }) {
                   </label>
                   {!!deck.pendingPhotos?.length && <p>待排版 {deck.pendingPhotos.length} 张
                     <button type="button" onClick={() => commit({ ...deck, pendingPhotos: [] })}>清空待排版照片</button></p>}
+                  <small>要保留逐图出处，请在参考材料中每行填写「文件名 | 出处」。</small>
                   <label>首页标题（原样保留）<input maxLength={120} value={deck.photoInput?.title ?? ''}
                     onChange={e => commit({ ...deck, photoInput: { copy: '', ...deck.photoInput, title: e.target.value } })} /></label>
                   <label>末页正文（原样保留）<textarea maxLength={220} value={deck.photoInput?.copy ?? ''}
@@ -487,7 +499,7 @@ export function Office({ workspace }) {
                   >
                     生成大纲
                   </button>
-                  <button onClick={() => enter('edit')}>手动编辑</button>
+                  <button disabled={!!deck.pendingPhotos?.length} title={deck.pendingPhotos?.length ? '先生成大纲以分配待排版照片' : undefined} onClick={() => enter('edit')}>手动编辑</button>
                 </div>
               </fieldset>
             </main>

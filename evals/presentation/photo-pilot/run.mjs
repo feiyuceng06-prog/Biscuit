@@ -64,7 +64,7 @@ try {
       return [s.objectID, s.artistDisplayName, s.title, s.objectDate, s.objectURL].join(' | ');
     }).join('\n');
     await page.getByLabel('参考材料').fill([text, sample.copy].filter(Boolean).join('\n'));
-    await page.getByLabel('页数', { exact: true }).selectOption(String(sample.pages));
+    await page.locator('.office-actions select').first().selectOption(String(sample.pages));
     await page.locator('.office-photo-intake summary').click();
     await page.getByLabel('首页标题（原样保留）').fill(sample.title);
     if (sample.copy) await page.getByLabel('末页正文（原样保留）').fill(sample.copy);

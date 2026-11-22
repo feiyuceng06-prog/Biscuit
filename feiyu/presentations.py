@@ -25,6 +25,9 @@ def generate(agent, request):
         task = ('生成 %d 页大纲。JSON 格式 {"title":"演示文稿标题","slides":'
                 '[{"title":"一句话标题","layout":"版式"}]}。版式从 %s 选择。'
                 '第一页用封面点题，后续标题用一句短句写清本页发现或决定。只有材料中有同单位的可比数字才选 chart；有明确先后才选 timeline。不要为了用齐版式而拆页。' % (count, ", ".join(LAYOUTS)))
+        photo_brief = field("photoBrief", 3500)
+        if photo_brief:
+            task += "\n用户指定的首页标题、末页原文及素材顺序：" + photo_brief
         if photography:
             task += ("摄影集开篇用 cover，照片作品用 image，创作说明或策展文字用 conclusion。"
                      "保持用户要求的语言、作品顺序与页数。按素材写标题，不虚构照片、授权或拍摄信息。")
@@ -39,7 +42,7 @@ def generate(agent, request):
                 '每项标题最多 18 字，正文最多 55 字；背景、出处和细节放入演讲备注。')
         if photography:
             task += ("摄影集封面用 text 写简短副标题，label 仅写已提供的署名或说明。作品页只写能从材料"
-                     "确认的内容，说明页可分段。若有照片文件名、图注或所需照片数量，将其视为参考；不要"
+                     "确认的内容，说明页可分段。若有照片文件名、图注或所需照片数量，将其视为参考；以本页匹配的馆藏记录为准，不要"
                      "生成图片、虚构图像细节或输出素材列表。按制作要求指定的语言写作。")
         if media:
             task += "\n用户提供的照片名称、图注及数量要求，仅作为参考材料：" + media

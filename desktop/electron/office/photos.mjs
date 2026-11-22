@@ -203,3 +203,12 @@ export function distributePhotos(slides, photos, brief) {
     return page.length ? { ...slide, photos: page } : slide;
   });
 }
+
+// Optional structured source lines: filename (or its stem) | original catalogue entry.
+export function photoCredits(source, photos = []) {
+  const names = new Set(photos.flatMap(({ name }) => name ? [name, name.replace(/\.[^.]+$/, '')] : []));
+  return source.split(/\r?\n/).filter(line => {
+    const bar = line.indexOf('|');
+    return bar > 0 && names.has(line.slice(0, bar).trim()) && line.slice(bar + 1).trim();
+  });
+}
