@@ -157,8 +157,7 @@ export function readDeck(raw) {
   if (raw.photoInput !== undefined && (!raw.photoInput || !string(raw.photoInput.title, 120)
     || !string(raw.photoInput.copy, 220))) fail();
   if (raw.pendingPhotos !== undefined && !validPhotos(raw.pendingPhotos)) fail();
-  if (pictureDataSize(raw.slides) + (raw.pendingPhotos ?? []).reduce((sum, p) => sum + p.data.length, 0)
-    > maxDeckPictureData) fail();
+  if (pictureDataSize(raw.slides, raw.pendingPhotos) > maxDeckPictureData) fail();
   if (raw.design !== undefined) return { ...raw, design: restoreDesign(raw, raw.design) };
   if (hasPhotos(raw)) return { ...raw, design: planDesign(raw, {}, { visualPlanner: true }) };
   return raw;

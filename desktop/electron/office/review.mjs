@@ -42,12 +42,14 @@ export async function inspectExport(output, bytes, deck, { backend, pages, deter
     const reportPath = path.join(output, 'report.json');
     const pptxSha256 = createHash('sha256').update(bytes).digest('hex');
     let processFailure = backendError;
-    if (backend) try {
-      await promisify(execFile)(backend.command, [...backend.args, '--presentation-review', work, output],
-        { windowsHide: true, timeout: deterministicOnly ? 120000 : 600000,
-          env: { ...process.env, PYTHONUTF8: '1', ...(deterministicOnly && { BISCUIT_PRESENTATION_CRITIC: '' }) } });
-    } catch (error) {
-      processFailure = 'Review process failed: ' + (error.code || error.signal || 'unknown');
+    if (backend) {
+      try {
+        await promisify(execFile)(backend.command, [...backend.args, '--presentation-review', work, output],
+          { windowsHide: true, timeout: deterministicOnly ? 120000 : 600000,
+            env: { ...process.env, PYTHONUTF8: '1', ...(deterministicOnly && { BISCUIT_PRESENTATION_CRITIC: '' }) } });
+      } catch (error) {
+        processFailure = 'Review process failed: ' + (error.code || error.signal || 'unknown');
+      }
     }
     let report;
     try {

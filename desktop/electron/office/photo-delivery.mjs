@@ -12,11 +12,19 @@ const deterministic = report => report.issues.filter(issue => issue.source === '
 const unresolved = report => deterministic(report).filter(issue => issue.severity === 'blocker' || isTextOverflow(issue));
 const writeReport = (file, report) => fs.writeFile(file, JSON.stringify(report, null, 2) + '\n');
 
-async function publish(file, destination) {
+async function publish(file, destination, previous) {
   const temp = path.join(path.dirname(destination), '.' + randomUUID() + '.tmp');
   try {
     await fs.copyFile(file, temp, constants.COPYFILE_EXCL);
+    let backedUp = true;
+    try {
+      await fs.copyFile(destination, previous, constants.COPYFILE_EXCL);
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+      backedUp = false;
+    }
     await fs.rename(temp, destination);
+    return backedUp;
   } finally {
     await fs.rm(temp, { force: true });
   }
@@ -91,18 +99,19 @@ export async function deliverPhotography(destination, raw, { backend, backendErr
   let failureReason = best.report.status === 'preview_unavailable'
     ? best.report.error || 'Preflight could not verify the export.'
     : remaining.length ? 'Unresolved deterministic findings: ' + remaining.map(issue => issue.issueId).join(', ') : null;
-  const finalPptx = best.round.pptx
+  let finalPptx = best.round.pptx
     ? path.join(output, failureReason ? 'draft.pptx' : 'final.pptx') : null;
   if (finalPptx) await fs.copyFile(best.round.pptx, finalPptx, constants.COPYFILE_EXCL);
 
-  let delivery;
+  let delivery, previousPptx;
   async function saveDelivery() {
     const status = failureReason ? (finalPptx ? 'draft' : 'export_failed') : best.report.status;
     delivery = {
       destination: failureReason ? finalPptx : destination, requestedDestination: destination,
-      status, reviewStatus: best.report.status, critic: best.report.critic.status,
+      status, ...(previousPptx && { previousPptx }), reviewStatus: best.report.status, critic: best.report.critic.status,
       report: reportPath, initialPptx: initial.round.pptx, initialReport: initial.round.report,
-      finalPptx, finalReport: best.round.report, repairAttempts: rounds.length - 1,
+      finalPptx, finalReport: best.round.report, selectedStage: best.round.stage,
+      renderCount: rounds.filter(round => round.pptx).length, repairAttempts: rounds.length - 1,
       durationMs: elapsed(start), failureReason,
     };
     const relative = file => path.relative(output, path.join(path.dirname(best.round.report), file)).split(path.sep).join('/');
@@ -119,9 +128,13 @@ export async function deliverPhotography(destination, raw, { backend, backendErr
   await saveDelivery();
   if (!failureReason) {
     try {
-      await publish(finalPptx, destination);
+      const previous = path.join(output, 'previous.pptx');
+      if (await publish(finalPptx, destination, previous)) previousPptx = previous;
     } catch (error) {
       failureReason = 'Could not publish the checked export: ' + error.message;
+      const draft = path.join(output, 'draft.pptx');
+      await fs.rename(finalPptx, draft);
+      finalPptx = draft;
     }
     await saveDelivery();
   }

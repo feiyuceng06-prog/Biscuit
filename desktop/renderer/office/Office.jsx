@@ -114,7 +114,7 @@ export function Office({ workspace }) {
       ),
     };
     if (
-      ('image' in patch || 'photos' in patch) && pictureDataSize(next.slides) > maxDeckPictureData
+      ('image' in patch || 'photos' in patch) && pictureDataSize(next.slides, next.pendingPhotos) > maxDeckPictureData
     ) {
       setError('文稿图片总量已达上限，请移除图片后再导入');
       return;
@@ -142,7 +142,7 @@ export function Office({ workspace }) {
       for (const file of files) pool.push(await loadPhoto(file));
       signal.throwIfAborted();
       if (current.current !== snapshot) throw Error('材料已改变，请重新导入照片');
-      if (pictureDataSize(snapshot.slides) + pool.reduce((sum, p) => sum + p.data.length, 0) > maxDeckPictureData)
+      if (pictureDataSize(snapshot.slides, pool) > maxDeckPictureData)
         throw Error('文稿图片总量已达上限');
       commit({ ...snapshot, pendingPhotos: pool, photoInput: snapshot.photoInput ?? { title: '', copy: '' } });
     });
@@ -176,7 +176,7 @@ export function Office({ workspace }) {
       history.current = [];
       commit(next, false);
       select(next.slides[0].id);
-      enter('edit');
+      enter(next.pendingPhotos?.length ? 'source' : 'edit');
     } catch (e) {
       setError(e.message);
     }
@@ -408,7 +408,7 @@ export function Office({ workspace }) {
                 <section className="office-recent" aria-label="本工作区草稿">
                   <h2>本工作区草稿</h2>
                   {deck ? (
-                    <button onClick={() => enter('edit')}>
+                    <button onClick={() => enter(deck.pendingPhotos?.length ? 'source' : 'edit')}>
                       <FileText size={18} /><strong>{deck.title}</strong><small>{deck.slides.length} 页</small><ArrowRight size={16} />
                     </button>
                   ) : <p>{ready ? '暂无草稿。新建后可在这里继续编辑。' : '正在读取草稿…'}</p>}

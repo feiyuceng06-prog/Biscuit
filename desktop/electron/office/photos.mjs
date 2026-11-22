@@ -3,9 +3,9 @@ export const maxPictureData = 3_000_000;
 export const maxDeckPictureData = 12_000_000;
 export const maxPhotoCaption = 160;
 
-export function pictureDataSize(slides) {
+export function pictureDataSize(slides, pending = []) {
   return slides.reduce((size, slide) => size + slide.image.length
-    + (slide.photos ?? []).reduce((sum, photo) => sum + photo.data.length, 0), 0);
+    + (slide.photos ?? []).reduce((sum, photo) => sum + photo.data.length, 0), pending.reduce((sum, photo) => sum + photo.data.length, 0));
 }
 
 export function pictureRatio(data, checkType = false) {
@@ -66,6 +66,7 @@ export const hasPhotos = deck => deck.slides.some(slide => slide.photos?.length)
 const photoRoles = {
   cover: /封面|\b(?:cover|title slide)\b/i,
   image: /作品页|图像页|\b(?:gallery|image|work|portfolio) (?:slide|page)s?\b/i,
+  comparison: /对比页|比较页|\bcomparison (?:slide|page)s?\b/i,
   conclusion: /说明页|\b(?:essay|explanation|notes?) (?:slide|page)s?\b/i,
 };
 export const photographyIntent = value =>
@@ -189,13 +190,14 @@ export function distributePhotos(slides, photos, brief) {
     if (requested[role] && !slides.some(s => s.layout === role))
       throw Error('大纲缺少指定的摄影页面，请重新生成大纲或调整制作要求');
   }
-  let remaining = photos.length - counts.reduce((sum, n) => sum + (n ?? 0), 0);
+  const remaining = photos.length - counts.reduce((sum, n) => sum + (n ?? 0), 0);
   const free = counts.flatMap((count, i) => count === undefined ? [i] : []);
   if (remaining < 0 || (remaining && !free.length))
     throw Error('照片总数与各页要求不一致，请调整照片或制作要求');
   for (const i of free) counts[i] = 0;
   // Give each open page a picture before filling a second row.
   for (let n = 0; n < remaining; n++) counts[free[n % free.length]]++;
+  if (counts.some(n => n > maxPhotos)) throw Error('单页照片超过 12 张，请增加页数或调整制作要求');
   let offset = 0;
   return slides.map((slide, i) => {
     const page = photos.slice(offset, offset + counts[i]);

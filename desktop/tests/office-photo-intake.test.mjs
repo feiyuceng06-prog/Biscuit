@@ -51,6 +51,7 @@ test('paired catalogue titles follow picture order and measured orientations on 
   const draft = { ...newDeck(), photoInput: { title: '', copy: '' }, pendingPhotos, brief: '比较画幅',
     source: 'landscape | B | Cedars | 1857 | https://example.com/b\nportrait | A | Sitters | 1870s | https://example.com/a' };
   const deck = outlineDeck(draft, { slides: [{ title: '比较', layout: 'comparison' }] }, 1);
+  assert.equal(distributePhotos(outline.slides.concat({ layout: 'comparison' }), pendingPhotos, '比较页两张照片').at(-1).photos.length, 2);
   const slide = deck.slides[0];
   const body = catalogueComparison(deck, slide);
   assert.deepEqual(body.items.map(({ label, text }) => [label, text]), [['竖幅', 'Sitters'], ['横幅', 'Cedars']]);

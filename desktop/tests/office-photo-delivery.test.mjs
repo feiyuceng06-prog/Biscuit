@@ -6,13 +6,16 @@ import os from 'node:os';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { blankItem, newDeck, newSlide } from '../electron/office/deck.mjs';
 import { deliverPhotography } from '../electron/office/photo-delivery.mjs';
 import { powerPoint } from '../electron/office/pptx.mjs';
 
 const zip = createRequire(createRequire(import.meta.url).resolve('pptxgenjs'))('jszip');
-const backend = { command: process.env.PYTHON || 'python3', args: ['-m', 'feiyu'] };
-const available = (command, args) => spawnSync(command, args, { windowsHide: true }).status === 0;
+const root = fileURLToPath(new URL('../..', import.meta.url));
+const backend = { command: process.env.PYTHON || 'python3',
+  args: ['-c', 'import runpy, sys; sys.path.insert(0, sys.argv.pop(1)); runpy.run_module("feiyu", run_name="__main__")', root] };
+const available = (command, args) => spawnSync(command, args, { cwd: root, windowsHide: true }).status === 0;
 const renderer = !available('soffice', ['--version']) || !available('pdftotext', ['-v'])
   || !available('pdftoppm', ['-v']) || !available('pdffonts', ['-v'])
   || !available(backend.command, ['-c', 'import feiyu, PIL'])
@@ -37,8 +40,9 @@ const allText = xml => [...xml.matchAll(/<a:t>(.*?)<\/a:t>/gs)].map(match => mat
 const picturesIn = xml => xml.match(/<p:pic>.*?<\/p:pic>/gs);
 
 async function target(t) {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'biscuit-photo-delivery-'));
-  t.after(() => fs.rm(dir, { recursive: true, force: true }));
+  const archive = process.env.BISCUIT_PHOTO_TEST_OUTPUT;
+  const dir = await fs.mkdtemp(path.join(archive || os.tmpdir(), 'biscuit-photo-delivery-'));
+  if (!archive) t.after(() => fs.rm(dir, { recursive: true, force: true }));
   return path.join(dir, '作品.pptx');
 }
 
@@ -51,7 +55,10 @@ test('actual Chinese text is re-rendered after one local fix and one photographi
     const input = deck(work, essay, chart);
     const snapshot = structuredClone(input);
     const destination = await target(t);
+    const prior = await powerPoint(deck(slide('cover', '之前的文稿', [row('原始标题', '')], photos(1))));
+    await fs.writeFile(destination, prior);
     const result = await deliverPhotography(destination, input, { backend });
+    assert.deepEqual(await fs.readFile(result.previousPptx), prior);
     const report = await json(result.report);
     assert.equal(result.destination, destination, result.failureReason);
     assert.equal(result.repairAttempts, 2);
@@ -94,10 +101,11 @@ test('actual Chinese text is re-rendered after one local fix and one photographi
       const notes = 'ppt/notesSlides/notesSlide' + i + '.xml';
       assert.equal(await before.file(notes).async('string'), await after.file(notes).async('string'));
     }
-    const nativeChart = 'ppt/charts/chart1.xml';
-    assert.equal(await before.file(nativeChart).async('string'), await after.file(nativeChart).async('string'));
-    const workbook = 'ppt/embeddings/Microsoft_Excel_Worksheet1.xlsx';
-    const embedded = await zip.loadAsync(await after.file(workbook).async('nodebuffer'));
+    const [firstChart] = before.file(/^ppt\/charts\/chart\d+\.xml$/);
+    const [finalChart] = after.file(/^ppt\/charts\/chart\d+\.xml$/);
+    assert.equal(await firstChart.async('string'), await finalChart.async('string'));
+    const [workbook] = after.file(/^ppt\/embeddings\/.*\.xlsx$/);
+    const embedded = await zip.loadAsync(await workbook.async('nodebuffer'));
     const worksheet = await embedded.file('xl/worksheets/sheet1.xml').async('string');
     assert.match(worksheet, /<c r="B2"[^>]*><v>0<\/v><\/c>/);
     const media = Object.keys(before.files).filter(file => /^ppt\/media\/.+\.jpeg$/.test(file));
@@ -113,7 +121,7 @@ test('real overflow with no safe layout retains a draft and an existing valid ta
     await fs.writeFile(destination, good);
     const title = '在漫长的冬季沿着寂静的海岸寻找逐渐消退的潮水，以及从雾中浮现出的山脊与村落'.repeat(2);
     const copy = '潮水退去之后，海岸露出柔软的纹理。我们沿着层层堆积的岩石缓慢前行，把镜头转向远方。日落之前，水上的微光从灰蓝变成深紫，远处的船只只留下安静的剪影。'.repeat(2);
-    const label = '馆藏编号：' + 'W'.repeat(49);
+    const label = '海岸　海岸　海岸　海岸　海岸　海岸　海岸　海岸';
     const gallery = photos(12).map(photo => ({ ...photo, caption: label.repeat(3).slice(0, 160) }));
     const input = deck(slide('image', title, gallery.slice(0, 4).map(() => row(label, copy)), gallery));
     const result = await deliverPhotography(destination, input, { backend });
@@ -125,6 +133,10 @@ test('real overflow with no safe layout retains a draft and an existing valid ta
     assert.deepEqual(await fs.readFile(destination), good);
     assert.ok(result.repairAttempts <= 2);
     assert.ok(report.issues.some(issue => issue.source === 'deterministic' && issue.kind === 'overflow'));
+    for (let i = 0; i < gallery.length; i++)
+      assert.ok(report.issues.some(issue => issue.source === 'deterministic'
+        && ['clipping', 'overflow'].includes(issue.kind) && issue.elementIds.includes('caption-' + i)),
+        'Unresolved dense caption ' + i + ' must be reported');
     assert.ok(report.unresolvedIssues.length);
     assert.match(result.failureReason, /Unresolved deterministic findings/);
     assert.equal(sha256(await fs.readFile(result.finalPptx)), report.pptxSha256);

@@ -64,7 +64,7 @@ function stack(objects, { x, y, w, h }, align) {
   }
 }
 
-function fallback(page, targets, variant) {
+function fallback(page, targets, variant, margin) {
   if (!['photo-cover', 'photo-work', 'photo-work-side', 'photo-essay'].includes(variant)
     || page.some(object => object.type === 'chart')) return page;
   const text = page.filter(object => object.type === 'text' && object.field && !caption(object));
@@ -72,8 +72,8 @@ function fallback(page, targets, variant) {
   const anchors = page.filter(object => object.type === 'image'
     || (object.type === 'text' && !text.includes(object)));
   const media = anchors.filter(object => object.type === 'image' || caption(object));
-  const x = Math.min(60, ...text.map(object => object.x));
-  const edge = Math.max(900, ...text.map(right));
+  const x = margin;
+  const edge = 960 - margin;
   const band = (left, top, end) => ({ x: left, y: top, w: edge - left, h: end - top });
   const end = variant === 'photo-cover' ? 520 : 485;
   const title = text.find(object => object.field === 'title');
@@ -113,7 +113,8 @@ export function repairPhotoPages(deck, pages, issues, stage) {
       && ids.has(reviewObjectId(object, i)) ? [i] : []);
     if (!targets.length) return page;
     const variant = deck.design.slidePlans[index].variant;
-    const next = stage === 'local' ? local(page, targets) : fallback(page, targets, variant);
+    const next = stage === 'local' ? local(page, targets)
+      : fallback(page, targets, variant, deck.design.tokens.spacing.margin);
     const elementIds = next.flatMap((object, i) => object !== page[i] ? [reviewObjectId(object, i)] : []);
     if (elementIds.length) changes.push({ slideId, elementIds, layout: variant });
     return next;
