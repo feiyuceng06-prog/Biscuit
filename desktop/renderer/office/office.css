@@ -597,3 +597,7 @@
 .office-director label { display: grid; gap: 4px; }
 .office-director :is(input, select) { width: 100%; min-width: 0; padding: 6px; }
 .office-director p { margin: 0; font-size: .875rem; }
+
+.office-page-plan { display: grid; gap: 4px; margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--line-strong); }
+.office-director .office-planner-toggle { display: flex; align-items: center; gap: 8px; }
+.office .office-planner-toggle input { width: auto; }

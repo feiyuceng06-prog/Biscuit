@@ -1,5 +1,5 @@
 import React from 'react';
-import { layouts, maxItems, blankItem } from '../../electron/office/deck.mjs';
+import { layouts, maxItems, blankItem, hasChartValue } from '../../electron/office/deck.mjs';
 
 async function loadImage(file) {
   if (!['image/png', 'image/jpeg'].includes(file.type) || file.size > 12_000_000)
@@ -21,7 +21,7 @@ async function loadImage(file) {
     image.close();
   }
 }
-export function Inspector({ slide, edit, error }) {
+export function Inspector({ slide, edit, error, planned = false }) {
   const updateItem = (id, patch) =>
     edit({ items: slide.items.map((item) => (item.id === id ? { ...item, ...patch } : item)) });
   const imageInput = async (e) => {
@@ -35,7 +35,9 @@ export function Inspector({ slide, edit, error }) {
     }
   };
   const limit = maxItems(slide.layout);
-  const supportsImage = slide.layout === 'image' || slide.layout === 'cover';
+  const supportsImage = planned || slide.layout === 'image' || slide.layout === 'cover';
+  const isDataRow = row => slide.layout === 'chart' || (planned && hasChartValue(slide, row));
+  const visibleItems = planned ? slide.items : slide.items.slice(0, limit);
   return (
     <aside className="office-inspector">
       <h3>编辑本页</h3>
@@ -67,16 +69,16 @@ export function Inspector({ slide, edit, error }) {
       {supportsImage && slide.image && (
         <button onClick={() => edit({ image: '' })}>移除配图</button>
       )}
-      {slide.layout === 'chart' && (
+      {(slide.layout === 'chart' || (planned && slide.items.some(row => hasChartValue(slide, row)))) && (
         <label>
           图表单位
           <input maxLength={24} value={slide.unit || ''} onChange={(e) => edit({ unit: e.target.value })} />
         </label>
       )}
-      {slide.items.slice(0, limit).map((row, i) => (
+      {visibleItems.map((row, i) => (
         <fieldset key={row.id}>
           <legend>
-            {slide.layout === 'chart' ? '数据' : '内容'} {i + 1}
+            {isDataRow(row) ? '数据' : '内容'} {i + 1}
           </legend>
           <label>
             小标题
@@ -87,17 +89,19 @@ export function Inspector({ slide, edit, error }) {
               onChange={(e) => updateItem(row.id, { label: e.target.value })}
             />
           </label>
-          {slide.layout === 'chart' ? (
+          {isDataRow(row) ? (
             <label>
               数值
               <input
                 type="number"
                 step="any"
-                defaultValue={row.value}
-                key={row.value}
+                defaultValue={planned && !hasChartValue(slide, row) ? '' : row.value}
+                key={String(row.value) + (row.valueKind || '')}
                 onBlur={(e) => {
                   if (e.target.value !== '' && Number.isFinite(e.target.valueAsNumber))
-                    updateItem(row.id, { value: e.target.valueAsNumber });
+                    updateItem(row.id, { value: e.target.valueAsNumber, ...(planned && { valueKind: 'chart-data' }) });
+                  else if (planned && e.target.value === '' && hasChartValue(slide, row))
+                    updateItem(row.id, { value: 0, valueKind: 'text' });
                 }}
               />
             </label>
@@ -112,9 +116,9 @@ export function Inspector({ slide, edit, error }) {
               />
             </label>
           )}
-          {slide.layout === 'chart' && (
+          {isDataRow(row) && (
             <label>
-              图旁解读（显示第一条非空解读）
+              {planned ? '数据说明' : '图旁解读（显示第一条非空解读）'}
               <textarea maxLength={220} value={row.text} onChange={(e) => updateItem(row.id, { text: e.target.value })} />
             </label>
           )}
@@ -126,7 +130,7 @@ export function Inspector({ slide, edit, error }) {
         </fieldset>
       ))}
       {slide.items.length < limit && (
-        <button onClick={() => edit({ items: [...slide.items, blankItem()] })}>添加内容项</button>
+        <button onClick={() => edit({ items: [...slide.items, { ...blankItem(), ...(planned && { valueKind: 'text' }) }] })}>添加内容项</button>
       )}
       <label>
         演讲备注

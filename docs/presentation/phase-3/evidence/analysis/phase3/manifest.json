@@ -1,0 +1,944 @@
+{
+  "deckId": "analysis",
+  "brief": "用时序和分组数据定位等待时间变化，保留零值和负值。",
+  "design": {
+    "direction": "corporate",
+    "rhythm": [
+      {
+        "slideId": "analysis-1",
+        "layout": "cover",
+        "role": "opening",
+        "emphasis": "text",
+        "density": "sparse",
+        "referenceId": "corporate-briefing",
+        "rationale": "保持稳定的标题与页脚位置，便于浏览。"
+      },
+      {
+        "slideId": "analysis-2",
+        "layout": "chart",
+        "role": "evidence",
+        "emphasis": "data",
+        "density": "sparse",
+        "referenceId": "corporate-evidence",
+        "rationale": "为证据安排一致的横向空间，保留可编辑图表。"
+      },
+      {
+        "slideId": "analysis-3",
+        "layout": "chart",
+        "role": "evidence",
+        "emphasis": "data",
+        "density": "sparse",
+        "referenceId": "corporate-evidence",
+        "rationale": "为证据安排一致的横向空间，保留可编辑图表。"
+      },
+      {
+        "slideId": "analysis-4",
+        "layout": "conclusion",
+        "role": "conclusion",
+        "emphasis": "text",
+        "density": "sparse",
+        "referenceId": "corporate-briefing",
+        "rationale": "保持稳定的标题与页脚位置，便于浏览。"
+      }
+    ],
+    "version": 2,
+    "slidePlans": [
+      {
+        "slideId": "analysis-1",
+        "sourceLayout": "cover",
+        "layout": "cover",
+        "variant": "cover-title",
+        "keyMessage": "自助机升级后，等待时间缩短",
+        "focalPoint": "headline",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "analysis-1",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "analysis-0-0",
+            "slotId": "opening-detail-0-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "analysis-0-0",
+            "slotId": "opening-detail-0-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "analysis-1",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "corporate-briefing"
+        ],
+        "selectionReason": "以全宽标题建立开场焦点。",
+        "candidates": [
+          {
+            "layout": "cover",
+            "variant": "cover-title",
+            "score": 56,
+            "feasible": true,
+            "reasons": [
+              "以全宽标题建立开场焦点。"
+            ]
+          },
+          {
+            "layout": "cover",
+            "variant": "cover-brief",
+            "score": 47,
+            "feasible": true,
+            "reasons": [
+              "把开场说明分行，给正文和配图留足空间。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": null,
+          "chart": null
+        }
+      },
+      {
+        "slideId": "analysis-2",
+        "sourceLayout": "chart",
+        "layout": "chart",
+        "variant": "line-focus",
+        "keyMessage": "中位等待时间连续四周下降",
+        "focalPoint": "chart",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "analysis-2",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "analysis-2",
+            "slotId": "chart-unit",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "analysis-1-0",
+            "slotId": "chart-category",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "analysis-1-0",
+            "slotId": "chart-value",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "analysis-1-1",
+            "slotId": "chart-category",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "analysis-1-1",
+            "slotId": "chart-value",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "analysis-1-2",
+            "slotId": "chart-category",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "analysis-1-2",
+            "slotId": "chart-value",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "analysis-1-3",
+            "slotId": "chart-category",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "analysis-1-3",
+            "slotId": "chart-value",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "analysis-2",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "corporate-evidence"
+        ],
+        "selectionReason": "使用等间隔、按时间递增的观测值绘制折线。",
+        "candidates": [
+          {
+            "layout": "chart",
+            "variant": "line-focus",
+            "score": 66,
+            "feasible": true,
+            "reasons": [
+              "使用等间隔、按时间递增的观测值绘制折线。"
+            ]
+          },
+          {
+            "layout": "chart",
+            "variant": "line-details",
+            "score": 61,
+            "feasible": true,
+            "reasons": [
+              "使用等间隔、按时间递增的观测值绘制折线。 将图表集中在略窄的内容区。"
+            ]
+          },
+          {
+            "layout": "chart",
+            "variant": "columns-focus",
+            "score": 59,
+            "feasible": true,
+            "reasons": [
+              "以独立柱表示各时间点，避免暗示连续或等间隔的变化。"
+            ]
+          },
+          {
+            "layout": "chart",
+            "variant": "columns-details",
+            "score": 54,
+            "feasible": true,
+            "reasons": [
+              "以独立柱表示各时间点，避免暗示连续或等间隔的变化。 将图表集中在略窄的内容区。"
+            ]
+          }
+        ],
+        "chartEncoding": "line",
+        "assetStrategy": {
+          "image": null,
+          "chart": {
+            "source": "slide-items",
+            "editable": true,
+            "encoding": "line"
+          }
+        }
+      },
+      {
+        "slideId": "analysis-3",
+        "sourceLayout": "chart",
+        "layout": "chart",
+        "variant": "bars-focus",
+        "keyMessage": "不同服务区的耗时变化并不相同",
+        "focalPoint": "chart",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "analysis-3",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "analysis-3",
+            "slotId": "chart-unit",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "analysis-2-0",
+            "slotId": "chart-category",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "analysis-2-0",
+            "slotId": "chart-value",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "analysis-2-1",
+            "slotId": "chart-category",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "analysis-2-1",
+            "slotId": "chart-value",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "analysis-2-2",
+            "slotId": "chart-category",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "analysis-2-2",
+            "slotId": "chart-value",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "analysis-2-3",
+            "slotId": "chart-category",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "analysis-2-3",
+            "slotId": "chart-value",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "analysis-3",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "corporate-evidence"
+        ],
+        "selectionReason": "以共同零点向两侧展示正负变化，保留零值标签。 与相邻同类页面采用不同的组织方式。",
+        "candidates": [
+          {
+            "layout": "chart",
+            "variant": "bars-focus",
+            "score": 63,
+            "feasible": true,
+            "reasons": [
+              "以共同零点向两侧展示正负变化，保留零值标签。"
+            ]
+          },
+          {
+            "layout": "chart",
+            "variant": "columns-focus",
+            "score": 59,
+            "feasible": true,
+            "reasons": [
+              "以共同零基线对照离散类别的原始数值。"
+            ]
+          },
+          {
+            "layout": "chart",
+            "variant": "bars-details",
+            "score": 58,
+            "feasible": true,
+            "reasons": [
+              "以共同零点向两侧展示正负变化，保留零值标签。 将图表集中在略窄的内容区。"
+            ]
+          },
+          {
+            "layout": "chart",
+            "variant": "columns-details",
+            "score": 54,
+            "feasible": true,
+            "reasons": [
+              "以共同零基线对照离散类别的原始数值。 将图表集中在略窄的内容区。"
+            ]
+          }
+        ],
+        "chartEncoding": "bars",
+        "assetStrategy": {
+          "image": null,
+          "chart": {
+            "source": "slide-items",
+            "editable": true,
+            "encoding": "bars"
+          }
+        }
+      },
+      {
+        "slideId": "analysis-4",
+        "sourceLayout": "conclusion",
+        "layout": "statement",
+        "variant": "statement-led",
+        "keyMessage": "优先跟踪跨馆借还",
+        "focalPoint": "headline",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "analysis-4",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "analysis-3-0",
+            "slotId": "statement-support-0-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "analysis-3-0",
+            "slotId": "statement-support-0-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "analysis-3-1",
+            "slotId": "statement-support-1-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "analysis-3-1",
+            "slotId": "statement-support-1-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "analysis-4",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "corporate-briefing"
+        ],
+        "selectionReason": "放大主张，用独立区域承接正文。",
+        "candidates": [
+          {
+            "layout": "statement",
+            "variant": "statement-led",
+            "score": 61,
+            "feasible": true,
+            "reasons": [
+              "放大主张，用独立区域承接正文。"
+            ]
+          },
+          {
+            "layout": "statement",
+            "variant": "statement-rows",
+            "score": 40,
+            "feasible": true,
+            "reasons": [
+              "用宽行保留小标题和较长正文。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": null,
+          "chart": null
+        }
+      }
+    ]
+  },
+  "slides": [
+    {
+      "slideId": "analysis-1",
+      "layout": "cover",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "F7F9FD",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "rect",
+          "color": "244F96",
+          "x": 0,
+          "y": 0,
+          "w": 13,
+          "h": 540,
+          "id": "rect-2"
+        },
+        {
+          "type": "rect",
+          "color": "244F96",
+          "x": 54,
+          "y": 106,
+          "w": 55,
+          "h": 4,
+          "id": "rect-3"
+        },
+        {
+          "type": "rect",
+          "color": "AABCD6",
+          "x": 54,
+          "y": 323,
+          "w": 852,
+          "h": 2,
+          "id": "rect-4"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 124,
+          "w": 852,
+          "h": 186,
+          "value": "自助机升级后，等待时间缩短",
+          "field": "title",
+          "size": 58,
+          "color": "152C48",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 58,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 330,
+          "w": 272,
+          "h": 144,
+          "value": "观察范围",
+          "field": "label-0",
+          "size": 23,
+          "color": "244F96",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 23,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 341,
+          "y": 330,
+          "w": 565,
+          "h": 144,
+          "value": "四周试点，所有指标均为示例数据。",
+          "field": "text-0",
+          "size": 20,
+          "color": "465A72",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 20,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 802,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "01 / 04",
+          "field": null,
+          "size": 13,
+          "color": "465A72",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.24,
+          "fontFace": "Segoe UI",
+          "fontFamily": "\"Segoe UI\", \"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-8"
+        }
+      ]
+    },
+    {
+      "slideId": "analysis-2",
+      "layout": "chart",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "F7F9FD",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "rect",
+          "color": "244F96",
+          "x": 54,
+          "y": 28,
+          "w": 55,
+          "h": 4,
+          "id": "rect-2"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 40,
+          "w": 852,
+          "h": 59.190000000000005,
+          "value": "中位等待时间连续四周下降",
+          "field": "title",
+          "size": 43,
+          "color": "152C48",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 43,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 119.19,
+          "w": 852,
+          "h": 24,
+          "value": "分钟",
+          "field": "unit",
+          "size": 13,
+          "color": "465A72",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 13,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "unit"
+        },
+        {
+          "type": "chart",
+          "x": 54,
+          "y": 143.19,
+          "w": 852,
+          "h": 335.81,
+          "encoding": "line",
+          "items": [
+            {
+              "id": "analysis-1-0",
+              "label": "第1周",
+              "text": "",
+              "value": 18
+            },
+            {
+              "id": "analysis-1-1",
+              "label": "第2周",
+              "text": "",
+              "value": 15
+            },
+            {
+              "id": "analysis-1-2",
+              "label": "第3周",
+              "text": "",
+              "value": 12
+            },
+            {
+              "id": "analysis-1-3",
+              "label": "第4周",
+              "text": "",
+              "value": 9
+            }
+          ],
+          "focus": -1,
+          "domain": {
+            "min": -2.5200000000000005,
+            "max": 20.52
+          },
+          "ink": "152C48",
+          "rule": "AABCD6",
+          "categorySize": 14,
+          "valueSize": 15,
+          "axisWidth": 2,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "valueFontFace": "Segoe UI",
+          "colors": [
+            "244F96",
+            "244F96",
+            "244F96",
+            "244F96"
+          ],
+          "id": "chart-5"
+        },
+        {
+          "type": "text",
+          "x": 802,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "02 / 04",
+          "field": null,
+          "size": 13,
+          "color": "465A72",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.24,
+          "fontFace": "Segoe UI",
+          "fontFamily": "\"Segoe UI\", \"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-6"
+        }
+      ]
+    },
+    {
+      "slideId": "analysis-3",
+      "layout": "chart",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "F7F9FD",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "rect",
+          "color": "244F96",
+          "x": 54,
+          "y": 28,
+          "w": 55,
+          "h": 4,
+          "id": "rect-2"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 40,
+          "w": 852,
+          "h": 59.190000000000005,
+          "value": "不同服务区的耗时变化并不相同",
+          "field": "title",
+          "size": 43,
+          "color": "152C48",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 43,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 119.19,
+          "w": 852,
+          "h": 24,
+          "value": "分钟",
+          "field": "unit",
+          "size": 13,
+          "color": "465A72",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 13,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "unit"
+        },
+        {
+          "type": "chart",
+          "x": 54,
+          "y": 143.19,
+          "w": 852,
+          "h": 335.81,
+          "encoding": "bars",
+          "items": [
+            {
+              "id": "analysis-2-0",
+              "label": "读者证补办服务区",
+              "text": "",
+              "value": -3
+            },
+            {
+              "id": "analysis-2-1",
+              "label": "预约图书自取区",
+              "text": "",
+              "value": 0
+            },
+            {
+              "id": "analysis-2-2",
+              "label": "跨馆借还服务区",
+              "text": "",
+              "value": 2
+            },
+            {
+              "id": "analysis-2-3",
+              "label": "无障碍辅助服务台",
+              "text": "",
+              "value": -1
+            }
+          ],
+          "focus": -1,
+          "domain": {
+            "min": -3.42,
+            "max": 2.42
+          },
+          "ink": "152C48",
+          "rule": "AABCD6",
+          "categorySize": 14,
+          "plot": {
+            "left": 319.68,
+            "right": 822,
+            "top": 3,
+            "bottom": 332.81,
+            "labelWidth": 289.68
+          },
+          "wrappedCategories": false,
+          "valueSize": 15,
+          "axisWidth": 2,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "valueFontFace": "Segoe UI",
+          "colors": [
+            "244F96",
+            "244F96",
+            "244F96",
+            "244F96"
+          ],
+          "id": "chart-5"
+        },
+        {
+          "type": "text",
+          "x": 802,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "03 / 04",
+          "field": null,
+          "size": 13,
+          "color": "465A72",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.24,
+          "fontFace": "Segoe UI",
+          "fontFamily": "\"Segoe UI\", \"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-6"
+        }
+      ]
+    },
+    {
+      "slideId": "analysis-4",
+      "layout": "conclusion",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "F7F9FD",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "rect",
+          "color": "244F96",
+          "x": 54,
+          "y": 40,
+          "w": 55,
+          "h": 4,
+          "id": "rect-2"
+        },
+        {
+          "type": "rect",
+          "color": "AABCD6",
+          "x": 425,
+          "y": 40,
+          "w": 481,
+          "h": 2,
+          "id": "rect-3"
+        },
+        {
+          "type": "rect",
+          "color": "AABCD6",
+          "x": 425,
+          "y": 259.5,
+          "w": 481,
+          "h": 2,
+          "id": "rect-4"
+        },
+        {
+          "type": "text",
+          "x": 54,
+          "y": 70,
+          "w": 349,
+          "h": 409,
+          "value": "优先跟踪跨馆借还",
+          "field": "title",
+          "size": 51,
+          "color": "152C48",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 51,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 425,
+          "y": 47,
+          "w": 153,
+          "h": 207.5,
+          "value": "观察",
+          "field": "label-0",
+          "size": 23,
+          "color": "244F96",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 23,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 593,
+          "y": 47,
+          "w": 313,
+          "h": 207.5,
+          "value": "跨馆借还比基线增加 2 分钟。",
+          "field": "text-0",
+          "size": 20,
+          "color": "465A72",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 20,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 425,
+          "y": 266.5,
+          "w": 153,
+          "h": 207.5,
+          "value": "下一步",
+          "field": "label-1",
+          "size": 23,
+          "color": "244F96",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 23,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-1"
+        },
+        {
+          "type": "text",
+          "x": 593,
+          "y": 266.5,
+          "w": 313,
+          "h": 207.5,
+          "value": "逐笔核对跨馆记录，确认耗时来自哪一步。",
+          "field": "text-1",
+          "size": 20,
+          "color": "465A72",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 20,
+          "lineHeight": 1.24,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", \"Segoe UI\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-1"
+        },
+        {
+          "type": "text",
+          "x": 802,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "04 / 04",
+          "field": null,
+          "size": 13,
+          "color": "465A72",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.24,
+          "fontFace": "Segoe UI",
+          "fontFamily": "\"Segoe UI\", \"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-10"
+        }
+      ]
+    }
+  ]
+}

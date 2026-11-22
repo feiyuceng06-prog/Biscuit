@@ -1,4 +1,5 @@
 import { restoreDesign, textUnits } from './director.mjs';
+import { barPlot, chartDomain, eastAsian, hasChartValue, resolveSlideLayout, textHeight } from './planner.mjs';
 
 // The canvas and PowerPoint share a 960 × 540 point coordinate system.
 export const layouts = Object.freeze({
@@ -10,6 +11,7 @@ export const layouts = Object.freeze({
   timeline: '时间线',
 });
 export const maxItems = (layout) => ({ cover: 1, comparison: 2, image: 3 })[layout] ?? 4;
+export { hasChartValue };
 export const uid = () => globalThis.crypto.randomUUID();
 const clean = (str, max) => (typeof str === 'string' ? str.trim().slice(0, max) : '');
 export const blankItem = () => ({ id: uid(), label: '', text: '', value: 0 });
@@ -67,13 +69,29 @@ export function applyBody(deck, original, body) {
   const current = deck.slides.find((s) => s.id === original.id);
   if (!current || current.revision !== original.revision || current.layout !== original.layout)
     return deck;
+  // The generation contract requires an explicit finite number for every chart
+  // row, including a zero whose category label was left empty.
+  const replacement = deck.design?.version === 2 && current.layout === 'chart'
+    ? { ...body, items: body.items.map(item => ({ ...item, valueKind: 'chart-data' })) } : body;
   return {
     ...deck,
     slides: deck.slides.map((s) =>
-      s.id === current.id ? { ...s, ...body, revision: s.revision + 1, generated: true } : s,
+      s.id === current.id ? { ...s, ...replacement, revision: s.revision + 1, generated: true } : s,
     ),
   };
 }
+// Remember which values came from a chart when a v2 slide changes its editable layout.
+export function preserveLayoutContent(slide, patch) {
+  if (!patch.layout || patch.layout === slide.layout
+    || ![slide.layout, patch.layout].includes('chart')) return patch;
+  return {
+    ...patch,
+    items: (patch.items ?? slide.items).map((item) => ({
+      ...item, valueKind: hasChartValue(slide, item) ? 'chart-data' : 'text',
+    })),
+  };
+}
+
 export function readDeck(raw) {
   const fail = () => {
     throw Error('演示文稿文件格式无效或超出限制');
@@ -119,7 +137,8 @@ export function readDeck(raw) {
     id(s.id);
     imageBytes += s.image.length;
     for (const row of s.items) {
-      if (!row || !string(row.label, 60) || !string(row.text, 220) || !Number.isFinite(row.value))
+      if (!row || !string(row.label, 60) || !string(row.text, 220) || !Number.isFinite(row.value)
+        || ![undefined, 'text', 'chart-data'].includes(row.valueKind))
         fail();
       id(row.id);
     }
@@ -162,6 +181,10 @@ export const themes = {
 };
 
 export function composition(slide, page, total, theme = 'paper', design) {
+  if (design?.version === 2) {
+    const plan = design.slidePlans?.find((p) => p.slideId === slide.id && p.sourceLayout === slide.layout);
+    if (plan) return plannedComposition(slide, page, total, design.tokens, plan);
+  }
   if (design) return designedComposition(slide, page, total, design);
 
   const { bg, ink, soft, tint, rule, accent, mutedBar } = themes[theme] || themes.paper;
@@ -353,7 +376,6 @@ function fitText(value, size, w, h, lineHeight, reserveEm = 0) {
   return size;
 }
 
-const eastAsian = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u;
 function fontFor(font, value) {
   const faces = eastAsian.test(value) ? [font.cjk, font.latin] : [font.latin, font.cjk];
   const family = [...faces, ...font.fallback].map((face) => face.includes(' ') ? '"' + face + '"' : face);
@@ -623,5 +645,83 @@ function designedComposition(slide, page, total, design) {
   }
   const folio = String(page).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
   text(right - 104, spacing.footer, 104, 21, folio, type.caption, soft, null, { font: 'data', align: 'right' });
+  return objects;
+}
+
+
+function plannedComposition(slide, page, total, tokens, plan) {
+  const { text, marks, picture, chart, palette } = resolveSlideLayout(slide, tokens, plan);
+  const { typography: type, fonts, spacing, graphics } = tokens;
+  const { ink, soft, accent, mutedBar, rule } = palette;
+  const markColors = { ...palette,
+    'brand-rule': graphics.brandAccent ?? rule, 'brand-accent': graphics.brandAccent ?? accent };
+  const objects = [];
+  const leading = type.lineHeight + 0.09;
+  function plannedSize(value, size, { w, h }, cjk) {
+    while (size > 8 && textHeight(value, size, w, leading, cjk ? 1 : 0) > h) size--;
+    return size;
+  }
+  function addText(region, value, size, color, field, font, bold = false, align = 'left') {
+    const { x, y, w, h } = region;
+    const cjk = eastAsian.test(value);
+    size = plannedSize(value, size, region, cjk);
+    objects.push({ type: 'text', x, y, w, h, value, field, size, color, bold, align,
+      ...(cjk && { wrapPadding: size }), lineHeight: type.lineHeight, ...fontFor(font, value) });
+  }
+
+  for (const { type: kind, color, ...region } of marks) {
+    if (kind === 'text-arrow') addText(region, '›', 17, markColors[color], null, fonts.body, true);
+    else objects.push({ type: kind, color: markColors[color], ...region });
+  }
+  if (picture) {
+    const intrinsic = pictureRatio(slide.image);
+    const ratio = Number.isFinite(intrinsic) && intrinsic > 0 ? intrinsic : 1077 / 810;
+    const w = Math.min(picture.w, picture.h * ratio);
+    const h = w / ratio;
+    objects.push({ type: 'image', x: picture.x + (picture.w - w) / 2,
+      y: picture.y + (picture.h - h) / 2, w, h, data: slide.image });
+  }
+  for (const region of text) {
+    const { value, size, field, role, align } = region;
+    const color = role === 'title' ? ink : ['label', 'value'].includes(role) ? accent : soft;
+    const font = role === 'title' ? fonts.title : role === 'value' ? fonts.data : fonts.body;
+    const bold = role === 'title' ? type.boldTitle : ['label', 'value'].includes(role);
+    addText(region, value, size, color, field, font, bold, align);
+  }
+  if (chart?.items.length) {
+    const { items, focus, encoding } = chart;
+    const highlight = focus >= 0 && items.filter((item) => item.text.trim()).length === 1 && encoding !== 'line';
+    const longest = Math.max(1, ...items.map((item) => textUnits(item.label)));
+    const bars = encoding === 'bars';
+    const labelWidth = bars ? chart.w * 0.34 : (chart.w - 52) / items.length;
+    const categorySize = Math.max(11, Math.min(type.category, Math.floor(labelWidth / longest)));
+    // Keep very long categories in a dedicated column instead of letting the chart
+    // engine shrink the plot to make room for a single unwrapped label.
+    const wrappedCategories = bars && (longest * categorySize > chart.w * 0.4 || items.some(({ label }) => label.includes('\n')));
+    const plot = bars ? barPlot(chart, type.value) : undefined;
+    objects.push({ type: 'chart', ...chart, domain: chartDomain(items), ink, rule, categorySize,
+      ...(plot && { plot, wrappedCategories }),
+      valueSize: type.value, axisWidth: graphics.rule,
+      ...fontFor(fonts.data, items.map((item) => item.label).join(' ')), valueFontFace: fonts.data.latin,
+      colors: items.map((_, i) => highlight && i !== focus ? mutedBar : accent),
+    });
+    if (wrappedCategories) {
+      const step = (plot.bottom - plot.top) / items.length;
+      items.forEach(({ label }, i) => {
+        if (!label) return;
+        const maxHeight = step - 4;
+        const cjk = eastAsian.test(label);
+        const size = plannedSize(label, categorySize, { w: plot.labelWidth, h: maxHeight }, cjk);
+        const estimatedHeight = Math.min(maxHeight,
+          textHeight(label, size, plot.labelWidth, leading, cjk ? 1 : 0));
+        const y = chart.y + plot.top + step * (i + 0.5) - estimatedHeight / 2;
+        addText({ x: chart.x, y, w: plot.labelWidth, h: estimatedHeight + 1 },
+          label, size, ink, null, fonts.data);
+      });
+    }
+  }
+  addText({ x: 856 - spacing.margin, y: spacing.footer, w: 104, h: 21 },
+    String(page).padStart(2, '0') + ' / ' + String(total).padStart(2, '0'),
+    type.caption, soft, null, fonts.data, false, 'right');
   return objects;
 }

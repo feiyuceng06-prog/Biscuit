@@ -1,0 +1,54 @@
+{
+  "slideId": "architecture-3",
+  "pngSha256": "3a3ce4ac07ff8758d84512995ce708b7d90c71e0085894e14921c44aaffd3dbd",
+  "critic": {
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "architecture-1",
+      "architecture-2",
+      "architecture-3",
+      "architecture-4"
+    ]
+  },
+  "issues": [
+    {
+      "slideId": "architecture-3",
+      "elementIds": [
+        "text-0",
+        "text-1"
+      ],
+      "kind": "crowded",
+      "severity": "major",
+      "confidence": 0.9,
+      "evidence": "Left and right columns have only two short lines of body text each, while the vertical divider (rect-4) extends to y=479 (h≈352), leaving a large empty area. The visible content occupies only ~40 px height (y=184.35 to ~225), so the comparison layout looks sparse and unbalanced.",
+      "suggestedChange": "Either shorten the vertical divider to match the text block height, or add 2–3 equally structured detail rows (e.g., trigger condition / user-facing message / recovery action) under each label to fill the column space.",
+      "source": "vision-model",
+      "issueId": "vision:architecture-3:1"
+    },
+    {
+      "slideId": "architecture-3",
+      "elementIds": [
+        "text-12"
+      ],
+      "kind": "low-contrast",
+      "severity": "minor",
+      "confidence": 0.6,
+      "evidence": "Page counter \"03 / 04\" at x=796,y=501 uses color B5CBD8 on background 101D27. Measured contrast is approximately 5.9:1, which passes AA for 13 px but is the dimmest element in the footer and visually fades against the dark field, while surrounding rules use 78DBEF.",
+      "suggestedChange": "Raise the counter to a brighter value such as 78DBEF or EFF8FD to keep footer hierarchy consistent with the cyan accent rules.",
+      "source": "vision-model",
+      "issueId": "vision:architecture-3:2"
+    },
+    {
+      "slideId": "architecture-3",
+      "elementIds": [],
+      "kind": "weak-hierarchy",
+      "severity": "suggestion",
+      "confidence": 0.55,
+      "evidence": "Title \"两个失败边界需要不同处理\" (45 px, EFF8FD) and both column labels (20 px, 78DBEF) are the only emphasis; body text at 20 px in B5CBD8 is nearly the same size as labels, so the label/body distinction relies mainly on color, not scale.",
+      "suggestedChange": "Increase the label-to-body size gap (e.g., labels 22 px bold, body 17–18 px) or indent body text under the labels to clarify the two-level hierarchy.",
+      "source": "vision-model",
+      "issueId": "vision:architecture-3:3"
+    }
+  ]
+}

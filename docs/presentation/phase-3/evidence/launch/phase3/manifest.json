@@ -1,0 +1,882 @@
+{
+  "deckId": "launch",
+  "brief": "向读者讲述一款图书馆阅读产品如何保存阅读位置和回到原文。",
+  "design": {
+    "direction": "editorial",
+    "rhythm": [
+      {
+        "slideId": "launch-1",
+        "layout": "cover",
+        "role": "opening",
+        "emphasis": "image",
+        "density": "sparse",
+        "referenceId": "editorial-opening",
+        "rationale": "用大标题和细线建立叙事层级。"
+      },
+      {
+        "slideId": "launch-2",
+        "layout": "image",
+        "role": "context",
+        "emphasis": "image",
+        "density": "sparse",
+        "referenceId": "editorial-feature",
+        "rationale": "用留白将图片和图旁说明分开。"
+      },
+      {
+        "slideId": "launch-3",
+        "layout": "conclusion",
+        "role": "thesis",
+        "emphasis": "text",
+        "density": "sparse",
+        "referenceId": "editorial-opening",
+        "rationale": "用大标题和细线建立叙事层级。"
+      },
+      {
+        "slideId": "launch-4",
+        "layout": "comparison",
+        "role": "contrast",
+        "emphasis": "text",
+        "density": "sparse",
+        "referenceId": "editorial-evidence",
+        "rationale": "给事实标签留出空间，用细线组织证据。"
+      }
+    ],
+    "version": 2,
+    "slidePlans": [
+      {
+        "slideId": "launch-1",
+        "sourceLayout": "cover",
+        "layout": "cover",
+        "variant": "cover-image",
+        "keyMessage": "闭馆以后，阅读继续",
+        "focalPoint": "headline",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "launch-1",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "launch-0-0",
+            "slotId": "opening-detail-0-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "launch-0-0",
+            "slotId": "opening-detail-0-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "launch-1",
+            "slotId": "image",
+            "emphasis": "supporting"
+          },
+          {
+            "nodeId": "launch-1",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "editorial-opening"
+        ],
+        "selectionReason": "开场标题与配图并列。",
+        "candidates": [
+          {
+            "layout": "cover",
+            "variant": "cover-image",
+            "score": 55,
+            "feasible": true,
+            "reasons": [
+              "开场标题与配图并列。"
+            ]
+          },
+          {
+            "layout": "cover",
+            "variant": "cover-brief",
+            "score": 47,
+            "feasible": true,
+            "reasons": [
+              "把开场说明分行，给正文和配图留足空间。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": {
+            "source": "existing-slide-image",
+            "fit": "contain",
+            "slotId": "image"
+          },
+          "chart": null
+        }
+      },
+      {
+        "slideId": "launch-2",
+        "sourceLayout": "image",
+        "layout": "image",
+        "variant": "image-hero",
+        "keyMessage": "把离馆前的一句话留下",
+        "focalPoint": "image",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "launch-2",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "launch-1-0",
+            "slotId": "image-0-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "launch-1-0",
+            "slotId": "image-0-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "launch-1-1",
+            "slotId": "image-1-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "launch-1-1",
+            "slotId": "image-1-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "launch-2",
+            "slotId": "image",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "launch-2",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "editorial-feature"
+        ],
+        "selectionReason": "使用现有配图，保留完整画面。 将视线集中在图片上。",
+        "candidates": [
+          {
+            "layout": "image",
+            "variant": "image-hero",
+            "score": 59,
+            "feasible": true,
+            "reasons": [
+              "使用现有配图，保留完整画面。 将视线集中在图片上。"
+            ]
+          },
+          {
+            "layout": "image",
+            "variant": "image-split",
+            "score": 57,
+            "feasible": true,
+            "reasons": [
+              "使用现有配图，保留完整画面。 为说明保留更宽的文字区。"
+            ]
+          },
+          {
+            "layout": "image",
+            "variant": "image-caption",
+            "score": 46,
+            "feasible": true,
+            "reasons": [
+              "使用现有配图，保留完整画面。 将长说明移至全宽区域。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": {
+            "source": "existing-slide-image",
+            "fit": "contain",
+            "slotId": "image"
+          },
+          "chart": null
+        }
+      },
+      {
+        "slideId": "launch-3",
+        "sourceLayout": "conclusion",
+        "layout": "statement",
+        "variant": "statement-takeaway",
+        "keyMessage": "隔一晚再回来，读者还能找到离开时读到的那句话吗？",
+        "focalPoint": "takeaway",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "launch-3",
+            "slotId": "headline",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "launch-2-0",
+            "slotId": "statement-caption",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "launch-2-0",
+            "slotId": "takeaway",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "launch-3",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "editorial-opening"
+        ],
+        "selectionReason": "正文明确标出核心问题或发现，直接放大该句，标题作为引导。",
+        "candidates": [
+          {
+            "layout": "statement",
+            "variant": "statement-takeaway",
+            "score": 65,
+            "feasible": true,
+            "reasons": [
+              "正文明确标出核心问题或发现，直接放大该句，标题作为引导。"
+            ]
+          },
+          {
+            "layout": "statement",
+            "variant": "statement-led",
+            "score": 53,
+            "feasible": true,
+            "reasons": [
+              "放大主张，用独立区域承接正文。"
+            ]
+          },
+          {
+            "layout": "statement",
+            "variant": "statement-rows",
+            "score": 40,
+            "feasible": true,
+            "reasons": [
+              "用宽行保留小标题和较长正文。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": null,
+          "chart": null
+        }
+      },
+      {
+        "slideId": "launch-4",
+        "sourceLayout": "comparison",
+        "layout": "comparison",
+        "variant": "comparison-pair",
+        "keyMessage": "同一份笔记的两种入口",
+        "focalPoint": "headline",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "launch-4",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "launch-3-0",
+            "slotId": "comparison-0-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "launch-3-0",
+            "slotId": "comparison-0-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "launch-3-1",
+            "slotId": "comparison-1-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "launch-3-1",
+            "slotId": "comparison-1-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "launch-4",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "editorial-evidence"
+        ],
+        "selectionReason": "为对照项分配同等宽度和文字层级。",
+        "candidates": [
+          {
+            "layout": "comparison",
+            "variant": "comparison-pair",
+            "score": 56,
+            "feasible": true,
+            "reasons": [
+              "为对照项分配同等宽度和文字层级。"
+            ]
+          },
+          {
+            "layout": "comparison",
+            "variant": "comparison-rows",
+            "score": 53,
+            "feasible": true,
+            "reasons": [
+              "用相同的行结构并列多个对照项，保留事实和上下文。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": null,
+          "chart": null
+        }
+      }
+    ]
+  },
+  "slides": [
+    {
+      "slideId": "launch-1",
+      "layout": "cover",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "FAF6F0",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "rect",
+          "color": "F0E4DA",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 285,
+          "id": "rect-2"
+        },
+        {
+          "type": "rect",
+          "color": "C7AA9D",
+          "x": 485.88,
+          "y": 106,
+          "w": 414.12,
+          "h": 1,
+          "id": "rect-3"
+        },
+        {
+          "type": "rect",
+          "color": "C7AA9D",
+          "x": 485.88,
+          "y": 323,
+          "w": 414.12,
+          "h": 1,
+          "id": "rect-4"
+        },
+        {
+          "type": "image",
+          "x": 60,
+          "y": 129.87938718662954,
+          "w": 397.88,
+          "h": 299.2412256267409,
+          "id": "image-5"
+        },
+        {
+          "type": "text",
+          "x": 485.88,
+          "y": 124,
+          "w": 414.12,
+          "h": 186,
+          "value": "闭馆以后，阅读继续",
+          "field": "title",
+          "size": 66,
+          "color": "2F2421",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 66,
+          "lineHeight": 1.25,
+          "fontFace": "Noto Serif CJK SC",
+          "fontFamily": "\"Noto Serif CJK SC\", Georgia, \"Songti SC\", SimSun, serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 485.88,
+          "y": 330,
+          "w": 132,
+          "h": 144,
+          "value": "夜读书签",
+          "field": "label-0",
+          "size": 24,
+          "color": "893C43",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 24,
+          "lineHeight": 1.25,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 632.88,
+          "y": 330,
+          "w": 267.12,
+          "h": 144,
+          "value": "新产品体验会",
+          "field": "text-0",
+          "size": 22,
+          "color": "61524B",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 22,
+          "lineHeight": 1.25,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 796,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "01 / 04",
+          "field": null,
+          "size": 13,
+          "color": "61524B",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.25,
+          "fontFace": "Arial",
+          "fontFamily": "Arial, \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-9"
+        }
+      ]
+    },
+    {
+      "slideId": "launch-2",
+      "layout": "image",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "FAF6F0",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "rect",
+          "color": "C7AA9D",
+          "x": 60,
+          "y": 33,
+          "w": 840,
+          "h": 1,
+          "id": "rect-2"
+        },
+        {
+          "type": "rect",
+          "color": "C7AA9D",
+          "x": 591.44,
+          "y": 135.66000000000003,
+          "w": 308.56,
+          "h": 1,
+          "id": "rect-3"
+        },
+        {
+          "type": "rect",
+          "color": "C7AA9D",
+          "x": 591.44,
+          "y": 307.33000000000004,
+          "w": 308.56,
+          "h": 1,
+          "id": "rect-4"
+        },
+        {
+          "type": "image",
+          "x": 83.46248148148149,
+          "y": 135.66000000000003,
+          "w": 456.515037037037,
+          "h": 343.34,
+          "id": "image-5"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 45,
+          "w": 840,
+          "h": 67.66000000000001,
+          "value": "把离馆前的一句话留下",
+          "field": "title",
+          "size": 49,
+          "color": "2F2421",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 49,
+          "lineHeight": 1.25,
+          "fontFace": "Noto Serif CJK SC",
+          "fontFamily": "\"Noto Serif CJK SC\", Georgia, \"Songti SC\", SimSun, serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 591.44,
+          "y": 142.66000000000003,
+          "w": 308.56,
+          "h": 32.160000000000004,
+          "value": "记录",
+          "field": "label-0",
+          "size": 24,
+          "color": "893C43",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 24,
+          "lineHeight": 1.25,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 591.44,
+          "y": 178.82000000000002,
+          "w": 308.56,
+          "h": 123.50999999999999,
+          "value": "保存页码和一句原文。",
+          "field": "text-0",
+          "size": 22,
+          "color": "61524B",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 22,
+          "lineHeight": 1.25,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 591.44,
+          "y": 314.33000000000004,
+          "w": 308.56,
+          "h": 32.160000000000004,
+          "value": "回看",
+          "field": "label-1",
+          "size": 24,
+          "color": "893C43",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 24,
+          "lineHeight": 1.25,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-1"
+        },
+        {
+          "type": "text",
+          "x": 591.44,
+          "y": 350.49000000000007,
+          "w": 308.56,
+          "h": 123.50999999999999,
+          "value": "下次打开时返回同一处批注。",
+          "field": "text-1",
+          "size": 22,
+          "color": "61524B",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 22,
+          "lineHeight": 1.25,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-1"
+        },
+        {
+          "type": "text",
+          "x": 796,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "02 / 04",
+          "field": null,
+          "size": 13,
+          "color": "61524B",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.25,
+          "fontFace": "Arial",
+          "fontFamily": "Arial, \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-11"
+        }
+      ]
+    },
+    {
+      "slideId": "launch-3",
+      "layout": "conclusion",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "FAF6F0",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "rect",
+          "color": "C7AA9D",
+          "x": 60,
+          "y": 45,
+          "w": 840,
+          "h": 1,
+          "id": "rect-2"
+        },
+        {
+          "type": "rect",
+          "color": "C7AA9D",
+          "x": 60,
+          "y": 147,
+          "w": 840,
+          "h": 1,
+          "id": "rect-3"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 67,
+          "w": 840,
+          "h": 74,
+          "value": "内测只验证一件事",
+          "field": "title",
+          "size": 27,
+          "color": "2F2421",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 27,
+          "lineHeight": 1.25,
+          "fontFace": "Noto Serif CJK SC",
+          "fontFamily": "\"Noto Serif CJK SC\", Georgia, \"Songti SC\", SimSun, serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 159,
+          "w": 840,
+          "h": 42,
+          "value": "核心问题",
+          "field": "label-0",
+          "size": 24,
+          "color": "893C43",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 24,
+          "lineHeight": 1.25,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 205,
+          "w": 840,
+          "h": 274,
+          "value": "隔一晚再回来，读者还能找到离开时读到的那句话吗？",
+          "field": "text-0",
+          "size": 46,
+          "color": "2F2421",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 46,
+          "lineHeight": 1.25,
+          "fontFace": "Noto Serif CJK SC",
+          "fontFamily": "\"Noto Serif CJK SC\", Georgia, \"Songti SC\", SimSun, serif",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 796,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "03 / 04",
+          "field": null,
+          "size": 13,
+          "color": "61524B",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.25,
+          "fontFace": "Arial",
+          "fontFamily": "Arial, \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-7"
+        }
+      ]
+    },
+    {
+      "slideId": "launch-4",
+      "layout": "comparison",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "FAF6F0",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "rect",
+          "color": "C7AA9D",
+          "x": 60,
+          "y": 33,
+          "w": 840,
+          "h": 1,
+          "id": "rect-2"
+        },
+        {
+          "type": "rect",
+          "color": "C7AA9D",
+          "x": 480,
+          "y": 212.10240000000002,
+          "w": 1,
+          "h": 131,
+          "id": "rect-3"
+        },
+        {
+          "type": "rect",
+          "color": "893C43",
+          "x": 60,
+          "y": 212.10240000000002,
+          "w": 406,
+          "h": 1,
+          "id": "rect-4"
+        },
+        {
+          "type": "rect",
+          "color": "893C43",
+          "x": 494,
+          "y": 212.10240000000002,
+          "w": 406,
+          "h": 1,
+          "id": "rect-5"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 45,
+          "w": 840,
+          "h": 67.66000000000001,
+          "value": "同一份笔记的两种入口",
+          "field": "title",
+          "size": 49,
+          "color": "2F2421",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 49,
+          "lineHeight": 1.25,
+          "fontFace": "Noto Serif CJK SC",
+          "fontFamily": "\"Noto Serif CJK SC\", Georgia, \"Songti SC\", SimSun, serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 239.10240000000002,
+          "w": 406,
+          "h": 32.160000000000004,
+          "value": "按书名",
+          "field": "label-0",
+          "size": 24,
+          "color": "893C43",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 24,
+          "lineHeight": 1.25,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 275.2624,
+          "w": 406,
+          "h": 67.84,
+          "value": "从书架进入这本书，再查看全部书签。",
+          "field": "text-0",
+          "size": 22,
+          "color": "61524B",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 22,
+          "lineHeight": 1.25,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 494,
+          "y": 239.10240000000002,
+          "w": 406,
+          "h": 32.160000000000004,
+          "value": "按日期",
+          "field": "label-1",
+          "size": 24,
+          "color": "893C43",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 24,
+          "lineHeight": 1.25,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-1"
+        },
+        {
+          "type": "text",
+          "x": 494,
+          "y": 275.2624,
+          "w": 406,
+          "h": 67.84,
+          "value": "从阅读日历选择当天，直接回到那条记录。",
+          "field": "text-1",
+          "size": 22,
+          "color": "61524B",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 22,
+          "lineHeight": 1.25,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-1"
+        },
+        {
+          "type": "text",
+          "x": 796,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "04 / 04",
+          "field": null,
+          "size": 13,
+          "color": "61524B",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.25,
+          "fontFace": "Arial",
+          "fontFamily": "Arial, \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-11"
+        }
+      ]
+    }
+  ]
+}

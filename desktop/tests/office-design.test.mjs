@@ -237,3 +237,53 @@ test('muted data bars have at least 3:1 contrast with their backgrounds in all d
     assert.ok((high + 0.05) / (low + 0.05) >= 3, direction + ' ' + palette);
   }
 });
+
+test('generic outline pages can become native process, comparison or data plans from their content', () => {
+  const slide = (title, items) => ({ ...newSlide(title, 'conclusion'),
+    items: items.map(([label, text]) => ({ ...blankItem(), label, text })) });
+  const deck = { ...newDeck(), slides: [
+    slide('离线导出的处理流程', [['校验', '读取版本。'], ['导出', '写入对象。'], ['预览', '渲染文件。']]),
+    slide('两种排班方案', [['单岗', '开放阅览。'], ['双岗', '增加借还。']]),
+    slide('三个服务区的等待时间', [['一层', ''], ['二层', ''], ['三层', '']]),
+    slide('下一步', [['观察', '等待缩短。'], ['行动', '继续逐日核对。']]),
+  ] };
+  deck.slides[2].items.forEach((item, i) => {
+    item.valueKind = 'chart-data';
+    item.value = [-1, 0, 2][i];
+  });
+  const original = structuredClone(deck);
+  const design = planDesign(deck, {}, { visualPlanner: true });
+  assert.deepEqual(design.slidePlans.map(plan => plan.layout), ['sequence', 'comparison', 'chart', 'statement']);
+  assert.equal(design.slidePlans[2].chartEncoding, 'bars');
+  const graph = objectsFor(deck, 2, design).find(o => o.type === 'chart');
+  assert.deepEqual(graph.items.map(i => i.value), [-1, 0, 2]);
+  assert.deepEqual(deck, original);
+});
+
+test('regular numbered weeks carry time meaning while numbered categories do not', () => {
+  const deck = sample();
+  const slide = deck.slides.find(s => s.layout === 'chart');
+  deck.slides = [slide];
+  const chart = labels => {
+    slide.items.forEach((item, i) => { item.label = labels[i]; item.text = ''; });
+    return planDesign(deck, {}, { visualPlanner: true }).slidePlans[0].chartEncoding;
+  };
+  assert.equal(chart(['第1周', '第2周', '第3周']), 'line');
+  assert.notEqual(chart(['第1周', '第3周', '第4周']), 'line');
+  assert.notEqual(chart(['第1组', '第2组', '第3组']), 'line');
+});
+
+test('a marked takeaway binds its original sentence to primary type; an annotated number keeps its unit', () => {
+  const deck = sample();
+  deck.slides[5].items = [{ ...blankItem(), label: '核心问题', text: '下周还能否找到同一段原文？' }];
+  deck.slides[3].items.forEach((item, i) => { item.text = i === 2 ? '比基线高。' : ''; });
+  const design = planDesign(deck, {}, { visualPlanner: true });
+  const plan = design.slidePlans[5];
+  const message = deck.slides[5].items[0].text;
+  assert.equal(plan.keyMessage, message);
+  assert.equal(plan.focalPoint, 'takeaway');
+  assert.ok(plan.contentBindings.some(b => b.nodeId === deck.slides[5].items[0].id && b.emphasis === 'primary'));
+  const output = objectsFor(deck, 5, design);
+  assert.ok(output.find(o => o.value === message).size > output.find(o => o.field === 'title').size);
+  assert.ok(objectsFor(deck, 3, design).some(o => o.value === '18.25 万元'));
+});

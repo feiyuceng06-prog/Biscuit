@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "deckId": "launch",
+  "pptxSha256": "5ea5e5ea3650f1786bd339b6465a2646cf77265482ab15de8ab8ab760ca800e5",
+  "status": "needs_review",
+  "critic": {
+    "status": "checked",
+    "modelAlias": "deepseek-flash",
+    "checkedSlides": [
+      "launch-1",
+      "launch-2",
+      "launch-3",
+      "launch-4"
+    ]
+  },
+  "pages": [
+    {
+      "slideId": "launch-1",
+      "png": "slide-1.png",
+      "sha256": "e0c48b4fb6559f8e43c6f04a8c9280139a6ab86473d69b14f6365950bfdd8e99"
+    },
+    {
+      "slideId": "launch-2",
+      "png": "slide-2.png",
+      "sha256": "52ba70393c1926cd3cd7f90fd704ea59bf1d24a3eefbe068fdc05f888e107599"
+    },
+    {
+      "slideId": "launch-3",
+      "png": "slide-3.png",
+      "sha256": "bca564769943378174ae1d67600b2d8fd7abe89a4267c6670dba493475d4361d"
+    },
+    {
+      "slideId": "launch-4",
+      "png": "slide-4.png",
+      "sha256": "748d3d6ad209c48a21ff85fcbd4896176a85e6d68cc302d2973ec12bad16d5b9"
+    }
+  ],
+  "issues": [
+    {
+      "slideId": "launch-1",
+      "elementIds": [
+        "title"
+      ],
+      "kind": "overflow",
+      "severity": "minor",
+      "confidence": 0.6,
+      "evidence": "Large title text extends to x≈800 and y≈133, close to the right margin at x≈892; no clear glyph crosses the boundary in the render, so this is a borderline fit rather than a definite overflow.",
+      "suggestedChange": "If localization or font substitution widens the title, reduce font size or adjust line wrapping to keep it within the text box.",
+      "source": "vision-model",
+      "issueId": "vision:launch-1:1"
+    },
+    {
+      "slideId": "launch-1",
+      "elementIds": [
+        "image-3",
+        "title"
+      ],
+      "kind": "poor-alignment",
+      "severity": "suggestion",
+      "confidence": 0.5,
+      "evidence": "The image bottom sits at y≈419 while the title block extends below it; the left image and right text column do not share a consistent baseline or bottom alignment.",
+      "suggestedChange": "Align the bottom of the image with the bottom of the title/subtitle block or set a deliberate vertical rhythm.",
+      "source": "vision-model",
+      "issueId": "vision:launch-1:2"
+    },
+    {
+      "slideId": "launch-1",
+      "elementIds": [],
+      "kind": "weak-hierarchy",
+      "severity": "suggestion",
+      "confidence": 0.4,
+      "evidence": "The cover has a large title and small label but no visible subtitle or supporting value proposition tied to preserving reading position; the slide communicates the event more than the product benefit.",
+      "suggestedChange": "Add a short subtitle or one-line benefit statement near the title, e.g. 保存阅读位置，随时回到原文。",
+      "source": "vision-model",
+      "issueId": "vision:launch-1:3"
+    },
+    {
+      "slideId": "launch-2",
+      "elementIds": [
+        "label-0",
+        "text-0"
+      ],
+      "kind": "poor-alignment",
+      "severity": "minor",
+      "confidence": 0.55,
+      "evidence": "The left text edge of the label \"记录\" at x=486.04 and the body text \"保存页码和一句原文。\" at x=486.04 share a frame edge, but the label's wrapping measurement places its visible glyph start slightly right of the body line in the slide render.",
+      "suggestedChange": "Confirm both text frames use the same wrapPadding, and align the visible left edge of \"记录\" to the left edge of \"保存页码和一句原文。\".",
+      "source": "vision-model",
+      "issueId": "vision:launch-2:1"
+    },
+    {
+      "slideId": "launch-2",
+      "elementIds": [
+        "image-4",
+        "rect-5",
+        "label-0",
+        "text-0",
+        "rect-8",
+        "label-1",
+        "text-1"
+      ],
+      "kind": "crowded",
+      "severity": "suggestion",
+      "confidence": 0.45,
+      "evidence": "The two right-side blocks are stacked very tightly: label \"记录\" and body text, then a rule at y=326.5, then label \"回看\" at y=334.5 and body text, leaving almost no separation between the second divider line and the following \"回看\" label.",
+      "suggestedChange": "Increase the vertical spacing between the divider at y=326.5 and the \"回看\" label, or reduce the body text sizes, so both sections breathe evenly.",
+      "source": "vision-model",
+      "issueId": "vision:launch-2:2"
+    },
+    {
+      "slideId": "launch-2",
+      "elementIds": [
+        "title"
+      ],
+      "kind": "weak-hierarchy",
+      "severity": "suggestion",
+      "confidence": 0.4,
+      "evidence": "The title is set at 49px with normal weight, while the labels \"记录\" and \"回看\" are bold 24px; the title is the largest object but its visual weight competes with the right-side section labels rather than clearly dominating the page.",
+      "suggestedChange": "Either increase the title weight or size slightly, or reduce the bold emphasis of the section labels, so the title clearly remains the primary visual anchor.",
+      "source": "vision-model",
+      "issueId": "vision:launch-2:3"
+    },
+    {
+      "slideId": "launch-3",
+      "elementIds": [
+        "text-0"
+      ],
+      "kind": "crowded",
+      "severity": "minor",
+      "confidence": 0.6,
+      "evidence": "The single line of body text sits inside a 249.6px-tall frame but occupies only the top ~30px, leaving the remainder of the slide empty; the title and body are compressed into the upper third.",
+      "suggestedChange": "Reduce the height of text-0 to fit its single line, or rebalance the layout by moving the body content lower/centering it to use the empty lower area.",
+      "source": "vision-model",
+      "issueId": "vision:launch-3:1"
+    },
+    {
+      "slideId": "launch-4",
+      "elementIds": [
+        "text-1"
+      ],
+      "kind": "clipping",
+      "severity": "minor",
+      "confidence": 0.55,
+      "evidence": "右栏正文“从阅读日历选择当天，直接回到那条记录。”的末字“录。”被折到第三行，行首位置在元素高度 225.4–465 的下沿附近，视觉上贴近文本框底部边界。",
+      "suggestedChange": "将右栏正文字号略减或加宽文本框，使该句在文本框内自然排成两行，避免末字单独成行贴近边界。",
+      "source": "vision-model",
+      "issueId": "vision:launch-4:1"
+    },
+    {
+      "slideId": "launch-4",
+      "elementIds": [
+        "label-0",
+        "label-1"
+      ],
+      "kind": "low-contrast",
+      "severity": "suggestion",
+      "confidence": 0.4,
+      "evidence": "左右两个栏目标签“按书名”“按日期”使用 #893C43 深红色，置于同色系细横线下方，标签与横线颜色完全一致，分隔感弱。",
+      "suggestedChange": "可将两条细横线改为更浅的中性灰或降低不透明度，使红色标签与分隔线形成层次差异。",
+      "source": "vision-model",
+      "issueId": "vision:launch-4:2"
+    },
+    {
+      "slideId": "launch-4",
+      "elementIds": [],
+      "kind": "weak-hierarchy",
+      "severity": "suggestion",
+      "confidence": 0.45,
+      "evidence": "页面标题占顶部约 100px，两栏正文仅一行半，下方 300px 以上为空白，信息密度偏低，视觉重心集中在顶部。",
+      "suggestedChange": "可将两栏内容整体下移或增加一行简短示例（如“示例：书签列表”“示例：日历视图”），使版面重心更均衡，同时保留留白。",
+      "source": "vision-model",
+      "issueId": "vision:launch-4:3"
+    }
+  ],
+  "renderer": "LibreOffice 26.8.3.1 680(Build:1)",
+  "rasterizer": "pdftoppm version 26.11.0",
+  "pdfSha256": "c20ce6feb80a173ce370c7ddff17cf33633947b11a3753d89ec8a8d1671b215b",
+  "fonts": [
+    "BAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     81  0",
+    "CAAAAA+NotoSerifCJKsc-Regular        Type 1            Builtin          yes yes yes     96  0",
+    "DAAAAA+NotoSansCJKsc-Regular         Type 1            Builtin          yes yes yes     86  0",
+    "EAAAAA+Arial                         TrueType          WinAnsi          yes yes yes     91  0",
+    "FAAAAA+NotoSansCJKsc-Bold            Type 1            Builtin          yes yes yes     76  0"
+  ],
+  "contactSheet": "contact.png",
+  "durationMs": 21457
+}

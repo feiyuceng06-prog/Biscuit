@@ -54,8 +54,36 @@ export async function checkOffice(application, page, workspace, output, fixture)
   await design.getByRole('button', { name: '应用设计方案' }).click();
   await expect(design.locator('summary')).toContainText('企业汇报');
   await expect(design.locator('p')).not.toBeEmpty();
+  const reason = design.getByRole('region', { name: '本页构图' }).locator('span');
+  await expect(reason).not.toBeEmpty();
+  const chartReason = await reason.textContent();
+  await page.locator('.office-thumb').first().click();
+  await expect(reason).not.toHaveText(chartReason);
+  await page.locator('.office-thumb').nth(1).click();
+  await expect(reason).toHaveText(chartReason);
+  await design.getByLabel('根据每页内容规划构图').uncheck();
+  await design.getByRole('button', { name: '应用设计方案' }).click();
+  await expect(reason).toHaveCount(0);
+  await design.getByLabel('根据每页内容规划构图').check();
+  await design.getByRole('button', { name: '应用设计方案' }).click();
+  await expect(reason).toHaveText(chartReason);
   await expect(page.locator('.office-canvas')).toContainText('48 人次');
   await design.locator('summary').click();
+  const plannedSource = path.join(workspace, '逐页规划.deck.json');
+  await application.evaluate(({ dialog }, file) => {
+    const original = dialog.showSaveDialog;
+    dialog.showSaveDialog = async () => {
+      dialog.showSaveDialog = original;
+      return { canceled: false, filePath: file };
+    };
+  }, plannedSource);
+  await page.getByRole('button', { name: '文稿选项' }).click();
+  await page.getByRole('button', { name: '保存源文件', exact: true }).click();
+  await expect(page.locator('.office-status')).toContainText('逐页规划.deck.json');
+  const plannedDeck = JSON.parse(await fs.readFile(plannedSource, 'utf8'));
+  expect(plannedDeck.design.version).toBe(2);
+  expect(plannedDeck.design.slidePlans.map(plan => plan.slideId)).toEqual(plannedDeck.slides.map(slide => slide.id));
+  await page.getByRole('button', { name: '模板与版式' }).click();
   await page.getByRole('button', { name: '午夜' }).click();
   await page.getByRole('button', { name: '收起面板' }).click();
   await expect(page.locator('.office-canvas')).toContainText('48 人次');

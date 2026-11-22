@@ -1,0 +1,1027 @@
+{
+  "deckId": "architecture",
+  "brief": "说明离线文稿架构的数据流、模块边界和失败处理。",
+  "design": {
+    "direction": "technology",
+    "rhythm": [
+      {
+        "slideId": "architecture-1",
+        "layout": "cover",
+        "role": "opening",
+        "emphasis": "text",
+        "density": "sparse",
+        "referenceId": "technology-opening",
+        "rationale": "用框角和单一亮色建立视觉识别。"
+      },
+      {
+        "slideId": "architecture-2",
+        "layout": "conclusion",
+        "role": "context",
+        "emphasis": "text",
+        "density": "balanced",
+        "referenceId": "technology-opening",
+        "rationale": "用框角和单一亮色建立视觉识别。"
+      },
+      {
+        "slideId": "architecture-3",
+        "layout": "comparison",
+        "role": "contrast",
+        "emphasis": "text",
+        "density": "sparse",
+        "referenceId": "technology-evidence",
+        "rationale": "用对齐的数值和高对比标签帮助扫描数据。"
+      },
+      {
+        "slideId": "architecture-4",
+        "layout": "conclusion",
+        "role": "conclusion",
+        "emphasis": "text",
+        "density": "sparse",
+        "referenceId": "technology-opening",
+        "rationale": "用框角和单一亮色建立视觉识别。"
+      }
+    ],
+    "version": 2,
+    "slidePlans": [
+      {
+        "slideId": "architecture-1",
+        "sourceLayout": "cover",
+        "layout": "cover",
+        "variant": "cover-title",
+        "keyMessage": "一次导出，两个交付物",
+        "focalPoint": "headline",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "architecture-1",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "architecture-0-0",
+            "slotId": "opening-detail-0-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "architecture-0-0",
+            "slotId": "opening-detail-0-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "architecture-1",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "technology-opening"
+        ],
+        "selectionReason": "以全宽标题建立开场焦点。",
+        "candidates": [
+          {
+            "layout": "cover",
+            "variant": "cover-title",
+            "score": 56,
+            "feasible": true,
+            "reasons": [
+              "以全宽标题建立开场焦点。"
+            ]
+          },
+          {
+            "layout": "cover",
+            "variant": "cover-brief",
+            "score": 47,
+            "feasible": true,
+            "reasons": [
+              "把开场说明分行，给正文和配图留足空间。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": null,
+          "chart": null
+        }
+      },
+      {
+        "slideId": "architecture-2",
+        "sourceLayout": "conclusion",
+        "layout": "sequence",
+        "variant": "process-flow",
+        "keyMessage": "从草稿到预览的处理流程",
+        "focalPoint": "headline",
+        "density": "balanced",
+        "contentBindings": [
+          {
+            "nodeId": "architecture-2",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "architecture-1-0",
+            "slotId": "sequence-0-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "architecture-1-0",
+            "slotId": "sequence-0-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "architecture-1-1",
+            "slotId": "sequence-1-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "architecture-1-1",
+            "slotId": "sequence-1-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "architecture-1-2",
+            "slotId": "sequence-2-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "architecture-1-2",
+            "slotId": "sequence-2-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "architecture-2",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "technology-opening"
+        ],
+        "selectionReason": "沿正向阅读顺序展示步骤。",
+        "candidates": [
+          {
+            "layout": "sequence",
+            "variant": "process-flow",
+            "score": 55.89,
+            "feasible": true,
+            "reasons": [
+              "沿正向阅读顺序展示步骤。"
+            ]
+          },
+          {
+            "layout": "sequence",
+            "variant": "process-stack",
+            "score": 54,
+            "feasible": true,
+            "reasons": [
+              "纵向安排步骤，为说明保留宽度。"
+            ]
+          },
+          {
+            "layout": "statement",
+            "variant": "statement-led",
+            "score": 53,
+            "feasible": true,
+            "reasons": [
+              "放大主张，用独立区域承接正文。"
+            ]
+          },
+          {
+            "layout": "statement",
+            "variant": "statement-rows",
+            "score": 40,
+            "feasible": true,
+            "reasons": [
+              "用宽行保留小标题和较长正文。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": null,
+          "chart": null
+        }
+      },
+      {
+        "slideId": "architecture-3",
+        "sourceLayout": "comparison",
+        "layout": "comparison",
+        "variant": "comparison-pair",
+        "keyMessage": "两个失败边界需要不同处理",
+        "focalPoint": "headline",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "architecture-3",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "architecture-2-0",
+            "slotId": "comparison-0-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "architecture-2-0",
+            "slotId": "comparison-0-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "architecture-2-1",
+            "slotId": "comparison-1-label",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "architecture-2-1",
+            "slotId": "comparison-1-body",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "architecture-3",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "technology-evidence"
+        ],
+        "selectionReason": "为对照项分配同等宽度和文字层级。",
+        "candidates": [
+          {
+            "layout": "comparison",
+            "variant": "comparison-pair",
+            "score": 56.26,
+            "feasible": true,
+            "reasons": [
+              "为对照项分配同等宽度和文字层级。"
+            ]
+          },
+          {
+            "layout": "comparison",
+            "variant": "comparison-rows",
+            "score": 53,
+            "feasible": true,
+            "reasons": [
+              "用相同的行结构并列多个对照项，保留事实和上下文。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": null,
+          "chart": null
+        }
+      },
+      {
+        "slideId": "architecture-4",
+        "sourceLayout": "conclusion",
+        "layout": "statement",
+        "variant": "statement-wide",
+        "keyMessage": "只在渲染成功后发布预览",
+        "focalPoint": "headline",
+        "density": "sparse",
+        "contentBindings": [
+          {
+            "nodeId": "architecture-4",
+            "slotId": "headline",
+            "emphasis": "primary"
+          },
+          {
+            "nodeId": "architecture-3-0",
+            "slotId": "statement-caption",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "architecture-3-0",
+            "slotId": "statement-support",
+            "emphasis": "secondary"
+          },
+          {
+            "nodeId": "architecture-4",
+            "slotId": "speaker-notes",
+            "emphasis": "supporting"
+          }
+        ],
+        "referenceIds": [
+          "technology-opening"
+        ],
+        "selectionReason": "单一主张使用全宽标题，下方单独承接说明。",
+        "candidates": [
+          {
+            "layout": "statement",
+            "variant": "statement-wide",
+            "score": 65,
+            "feasible": true,
+            "reasons": [
+              "单一主张使用全宽标题，下方单独承接说明。"
+            ]
+          },
+          {
+            "layout": "statement",
+            "variant": "statement-led",
+            "score": 61,
+            "feasible": true,
+            "reasons": [
+              "放大主张，用独立区域承接正文。"
+            ]
+          },
+          {
+            "layout": "statement",
+            "variant": "statement-rows",
+            "score": 40,
+            "feasible": true,
+            "reasons": [
+              "用宽行保留小标题和较长正文。"
+            ]
+          }
+        ],
+        "assetStrategy": {
+          "image": null,
+          "chart": null
+        }
+      }
+    ]
+  },
+  "slides": [
+    {
+      "slideId": "architecture-1",
+      "layout": "cover",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "101D27",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "rect",
+          "color": "466B7A",
+          "x": 44,
+          "y": 25,
+          "w": 872,
+          "h": 2,
+          "id": "rect-2"
+        },
+        {
+          "type": "rect",
+          "color": "466B7A",
+          "x": 44,
+          "y": 488,
+          "w": 872,
+          "h": 2,
+          "id": "rect-3"
+        },
+        {
+          "type": "rect",
+          "color": "466B7A",
+          "x": 44,
+          "y": 25,
+          "w": 2,
+          "h": 464,
+          "id": "rect-4"
+        },
+        {
+          "type": "rect",
+          "color": "466B7A",
+          "x": 915,
+          "y": 25,
+          "w": 2,
+          "h": 464,
+          "id": "rect-5"
+        },
+        {
+          "type": "rect",
+          "color": "78DBEF",
+          "x": 60,
+          "y": 106,
+          "w": 22,
+          "h": 2,
+          "id": "rect-6"
+        },
+        {
+          "type": "rect",
+          "color": "78DBEF",
+          "x": 60,
+          "y": 106,
+          "w": 2,
+          "h": 9,
+          "id": "rect-7"
+        },
+        {
+          "type": "rect",
+          "color": "466B7A",
+          "x": 60,
+          "y": 323,
+          "w": 840,
+          "h": 2,
+          "id": "rect-8"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 124,
+          "w": 840,
+          "h": 186,
+          "value": "一次导出，两个交付物",
+          "field": "title",
+          "size": 60,
+          "color": "EFF8FD",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 60,
+          "lineHeight": 1.22,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 330,
+          "w": 268,
+          "h": 144,
+          "value": "架构评审",
+          "field": "label-0",
+          "size": 22,
+          "color": "78DBEF",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 22,
+          "lineHeight": 1.22,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 343,
+          "y": 330,
+          "w": 557,
+          "h": 144,
+          "value": "编辑文件与逐页预览分别保存。",
+          "field": "text-0",
+          "size": 20,
+          "color": "B5CBD8",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 20,
+          "lineHeight": 1.22,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 796,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "01 / 04",
+          "field": null,
+          "size": 13,
+          "color": "B5CBD8",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.22,
+          "fontFace": "Courier New",
+          "fontFamily": "\"Courier New\", \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"PingFang SC\", monospace",
+          "id": "text-12"
+        }
+      ]
+    },
+    {
+      "slideId": "architecture-2",
+      "layout": "conclusion",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "101D27",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "rect",
+          "color": "78DBEF",
+          "x": 60,
+          "y": 32,
+          "w": 22,
+          "h": 2,
+          "id": "rect-2"
+        },
+        {
+          "type": "rect",
+          "color": "78DBEF",
+          "x": 60,
+          "y": 32,
+          "w": 2,
+          "h": 9,
+          "id": "rect-3"
+        },
+        {
+          "type": "rect",
+          "color": "78DBEF",
+          "x": 60,
+          "y": 126.95,
+          "w": 11,
+          "h": 11,
+          "id": "rect-4"
+        },
+        {
+          "type": "rect",
+          "color": "466B7A",
+          "x": 79,
+          "y": 131.95,
+          "w": 256,
+          "h": 2,
+          "id": "rect-5"
+        },
+        {
+          "type": "text",
+          "x": 328,
+          "y": 121.95,
+          "w": 16,
+          "h": 22,
+          "value": "›",
+          "field": null,
+          "size": 15,
+          "color": "78DBEF",
+          "bold": true,
+          "align": "left",
+          "lineHeight": 1.22,
+          "fontFace": "Arial",
+          "fontFamily": "Arial, \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-6"
+        },
+        {
+          "type": "rect",
+          "color": "78DBEF",
+          "x": 348,
+          "y": 126.95,
+          "w": 11,
+          "h": 11,
+          "id": "rect-7"
+        },
+        {
+          "type": "rect",
+          "color": "466B7A",
+          "x": 367,
+          "y": 131.95,
+          "w": 256,
+          "h": 2,
+          "id": "rect-8"
+        },
+        {
+          "type": "text",
+          "x": 616,
+          "y": 121.95,
+          "w": 16,
+          "h": 22,
+          "value": "›",
+          "field": null,
+          "size": 15,
+          "color": "78DBEF",
+          "bold": true,
+          "align": "left",
+          "lineHeight": 1.22,
+          "fontFace": "Arial",
+          "fontFamily": "Arial, \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-9"
+        },
+        {
+          "type": "rect",
+          "color": "78DBEF",
+          "x": 636,
+          "y": 126.95,
+          "w": 11,
+          "h": 11,
+          "id": "rect-10"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 44,
+          "w": 840,
+          "h": 60.95,
+          "value": "从草稿到预览的处理流程",
+          "field": "title",
+          "size": 45,
+          "color": "EFF8FD",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 45,
+          "lineHeight": 1.22,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 153.95,
+          "w": 264,
+          "h": 28.82,
+          "value": "校验输入",
+          "field": "label-0",
+          "size": 22,
+          "color": "78DBEF",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 22,
+          "lineHeight": 1.22,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 186.76999999999998,
+          "w": 264,
+          "h": 292.23,
+          "value": "读取页标识、文本与图表数据。",
+          "field": "text-0",
+          "size": 20,
+          "color": "B5CBD8",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 20,
+          "lineHeight": 1.22,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 348,
+          "y": 153.95,
+          "w": 264,
+          "h": 28.82,
+          "value": "写入文件",
+          "field": "label-1",
+          "size": 22,
+          "color": "78DBEF",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 22,
+          "lineHeight": 1.22,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-1"
+        },
+        {
+          "type": "text",
+          "x": 348,
+          "y": 186.76999999999998,
+          "w": 264,
+          "h": 292.23,
+          "value": "写入可编辑对象，关闭输出文件。",
+          "field": "text-1",
+          "size": 20,
+          "color": "B5CBD8",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 20,
+          "lineHeight": 1.22,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-1"
+        },
+        {
+          "type": "text",
+          "x": 636,
+          "y": 153.95,
+          "w": 264,
+          "h": 28.82,
+          "value": "生成预览",
+          "field": "label-2",
+          "size": 22,
+          "color": "78DBEF",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 22,
+          "lineHeight": 1.22,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-2"
+        },
+        {
+          "type": "text",
+          "x": 636,
+          "y": 186.76999999999998,
+          "w": 264,
+          "h": 292.23,
+          "value": "从已保存的文件渲染实际页面。",
+          "field": "text-2",
+          "size": 20,
+          "color": "B5CBD8",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 20,
+          "lineHeight": 1.22,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-2"
+        },
+        {
+          "type": "text",
+          "x": 796,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "02 / 04",
+          "field": null,
+          "size": 13,
+          "color": "B5CBD8",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.22,
+          "fontFace": "Courier New",
+          "fontFamily": "\"Courier New\", \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"PingFang SC\", monospace",
+          "id": "text-18"
+        }
+      ]
+    },
+    {
+      "slideId": "architecture-3",
+      "layout": "comparison",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "101D27",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "rect",
+          "color": "78DBEF",
+          "x": 60,
+          "y": 32,
+          "w": 22,
+          "h": 2,
+          "id": "rect-2"
+        },
+        {
+          "type": "rect",
+          "color": "78DBEF",
+          "x": 60,
+          "y": 32,
+          "w": 2,
+          "h": 9,
+          "id": "rect-3"
+        },
+        {
+          "type": "rect",
+          "color": "466B7A",
+          "x": 480,
+          "y": 215.52800000000002,
+          "w": 2,
+          "h": 106,
+          "id": "rect-4"
+        },
+        {
+          "type": "rect",
+          "color": "78DBEF",
+          "x": 60,
+          "y": 215.52800000000002,
+          "w": 408,
+          "h": 2,
+          "id": "rect-5"
+        },
+        {
+          "type": "rect",
+          "color": "78DBEF",
+          "x": 492,
+          "y": 215.52800000000002,
+          "w": 408,
+          "h": 2,
+          "id": "rect-6"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 44,
+          "w": 840,
+          "h": 60.95,
+          "value": "两个失败边界需要不同处理",
+          "field": "title",
+          "size": 45,
+          "color": "EFF8FD",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 45,
+          "lineHeight": 1.22,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 242.52800000000002,
+          "w": 408,
+          "h": 28.82,
+          "value": "写入失败",
+          "field": "label-0",
+          "size": 22,
+          "color": "78DBEF",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 22,
+          "lineHeight": 1.22,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 275.348,
+          "w": 408,
+          "h": 46.18,
+          "value": "保留草稿，显示文件写入错误。",
+          "field": "text-0",
+          "size": 20,
+          "color": "B5CBD8",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 20,
+          "lineHeight": 1.22,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 492,
+          "y": 242.52800000000002,
+          "w": 408,
+          "h": 28.82,
+          "value": "预览失败",
+          "field": "label-1",
+          "size": 22,
+          "color": "78DBEF",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 22,
+          "lineHeight": 1.22,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-1"
+        },
+        {
+          "type": "text",
+          "x": 492,
+          "y": 275.348,
+          "w": 408,
+          "h": 46.18,
+          "value": "保留已导出的文稿，显示预览不可用。",
+          "field": "text-1",
+          "size": 20,
+          "color": "B5CBD8",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 20,
+          "lineHeight": 1.22,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-1"
+        },
+        {
+          "type": "text",
+          "x": 796,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "03 / 04",
+          "field": null,
+          "size": 13,
+          "color": "B5CBD8",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.22,
+          "fontFace": "Courier New",
+          "fontFamily": "\"Courier New\", \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"PingFang SC\", monospace",
+          "id": "text-12"
+        }
+      ]
+    },
+    {
+      "slideId": "architecture-4",
+      "layout": "conclusion",
+      "objects": [
+        {
+          "type": "rect",
+          "color": "101D27",
+          "x": 0,
+          "y": 0,
+          "w": 960,
+          "h": 540,
+          "id": "rect-1"
+        },
+        {
+          "type": "rect",
+          "color": "78DBEF",
+          "x": 60,
+          "y": 44,
+          "w": 22,
+          "h": 2,
+          "id": "rect-2"
+        },
+        {
+          "type": "rect",
+          "color": "78DBEF",
+          "x": 60,
+          "y": 44,
+          "w": 2,
+          "h": 9,
+          "id": "rect-3"
+        },
+        {
+          "type": "rect",
+          "color": "466B7A",
+          "x": 60,
+          "y": 333,
+          "w": 840,
+          "h": 2,
+          "id": "rect-4"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 66,
+          "w": 840,
+          "h": 263,
+          "value": "只在渲染成功后发布预览",
+          "field": "title",
+          "size": 50,
+          "color": "EFF8FD",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 50,
+          "lineHeight": 1.22,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 345,
+          "w": 840,
+          "h": 42,
+          "value": "交付条件",
+          "field": "label-0",
+          "size": 22,
+          "color": "78DBEF",
+          "bold": true,
+          "align": "left",
+          "wrapPadding": 22,
+          "lineHeight": 1.22,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "label-0"
+        },
+        {
+          "type": "text",
+          "x": 60,
+          "y": 391,
+          "w": 840,
+          "h": 88,
+          "value": "必须得到与文稿页数一致的完整图片序列。",
+          "field": "text-0",
+          "size": 23,
+          "color": "B5CBD8",
+          "bold": false,
+          "align": "left",
+          "wrapPadding": 23,
+          "lineHeight": 1.22,
+          "fontFace": "Noto Sans CJK SC",
+          "fontFamily": "\"Noto Sans CJK SC\", Arial, \"Microsoft YaHei\", \"PingFang SC\", sans-serif",
+          "id": "text-0"
+        },
+        {
+          "type": "text",
+          "x": 796,
+          "y": 501,
+          "w": 104,
+          "h": 21,
+          "value": "04 / 04",
+          "field": null,
+          "size": 13,
+          "color": "B5CBD8",
+          "bold": false,
+          "align": "right",
+          "lineHeight": 1.22,
+          "fontFace": "Courier New",
+          "fontFamily": "\"Courier New\", \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"PingFang SC\", monospace",
+          "id": "text-8"
+        }
+      ]
+    }
+  ]
+}

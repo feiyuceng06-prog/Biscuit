@@ -3,9 +3,12 @@ import { planDesign } from '../../electron/office/director.mjs';
 
 const directions = { auto: '自动选择', editorial: '编辑叙事', minimal: '极简', corporate: '企业汇报', technology: '技术说明' };
 
-export function DesignBrief({ deck, commit, onError, disabled }) {
+export function DesignBrief({ deck, slideId, commit, onError, disabled }) {
   const [preferences, setPreferences] = useState(deck.design?.preferences || {});
+  const [usePlanner, setUsePlanner] = useState(deck.design?.version !== 1);
+  useEffect(() => { setUsePlanner(deck.design?.version !== 1); }, [deck.design?.version]);
   const [loading, setLoading] = useState(false);
+  const pagePlan = deck.design?.slidePlans?.find(page => page.slideId === slideId);
   const saved = JSON.stringify(deck.design?.preferences || {});
   useEffect(() => { setPreferences(JSON.parse(saved)); }, [saved]);
   function update(field, value) {
@@ -24,7 +27,7 @@ export function DesignBrief({ deck, commit, onError, disabled }) {
   }
   function apply() {
     try {
-      commit({ ...deck, design: planDesign(deck, preferences) });
+      commit({ ...deck, design: planDesign(deck, preferences, { visualPlanner: usePlanner }) });
     } catch (error) {
       onError(error.message);
     }
@@ -42,6 +45,8 @@ export function DesignBrief({ deck, commit, onError, disabled }) {
         <label>视觉方向<select value={preferences.direction || 'auto'} onChange={e => update('direction', e.target.value)}>
           {Object.entries(directions).map(([id, label]) => <option key={id} value={id}>{label}</option>)}
         </select></label>
+        <label className="office-planner-toggle"><input type="checkbox" checked={usePlanner}
+          onChange={e => setUsePlanner(e.target.checked)} />根据每页内容规划构图</label>
         <div className="office-actions">
           <button type="button" onClick={reference}>{loading ? '分析中…' : '分析参考 PPTX'}</button>
           {preferences.reference && <button type="button" onClick={() => setPreferences(({ reference, ...rest }) => rest)}>移除参考</button>}
@@ -50,6 +55,11 @@ export function DesignBrief({ deck, commit, onError, disabled }) {
         <button type="button" className="office-primary" onClick={apply}>应用设计方案</button>
         {deck.design && <p>{deck.design.rationale}</p>}
       </fieldset>
+      {pagePlan && <section className="office-page-plan" aria-label="本页构图">
+        <strong>本页构图</strong>
+        <span>{pagePlan.selectionReason}</span>
+        {pagePlan.contentEditProposal && <small>此页内容较密，可手动拆页。已保留全部原文。</small>}
+      </section>}
     </details>
   );
 }

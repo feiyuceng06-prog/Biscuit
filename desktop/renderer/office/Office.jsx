@@ -8,6 +8,7 @@ import {
   outlineDeck,
   generatedBody,
   applyBody,
+  preserveLayoutContent,
   readDeck,
 } from '../../electron/office/deck.mjs';
 import { requestPage } from './model.mjs';
@@ -73,7 +74,7 @@ export function Office({ workspace }) {
     const previous = current.current;
     if (next === previous) return;
     if (next.design && next.design === previous?.design) {
-      next = { ...next, design: planDesign(next, next.design.preferences) };
+      next = { ...next, design: planDesign(next, next.design.preferences, { visualPlanner: next.design.version === 2 }) };
     }
     if (record && previous) history.current = [...history.current.slice(-29), previous];
     current.current = next;
@@ -100,7 +101,7 @@ export function Office({ workspace }) {
         s.id === id
           ? {
               ...s,
-              ...patch,
+              ...(deck.design?.version === 2 ? preserveLayoutContent(s, patch) : patch),
               generated: s.generated || 'items' in patch || 'notes' in patch,
               revision: s.revision + (Object.keys(patch).some((k) => k !== 'title') ? 1 : 0),
             }
@@ -128,7 +129,7 @@ export function Office({ workspace }) {
     )
       return;
     const next = example ? libraryExample(readingRoom) : newDeck();
-    if (!example && autoDesign.current) next.design = planDesign(next);
+    if (!example && autoDesign.current) next.design = planDesign(next, {}, { visualPlanner: true });
     history.current = [];
     commit(next, false);
     select(next.slides[0].id);
