@@ -194,6 +194,19 @@ export function Office({ workspace }) {
       setError(e.message);
     }
   }
+  function importPresentation() {
+    return run('读取 PPTX 内容', async (signal) => {
+      const result = await window.feiyuDesktop.core.invoke('presentation_content');
+      if (!result || signal.aborted) return;
+      if (result.truncated) throw Error('PPTX 内容超出导入上限，请选择较短的文稿');
+      if (!result.text?.trim()) throw Error('这个 PPTX 没有可导入的文字');
+      const deck = current.current;
+      const source = [deck.source, result.text].filter(Boolean).join('\n\n');
+      if (source.length > 30000) throw Error('合并后的参考材料超过 3 万字，请先缩短材料');
+      commit({ ...deck, source });
+      setMessage('已将 PPTX 内容加入参考材料，可在生成前核对');
+    });
+  }
   async function save(format) {
     try {
       setError('');
@@ -455,6 +468,7 @@ export function Office({ workspace }) {
                 </label>
                 <div className="office-actions">
                   <button onClick={() => reportInput.current.click()}><Upload size={16} />导入材料</button>
+                  <button onClick={importPresentation}><Upload size={16} />导入 PPTX 内容</button>
                   <input
                     type="file"
                     hidden

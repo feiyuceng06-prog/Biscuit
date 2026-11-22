@@ -148,17 +148,24 @@ ipcMain.handle('feiyu:command', async (event, command, args = {}) => {
   trusted(event);
   switch (command) {
     case 'presentation_design_enabled': return process.env.presentation_design_engine === '1';
+    case 'presentation_content':
     case 'presentation_reference': {
-      const selected = await dialog.showOpenDialog(win, { title: '分析参考演示文稿', properties: ['openFile'],
+      const content = command === 'presentation_content';
+      const selected = await dialog.showOpenDialog(win, { title: content ? '导入 PPTX 内容' : '分析参考演示文稿', properties: ['openFile'],
         filters: [{ name: 'PowerPoint', extensions: ['pptx'] }] });
       if (selected.canceled || !selected.filePaths.length) return null;
       const backend = resolveBackend({ packaged: app.isPackaged, resources: process.resourcesPath, root });
       try {
         const { stdout } = await promisify(execFile)(backend.command,
-          [...backend.args, '--presentation-reference', selected.filePaths[0]],
-          { windowsHide: true, timeout: 15000, maxBuffer: 65536, env: { ...process.env, PYTHONUTF8: '1' } });
+          [...backend.args, content ? '--presentation-content' : '--presentation-reference', selected.filePaths[0]],
+          { windowsHide: true, timeout: 15000, maxBuffer: content ? 1024 * 1024 : 65536, env: { ...process.env, PYTHONUTF8: '1' } });
         return JSON.parse(stdout);
-      } catch {
+      } catch (error) {
+        if (content) {
+          if (error.killed) throw Error('读取 PPTX 超时');
+          const reason = error.stderr?.trim();
+          throw Error(reason && reason.length <= 320 ? reason : '无法导入 PPTX 内容，请检查文件和本机后端');
+        }
         throw Error('无法读取参考 PPTX。请选择有效的 .pptx 文件（最多 16 MB、100 页）。');
       }
     }

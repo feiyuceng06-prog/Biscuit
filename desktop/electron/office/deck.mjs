@@ -28,6 +28,17 @@ export function newSlide(title = '新的一页', layout = 'conclusion') {
     generated: false,
   };
 }
+export function duplicateSlide(deck, index) {
+  if (!deck.slides[index] || deck.slides.length >= 20) throw Error('文稿最多支持 20 页');
+  const copy = structuredClone(deck.slides[index]);
+  copy.id = uid();
+  for (const item of [...copy.items, ...(copy.photos ?? [])]) item.id = uid();
+  const slides = [...deck.slides];
+  slides.splice(index + 1, 0, copy);
+  if (pictureDataSize(slides, deck.pendingPhotos) > maxDeckPictureData)
+    throw Error('复制后图片总量将超过文稿上限');
+  return { ...deck, slides };
+}
 export function newDeck() {
   return {
     version: 1,

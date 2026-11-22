@@ -35,6 +35,11 @@ export async function checkOffice(application, page, workspace, output, fixture)
   await expect(page.locator('.office-thumb')).toHaveCount(5);
   await expect(page.locator('.office-canvas svg image')).toBeVisible();
   await page.locator('.office-thumb').nth(1).click();
+  await page.getByRole('button', { name: '复制本页' }).click();
+  await expect(page.locator('.office-thumb')).toHaveCount(6);
+  await page.getByRole('button', { name: '撤销' }).click();
+  await expect(page.locator('.office-thumb')).toHaveCount(5);
+  await page.locator('.office-thumb').nth(1).click();
   await page.getByRole('button', { name: '模板与版式' }).click();
   await expect(page.locator('.studio-themes button svg')).toHaveCount(3);
   const design = office.locator('.office-director');
@@ -94,6 +99,18 @@ export async function checkOffice(application, page, workspace, output, fixture)
   await page.getByRole('button', { name: '返回办公' }).click();
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: '新建演示文稿' }).click();
+  const source = page.locator('.office-report');
+  await source.fill('已有材料');
+  await application.evaluate(({ dialog }, file) => {
+    const original = dialog.showOpenDialog;
+    dialog.showOpenDialog = async () => {
+      dialog.showOpenDialog = original;
+      return { canceled: false, filePaths: [file] };
+    };
+  }, referencePath);
+  await page.getByRole('button', { name: '导入 PPTX 内容' }).click();
+  await expect(source).toHaveValue(/^已有材料\n\nPPTX 共 5 页[\s\S]*演讲者备注/, { timeout: 15000 });
+  await source.fill('');
   const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }));
   try {
     await page.setViewportSize({ width: 390, height: 740 });

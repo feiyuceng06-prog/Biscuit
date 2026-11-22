@@ -44,6 +44,11 @@ export function DesignBrief({ deck, slideId, commit, onError, disabled }) {
           placeholder="例如：技术评审会" onChange={e => update('setting', e.target.value)} /></label>
         <label>品牌强调色（可选）<input maxLength={7} value={preferences.brandAccent || ''}
           placeholder="#24549B" onChange={e => update('brandAccent', e.target.value)} /></label>
+        <label>品牌字体（可选）<input maxLength={64} value={preferences.brandFont || ''}
+          placeholder="本机字体名称" onChange={e => update('brandFont', e.target.value)} /></label>
+        <label>背景明暗<select value={preferences.background || ''} onChange={e => update('background', e.target.value)}>
+          <option value="">跟随参考或设计方向</option><option value="light">浅色</option><option value="dark">深色</option>
+        </select></label>
         <label>视觉方向<select value={preferences.direction || 'auto'} onChange={e => update('direction', e.target.value)}>
           {Object.entries(directions).map(([id, label]) => <option key={id} value={id}>{label}</option>)}
         </select></label>
