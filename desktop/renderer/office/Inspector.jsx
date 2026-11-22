@@ -35,6 +35,7 @@ export function Inspector({ slide, edit, error }) {
     }
   };
   const limit = maxItems(slide.layout);
+  const supportsImage = slide.layout === 'image' || slide.layout === 'cover';
   return (
     <aside className="office-inspector">
       <h3>编辑本页</h3>
@@ -57,14 +58,20 @@ export function Inspector({ slide, edit, error }) {
           ))}
         </select>
       </label>
-      {slide.layout === 'image' && (
+      {supportsImage && (
         <label>
           配图
           <input type="file" accept="image/png,image/jpeg" onChange={imageInput} />
         </label>
       )}
-      {slide.layout === 'image' && slide.image && (
+      {supportsImage && slide.image && (
         <button onClick={() => edit({ image: '' })}>移除配图</button>
+      )}
+      {slide.layout === 'chart' && (
+        <label>
+          图表单位
+          <input maxLength={24} value={slide.unit || ''} onChange={(e) => edit({ unit: e.target.value })} />
+        </label>
       )}
       {slide.items.slice(0, limit).map((row, i) => (
         <fieldset key={row.id}>
@@ -103,6 +110,12 @@ export function Inspector({ slide, edit, error }) {
                 value={row.text}
                 onChange={(e) => updateItem(row.id, { text: e.target.value })}
               />
+            </label>
+          )}
+          {slide.layout === 'chart' && (
+            <label>
+              图旁解读（显示第一条非空解读）
+              <textarea maxLength={220} value={row.text} onChange={(e) => updateItem(row.id, { text: e.target.value })} />
             </label>
           )}
           {slide.items.length > 1 && (

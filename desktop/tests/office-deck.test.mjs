@@ -59,3 +59,36 @@ test('chart bodies require numbers and preserve the signs of real values', () =>
     [-42, 0],
   );
 });
+
+test('chart units survive reopening and only the annotated category is highlighted', () => {
+  const deck = newDeck();
+  const slide = newSlide('周五客流', 'chart');
+  deck.slides = [slide];
+  Object.assign(
+    slide,
+    generatedBody(slide, {
+      unit: '人次',
+      items: [
+        { label: '首周', value: 26 },
+        { label: '次周', value: 35, text: '多了 9 人次' },
+      ],
+    }),
+  );
+  const reopened = readDeck(JSON.parse(JSON.stringify(deck))).slides[0];
+  for (const theme of ['paper', 'sand', 'midnight']) {
+    const objects = composition(reopened, 1, 1, theme);
+    const chart = objects.find((o) => o.type === 'chart');
+    assert.notEqual(chart.colors[0], chart.colors[1]);
+    assert.ok(objects.some((o) => o.value === '35 人次'));
+    assert.ok(objects.some((o) => o.value === '多了 9 人次' && o.field === 'text-1'));
+    const plain = composition(
+      { ...reopened, items: reopened.items.map((i) => ({ ...i, text: '' })) },
+      1,
+      1,
+      theme,
+    );
+    assert.ok(plain.find((o) => o.type === 'chart').w > chart.w);
+  }
+  slide.unit = {};
+  assert.throws(() => readDeck(deck));
+});

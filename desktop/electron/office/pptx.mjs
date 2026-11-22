@@ -26,7 +26,8 @@ export async function powerPoint(raw) {
       if (o.type === 'text')
         page.addText(o.value, {
           ...box,
-          fontFace: 'Microsoft YaHei',
+          fontFace: o.serif ? 'Noto Serif CJK SC' : 'Microsoft YaHei',
+          lang: 'zh-CN',
           align: o.align || 'left',
           fontSize: o.size,
           bold: o.bold,
@@ -57,7 +58,8 @@ export async function powerPoint(raw) {
             dataLabelPosition: 'outEnd',
             dataLabelFormatCode: 'General',
             dataLabelColor: o.ink,
-            chartColors: [o.accent],
+            chartColors: o.colors,
+            dataLabelFontSize: 15,
             showCatName: false,
             showBorder: false,
           },

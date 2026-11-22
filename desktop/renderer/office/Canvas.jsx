@@ -23,7 +23,7 @@ function Chart({ o }) {
               y={Math.min(top, baseline)}
               width={step * 0.56}
               height={Math.max(1, Math.abs(top - baseline))}
-              fill={'#' + o.accent}
+              fill={'#' + o.colors[i]}
             />
             <text
               x={x}
@@ -54,7 +54,7 @@ export function Canvas({ slide, index, total, theme, onEdit }) {
         items: slide.items.map((r) => ({
           ...r,
           label: r.label || '添加小标题',
-          text: r.text || '点击添加正文',
+          text: r.text || (slide.layout === 'chart' ? '' : '点击添加正文'),
         })),
       }
     : slide;
@@ -85,8 +85,11 @@ export function Canvas({ slide, index, total, theme, onEdit }) {
           return <image key={i} {...box} href={o.data} preserveAspectRatio="none" />;
         if (o.type === 'chart') return <Chart key={i} o={o} />;
         const [field, row] = o.field?.split('-') || [];
-        const value = field === 'title' ? slide.title : slide.items[row]?.[field];
-        const style = { textAlign:o.align||'left',fontSize: o.size, color: '#' + o.color, fontWeight: o.bold ? 700 : 400 };
+        const value = row === undefined ? slide[field] : slide.items[row]?.[field];
+        const style = {
+          fontFamily: o.serif ? '"Noto Serif CJK SC", "Songti SC", SimSun, serif' : undefined,
+          textAlign: o.align, fontSize: o.size, color: '#' + o.color, fontWeight: o.bold ? 700 : 400,
+        };
         return (
           <foreignObject key={o.field || i} {...box}>
             {onEdit && o.field && active === o.field ? (
@@ -95,7 +98,7 @@ export function Canvas({ slide, index, total, theme, onEdit }) {
                 style={style}
                 aria-label="画布文字"
                 autoFocus
-                maxLength={field === 'title' ? 120 : field === 'label' ? 60 : 220}
+                maxLength={field === 'unit' ? 24 : field === 'title' ? 120 : field === 'label' ? 60 : 220}
                 value={value}
                 onFocus={(e) => e.target.select()}
                 onChange={(e) => onEdit(field, row, e.target.value)}

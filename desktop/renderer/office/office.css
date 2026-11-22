@@ -541,13 +541,6 @@
   gap: 5px;
   padding: 5px;
 }
-.studio-themes b {
-  width: 100%;
-  padding: 4px 0;
-  font:
-    24px Georgia,
-    serif;
-}
 .studio-themes button[aria-pressed='true'],
 .studio-layouts button[aria-pressed='true'] {
   border-color: var(--text);

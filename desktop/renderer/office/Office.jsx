@@ -10,6 +10,8 @@ import {
 } from '../../electron/office/deck.mjs';
 import { requestPage } from './model.mjs';
 import { draft } from './drafts.mjs';
+import { libraryExample } from './library-example.mjs';
+import readingRoom from './reading-room.jpg';
 import { Studio } from './Studio.jsx';
 
 import './office.css';
@@ -104,17 +106,17 @@ export function Office({ workspace }) {
     setError('');
     setMessage('');
   }
-  function newPresentation() {
+  function newPresentation(example = false) {
     if (
       current.current &&
       !window.confirm('新建将替换这份本地草稿。已保存的源文件可随时打开，继续新建吗？')
     )
       return;
-    const next = newDeck();
+    const next = example ? libraryExample(readingRoom) : newDeck();
     history.current = [];
     commit(next, false);
     select(next.slides[0].id);
-    enter('source');
+    enter(example ? 'edit' : 'source');
   }
   async function openFile(e) {
     const file = e.target.files[0];
@@ -217,7 +219,7 @@ export function Office({ workspace }) {
             title: active.title,
             layout: active.layout,
             outline: now.slides.map((s) => s.title).join('\n'),
-            current: JSON.stringify(active.items),
+            current: JSON.stringify({ items: active.items, unit: active.unit }),
             change: all ? '' : change,
           },
           signal,
@@ -321,12 +323,13 @@ export function Office({ workspace }) {
                 </div>
                 <h2>演示文稿</h2>
                 <p>从项目材料生成大纲，逐页编辑并导出 PowerPoint。</p>
-                <button className="office-primary" disabled={!ready} onClick={newPresentation}>
+                <button className="office-primary" disabled={!ready} onClick={() => newPresentation()}>
                   新建演示文稿
                 </button>
                 <button disabled={!ready} onClick={() => fileInput.current.click()}>
                   打开源文件
                 </button>
+                <button disabled={!ready} onClick={() => newPresentation(true)}>打开示例文稿</button>
               </section>
               {deck && (
                 <section className="office-recent">

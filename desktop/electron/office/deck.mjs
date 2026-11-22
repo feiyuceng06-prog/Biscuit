@@ -37,7 +37,8 @@ export function outlineDeck(draft, result, count) {
   if (!Array.isArray(result?.slides) || result.slides.length !== count)
     throw Error('大纲页数与要求不符');
   const slides = result.slides.map((row) => {
-    if (!Object.hasOwn(layouts, row?.layout) || !clean(row.title, 120)) throw Error('大纲格式不完整');
+    if (!Object.hasOwn(layouts, row?.layout) || !clean(row.title, 120))
+      throw Error('大纲格式不完整');
     return newSlide(clean(row.title, 120), row.layout);
   });
   return { ...draft, title: clean(result.title, 120) || slides[0].title, slides };
@@ -54,7 +55,10 @@ export function generatedBody(slide, result) {
       value: Number.isFinite(row.value) ? row.value : 0,
     };
   });
-  return { items, notes: clean(result.notes, 1200) };
+  const body = { items, notes: clean(result.notes, 1200) };
+  if (slide.layout === 'chart' && typeof result.unit === 'string')
+    body.unit = clean(result.unit, 24);
+  return body;
 }
 // Only replace the requested body. Title changes can coexist with a pending request.
 export function applyBody(deck, original, body) {
@@ -80,7 +84,8 @@ export function readDeck(raw) {
   };
   if (
     raw?.version !== 1 ||
-    (raw.theme !== undefined && (typeof raw.theme !== 'string' || !Object.hasOwn(themes, raw.theme))) ||
+    (raw.theme !== undefined &&
+      (typeof raw.theme !== 'string' || !Object.hasOwn(themes, raw.theme))) ||
     !string(raw.title, 120) ||
     !string(raw.source, 30000) ||
     !string(raw.brief, 1500) ||
@@ -98,6 +103,7 @@ export function readDeck(raw) {
       !Object.hasOwn(layouts, s.layout) ||
       !string(s.title, 120) ||
       !string(s.notes, 1200) ||
+      (s.unit !== undefined && !string(s.unit, 24)) ||
       !Number.isSafeInteger(s.revision) ||
       s.revision < 0 ||
       typeof s.generated !== 'boolean' ||
@@ -124,131 +130,220 @@ export const themes = {
   paper: {
     name: '白纸',
     bg: 'FFFFFF',
-    ink: '202122',
-    soft: '57595A',
-    tint: 'F0F0ED',
-    rule: 'D5D6D1',
-    accent: '344EAE',
+    ink: '14181E',
+    soft: '454D5A',
+    tint: 'EAF0FA',
+    rule: 'CFD6E0',
+    accent: '2449AD',
+    mutedBar: 'A8B7D4',
   },
   sand: {
     name: '陶土',
-    bg: 'FBF6ED',
-    ink: '362B26',
-    soft: '655549',
-    tint: 'F1E2D0',
-    rule: 'D7BC9F',
-    accent: 'A64930',
+    bg: 'FBF6EB',
+    ink: '302A23',
+    soft: '60564B',
+    tint: 'F2E4C9',
+    rule: 'D3C3AA',
+    accent: '9D422C',
+    mutedBar: 'C9BBA5',
   },
   midnight: {
     name: '午夜',
-    bg: '1C2028',
-    ink: 'F4F2EB',
-    soft: 'B5BBCA',
-    tint: '2A303D',
-    rule: '545D70',
-    accent: 'AEBBF5',
+    bg: '192221',
+    ink: 'F0F3EA',
+    soft: 'C4CFC3',
+    tint: '2B3936',
+    rule: '53645D',
+    accent: 'D6ED87',
+    mutedBar: '778B80',
   },
 };
+
 export function composition(slide, page, total, theme = 'paper') {
-  const { bg, ink, soft, tint, rule, accent } = themes[theme] || themes.paper;
+  const { bg, ink, soft, tint, rule, accent, mutedBar } = themes[theme] || themes.paper;
+  const editorial = theme === 'sand',
+    dark = theme === 'midnight';
   const objects = [];
   const rect = (x, y, w, h, color) => objects.push({ type: 'rect', x, y, w, h, color });
-  function text(x, y, w, h, value, size, color = ink, bold = false, field = null) {
+  function text(
+    x,
+    y,
+    w,
+    h,
+    value,
+    size,
+    color,
+    field,
+    { bold = false, serif = false, align = 'left' } = {},
+  ) {
     if (!value) return;
-    // Reserve room for wraps in both Chinese and Latin scripts, in the editor and export.
-    const lines = (font) =>
-      String(value)
-        .split('\n')
-        .reduce((n, line) => {
-          const units = Array.from(line).reduce(
-            (sum, c) => sum + (c.charCodeAt(0) < 128 ? 0.6 : 1.05),
-            0,
-          );
-          return n + Math.max(1, Math.ceil((units * font) / w));
-        }, 0);
-    while (size > 8 && lines(size) * size * 1.35 > h) size--;
-    objects.push({ type: 'text', x, y, w, h, value, size, color, bold, field });
+    const widths = String(value)
+      .split('\n')
+      .map((line) =>
+        Array.from(line).reduce((sum, c) => sum + (c.charCodeAt(0) < 128 ? 0.6 : 1.05), 0),
+      );
+    while (
+      size > 8 &&
+      widths.reduce((n, units) => n + Math.max(1, Math.ceil((units * size) / w)), 0) * size * 1.35 >
+        h
+    )
+      size--;
+    objects.push({ type: 'text', x, y, w, h, value, size, color, field, bold, serif, align });
   }
   const items = slide.items.slice(0, maxItems(slide.layout));
+  const title = (x, y, w, h, size, color = ink, align = 'left') =>
+    text(x, y, w, h, slide.title, size, color, 'title', {
+      bold: !editorial,
+      serif: editorial,
+      align,
+    });
+  const label = (i, x, y, w, h, size, color = ink, align = 'left') =>
+    text(x, y, w, h, items[i].label, size, color, 'label-' + i, { bold: true, align });
+  const body = (i, x, y, w, h, size, color = soft, align = 'left') =>
+    text(x, y, w, h, items[i].text, size, color, 'text-' + i, { align });
+  function rows(x, y, w, h) {
+    const step = h / items.length;
+    items.forEach((_, i) => {
+      const top = y + i * step;
+      rect(x, top, w, 1, rule);
+      label(i, x, top + 10, w, step * 0.37, 24);
+      body(i, x, top + 11 + step * 0.37, w, step * 0.58 - 12, 20);
+    });
+  }
+  const illustration = (x, y, w, h) =>
+    objects.push({ type: 'image', x, y, w, h, data: slide.image });
+  const folio = String(page).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
   rect(0, 0, 960, 540, bg);
-  const ellipse = (x, y, w, h, color, outline = false) =>
-    objects.push({ type: 'ellipse', x, y, w, h, color, outline });
-  const title = (x, y, w, h, size) => text(x, y, w, h, slide.title, size, ink, true, 'title');
-  const body = (row, i, x, y, w, h, size) => text(x, y, w, h, row.text, size, soft, false, 'text-' + i);
-  const label = (row, i, x, y, w, h, size) => text(x, y, w, h, row.label, size, ink, true, 'label-' + i);
-  if (slide.layout === 'cover' && theme === 'paper') {
-    text(116, 110, 728, 48, items[0].label, 18, soft, false, 'label-0');
-    title(70, 179, 820, 131, 61);
-    body(items[0], 0, 108, 323, 744, 115, 24);
-    for (const object of objects) if (object.type === 'text') object.align = 'center';
-  } else if (slide.layout === 'cover') {
-    rect(615, 0, 345, 540, tint);
-    if(theme==='midnight') {
-      ellipse(645,115,277,277,rule,true);
-      ellipse(676,146,215,215,rule,true);
-      ellipse(710,180,147,147,accent,true);
-      ellipse(872,135,14,14,accent);
-      ellipse(765,236,37,37,accent);
+  if (slide.layout === 'cover') {
+    if (slide.image) {
+      if (dark) {
+        illustration(240, 0, 720, 540);
+        rect(0, 0, 451, 540, bg);
+        label(0, 47, 56, 354, 55, 17, soft);
+        title(44, 144, 362, 200, 62, accent);
+        body(0, 47, 375, 354, 103, 23);
+      } else if (editorial) {
+        illustration(49, 76, 443, 333);
+        label(0, 50, 424, 442, 49, 15, accent);
+        title(520, 108, 395, 199, 63);
+        rect(523, 330, 379, 1, rule);
+        body(0, 523, 351, 379, 114, 22);
+      } else {
+        illustration(415, 66, 544, 409);
+        label(0, 47, 64, 336, 58, 17, accent);
+        title(44, 155, 350, 180, 58);
+        body(0, 47, 368, 335, 100, 22);
+      }
+    } else if (editorial) {
+      rect(0, 0, 960, 373, tint);
+      label(0, 57, 53, 820, 56, 17, accent);
+      title(52, 131, 845, 207, 67);
+      rect(57, 371, 846, 1, accent);
+      body(0, 57, 401, 785, 91, 24);
+    } else if (dark) {
+      label(0, 90, 92, 780, 49, 17, soft, 'center');
+      title(57, 166, 846, 157, 74, accent, 'center');
+      body(0, 108, 354, 744, 104, 22, soft, 'center');
     } else {
-      for (let i = 0; i < 10; i++)
-        ellipse(640 + i * 13, 76 + i * 8, 282 - i * 13, 365 - i * 16, accent, true);
+      label(0, 55, 53, 844, 54, 17, accent);
+      title(50, 147, 858, 210, 75);
+      rect(0, 392, 960, 148, accent);
+      body(0, 56, 420, 770, 92, 24, 'FFFFFF');
     }
-    text(55, 66, 505, 60, items[0]?.label, 18, accent, true, 'label-0');
-    title(52, 153, 523, 175, 58);
-    body(items[0], 0, 55, 350, 515, 105, 24);
-  } else if (slide.layout === 'conclusion') {
-    title(52, 57, 355, 346, 46);
-    const step = 382 / items.length;
-    items.forEach((r, i) => {
+  } else if (slide.layout === 'chart') {
+    title(51, 38, 856, 105, 42);
+    const focus = items.findIndex((item) => item.text.trim());
+    const chart = {
+      type: 'chart',
+      x: 53,
+      y: 178,
+      w: focus < 0 ? 851 : 513,
+      h: 285,
+      items,
+      ink,
+      rule,
+      colors: items.map((_, i) => (focus < 0 || i === focus ? accent : mutedBar)),
+    };
+    if (editorial && focus >= 0) chart.x = 399;
+    objects.push(chart);
+    if (slide.unit) text(chart.x + 10, 149, chart.w - 20, 26, slide.unit, 15, soft, 'unit');
+    if (focus >= 0) {
+      const x = editorial ? 53 : 610;
+      rect(x, 166, 299, 2, accent);
+      label(focus, x, 187, 297, 51, 19);
+      text(
+        x - 2,
+        246,
+        301,
+        93,
+        [String(items[focus].value), slide.unit].filter(Boolean).join(' '),
+        63,
+        accent,
+        null,
+        { serif: editorial, bold: !editorial },
+      );
+      body(focus, x, 350, 298, 116, 21);
+    }
+  } else if (slide.layout === 'conclusion' && !editorial) {
+    if (dark) rect(0, 0, 422, 540, tint);
+    title(49, 73, 343, 356, 52, dark ? accent : ink);
+    rows(457, 68, 448, 397);
+  } else if (slide.layout === 'timeline' && editorial) {
+    title(50, 63, 342, 346, 49);
+    const step = 396 / items.length;
+    items.forEach((_, i) => {
       const y = 65 + i * step;
-      rect(445, y, 457, 1, rule);
-      label(r, i, 445, y + 10, 457, step * 0.35, 25);
-      body(r, i, 445, y + step * 0.4 + 5, 457, step * 0.55 - 4, 21);
+      rect(422, y, 483, 1, rule);
+      label(i, 422, y + 11, 123, step - 16, 20, accent);
+      body(i, 555, y + 10, 350, step - 16, 22);
     });
   } else {
-    title(52, 46, 855, 95, 43);
-    if (slide.layout === 'chart') {
-      objects.push({ type: 'chart', x: 59, y: 155, w: 840, h: 300, items, accent, ink, rule });
-    } else if (slide.layout === 'comparison') {
-      const step = 864 / items.length;
-      items.forEach((r, i) => {
-        const x = 49 + i * step;
-        rect(x, 167, step - 14, 274, i ? tint : bg);
-        rect(x, 167, step - 14, 3, i ? accent : ink);
-        label(r, i, x + 18, 194, step - 53, 77, 32);
-        body(r, i, x + 18, 285, step - 53, 137, 23);
+    title(51, 39, 855, 106, 44);
+    if (slide.layout === 'comparison') {
+      const step = 854 / items.length;
+      items.forEach((_, i) => {
+        const x = 53 + i * step;
+        if (dark || (!editorial && i === 1)) rect(x, 168, step - 12, 288, tint);
+        rect(x, 166, step - 12, 2, editorial ? accent : rule);
+        label(i, x + 16, 197, step - 54, 92, 37, editorial ? accent : ink);
+        body(i, x + 16, 308, step - 54, 129, 24);
       });
     } else if (slide.layout === 'timeline') {
       const step = 852 / items.length;
-      rect(58, 221, Math.max(24, (items.length - 1) * step), 2, rule);
-      items.forEach((r, i) => {
-        const x = 54 + i * step;
-        ellipse(x, 214, 16, 16, accent);
-        label(r, i, x, 247, step - 15, 74, 25);
-        body(r, i, x, 328, step - 15, 127, 20);
+      rect(54, 218, step * (items.length - 1) + 12, 2, rule);
+      items.forEach((_, i) => {
+        const x = 53 + i * step;
+        rect(x, 213, 11, 11, accent);
+        label(i, x, 248, step - 17, 73, 25);
+        body(i, x, 333, step - 17, 126, 21);
       });
+    } else if (slide.layout === 'image' && slide.image) {
+      const imageLeft = editorial || dark;
+      illustration(imageLeft ? 52 : 507, 157, 400, 301);
+      rows(imageLeft ? 498 : 53, 161, 408, 298);
     } else {
-      const image = !!slide.image,
-        width = image ? 400 : 840,
-        step = 293 / items.length;
-      items.forEach((r, i) => {
-        const y = 155 + i * step;
-        rect(54, y, width, 1, rule);
-        label(r, i, 54, y + 7, width, step * 0.38, 24);
-        body(r, i, 54, y + step * 0.4 + 4, width, step * 0.54, 20);
+      // Parallel columns keep the evidence under its own heading, including a text-only image page.
+      const step = 854 / items.length;
+      items.forEach((_, i) => {
+        const x = 53 + i * step;
+        rect(x, 168, step - 15, 1, rule);
+        label(i, x, 193, step - 19, 101, 33, accent);
+        body(i, x, 308, step - 19, 143, 23);
       });
-      if (image) objects.push({ type: 'image', x: 496, y: 145, w: 401, h: 302, data: slide.image });
     }
   }
-  rect(54, 480, 852, 1, rule);
+  const footColor =
+    slide.layout === 'cover' && !slide.image && !dark && !editorial ? 'FFFFFF' : soft;
   text(
-    833,
-    495,
-    78,
-    25,
-    String(page).padStart(2, '0') + ' / ' + String(total).padStart(2, '0'),
+    dark && slide.layout === 'cover' && slide.image ? 303 : 808,
+    504,
+    99,
+    23,
+    folio,
     12,
-    soft,
+    footColor,
+    null,
+    { align: 'right' },
   );
   return objects;
 }

@@ -75,7 +75,7 @@ export function Studio({
     return () => host?.removeEventListener('cancel', cancel, true);
   }, [playing, panel]);
   function write(field, row, value) {
-    if (field === 'title') edit({ title: value });
+    if (field === 'title' || field === 'unit') edit({ [field]: value });
     else
       edit({
         items: slide.items.map((item, i) => (i === Number(row) ? { ...item, [field]: value } : item)),
@@ -304,15 +304,9 @@ export function Studio({
                       aria-pressed={theme === key}
                       onClick={() => commit({ ...deck, theme: key })}
                     >
-                      <b
-                        style={{
-                          background: '#' + t.bg,
-                          color: '#' + t.ink,
-                          borderBottom: '4px solid #' + t.accent,
-                        }}
-                      >
-                        Aa
-                      </b>
+                      <span className="studio-layout-preview" aria-hidden="true">
+                        <Canvas slide={slide} index={index} total={total} theme={key} />
+                      </span>
                       {t.name}
                     </button>
                   ))}

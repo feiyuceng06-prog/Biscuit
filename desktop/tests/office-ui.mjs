@@ -4,6 +4,17 @@ import path from 'node:path';
 
 export async function checkOffice(application, page, workspace, output, fixture) {
   await page.getByRole('button', { name: '办公', exact: true }).click();
+  await page.getByRole('button', { name: '打开示例文稿' }).click();
+  await expect(page.locator('.office-thumb')).toHaveCount(5);
+  await expect(page.locator('.office-canvas svg image')).toBeVisible();
+  await page.locator('.office-thumb').nth(1).click();
+  await page.getByRole('button', { name: '模板与版式' }).click();
+  await expect(page.locator('.studio-themes button svg')).toHaveCount(3);
+  await page.getByRole('button', { name: '午夜' }).click();
+  await page.getByRole('button', { name: '收起面板' }).click();
+  await expect(page.locator('.office-canvas')).toContainText('48 人次');
+  await page.getByRole('button', { name: '返回办公' }).click();
+  page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: '新建演示文稿' }).click();
   await page.getByLabel('制作要求').fill('给管理层做八页汇报，重点讲风险');
   await page
